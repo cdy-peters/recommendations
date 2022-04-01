@@ -2,6 +2,8 @@ from audioop import reverse
 import spotipy, os
 from spotipy.oauth2 import SpotifyOAuth, SpotifyClientCredentials
 from flask import Flask
+from numpy import dot
+from numpy.linalg import norm
 
 
 app = Flask(__name__)
@@ -154,3 +156,24 @@ def recommended_track_features(recommendations):
                 'valence': features[0]['valence']
             }
     return recommendations
+
+def cos_similarity(recommendations, collated_features):
+    recommendations2 = []
+
+    average_values = []
+    # Append average feature values to list
+    for v in collated_features.values():
+        average_values.append(v)
+
+    # Iterate through tracks
+    for i in recommendations:
+        features = i['features']
+        feature_values = []
+        # Append track feature values to a list
+        for v in features.values():
+            feature_values.append(v)
+
+        cos_similarity = dot(average_values, feature_values) / (norm(average_values) * norm(feature_values))
+        recommendations2.append({'id': i['id'], 'similarity': cos_similarity})
+    
+    return sorted(recommendations2, key=lambda d: d['similarity'], reverse=True) # Returns dictionary sorted by similarity

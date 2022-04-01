@@ -27,6 +27,7 @@ def index():
 @app.route('/recommend')
 def recommend():
     # First pass (do): GET user saved songs
+    # TODO: Remove Spotipy methods from app.py, having all Spotipy logic in functions.py
     saved_tracks = soa.current_user_saved_tracks(10)
     track_ids, artist_ids, collated_features, song_counter, song_error_counter = track_info(saved_tracks)
 
@@ -64,6 +65,7 @@ def recommend():
         recommendations.pop(i)
 
     recommendations = recommended_track_features(recommendations)
+    recommendations = cos_similarity(recommendations, collated_features)
     print(recommendations)
 
     return render_template('recommended_songs.html')
