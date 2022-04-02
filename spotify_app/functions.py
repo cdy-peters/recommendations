@@ -1,17 +1,16 @@
-from audioop import reverse
 import spotipy, os
 from spotipy.oauth2 import SpotifyOAuth, SpotifyClientCredentials
 from flask import Flask
 from numpy import dot
 from numpy.linalg import norm
+import config
 
 
 app = Flask(__name__)
-app.config.from_object("config.DevelopmentConfig")
 
-os.environ['SPOTIPY_CLIENT_ID']=app.config['SPOTIPY_CLIENT_ID']
-os.environ['SPOTIPY_CLIENT_SECRET']=app.config['SPOTIPY_CLIENT_SECRET']
-os.environ['SPOTIPY_REDIRECT_URI']=app.config['SPOTIPY_REDIRECT_URI']
+os.environ['SPOTIPY_CLIENT_ID']=config.spotipy_client_id
+os.environ['SPOTIPY_CLIENT_SECRET']=config.spotipy_client_secret
+os.environ['SPOTIPY_REDIRECT_URI']=config.spotipy_redirect_uri
 
 
 scope = "user-library-read"
@@ -167,6 +166,7 @@ def cos_similarity(recommendations, collated_features):
 
     # Iterate through tracks
     for i in recommendations:
+        print(i)
         features = i['features']
         feature_values = []
         # Append track feature values to a list

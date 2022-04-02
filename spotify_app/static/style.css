@@ -1,0 +1,64 @@
+html {
+    background-color: #191414;
+    font-family: 'Inter';
+    height: 100%;
+}
+
+/* Home Page */
+#index .inner {
+    /* Vertically and horizontally center text */
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    -webkit-transform: translate(-50%, -50%);
+    transform: translate(-50%, -50%);
+    text-align: center;
+
+}
+
+#index h1 {
+    /* Text styling */
+    color: white;
+    font-style: normal;
+    font-weight: 700;
+    font-size: 32px;
+    line-height: 40px;
+}
+
+#index p {
+    max-width: 350px;
+
+    /* Text styling */
+    color: white;
+    font-size: normal;
+    font-weight: 400;
+    font-size: 24px;
+    line-height: 30px;
+}
+
+#index a {
+    width: 150px;
+    height: 55px;
+
+    /* Button styling */
+    background-color: #1DB954;
+    border-radius: 50px;
+    border: none;
+
+    /* Text styling */
+    color: white;
+    text-decoration: none;
+    font-style: normal;
+    font-weight: 400;
+    font-size: 30px;
+    line-height: 40px;
+
+    /* Vertically and horizontally center text */
+    display: flex;
+    justify-content: center;
+    align-content: center;
+
+    /* Center button in div */
+    margin: auto;
+    left: 50%;
+}
