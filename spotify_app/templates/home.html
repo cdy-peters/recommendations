@@ -1,13 +1,51 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
-</head>
-<body>
-    <h1>Successfully Logged In</h1>
-    <a href="signout">Signout</a>
-</body>
-</html>
+{% extends "layout.html" %}
+
+{% block head %}
+<!-- <script src="../static/js/jquery-3.6.0.js"></script> -->
+{% endblock %}
+
+{% block content %}
+    <div id="selected_playlist">
+        <img src="../static/images/placeholder.png" style="height: 200px; width: 200px; float: left;">
+        <div style="float: left;">
+            <h5>Select a playlist below</h5>
+            <p></p>
+            <form action="/scan" method="POST">
+                <button class="btn" id="scan_btn" type="submit" name="scan_btn" disabled>Scan Playlist</button>
+            </form>
+        </div>
+    </div>
+    <div style="clear: both;">
+        {% if playlists %}
+            <h3 style="text-align: center;">{{ playlists | length }} public playlists</h3>
+            <br>
+            <div>
+                <div id="playlist_row">
+                    <div class="playlist_container" style="background-color: #1877f2;">
+                        <div class="playlist_info">
+                            <img src='../static/images/liked_songs_cover.png'>
+                            <p>Liked Songs</p>
+                        </div>
+                    </div>
+                    <br>
+                    {% for i in playlists %}
+                        <div class="playlist_container" onclick="playlistClick({'url': '{{ i.images[0].url }}', 'name': '{{ i.name }}', 'total': '{{ i.tracks.total }}', 'id': '{{ i.id }}'})">
+                            <div class="playlist_info">
+                                <img src='{{ i["images"][0]["url"] }}'>
+                                <p>{{ i['name'] }}</p>
+                            </div>
+                        </div>
+                        <br>
+                    {% endfor %}
+                </div>
+            </div>
+        {% else %}
+            <p>You have no public playlists</p>
+        {% endif %}
+        <p>Select a private playlist<br>Copy and paste the playlist URL below</p>
+        <input type="text">
+    </div>
+
+    <script src="../static/js/home.js"></script>
+
+{% endblock %}

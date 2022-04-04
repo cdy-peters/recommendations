@@ -1,0 +1,14 @@
+{% extends 'layout.html' %}
+
+{% block content %}
+<h1>Scan</h1>
+<p>{{ results[0] | length }} songs scanned with {{ results[4] }} errors</p>
+<p>{{ results[1] | length }} artists retrieved</p>
+<p>{{ results[2] | length }} genres retrieved</p>
+
+<form action="/recommend" method="POST">
+    <button name="type" value="track">Track</button>
+    <button name="type" value="artist">Artist</button>
+    <button name="type" value="genre">Genre</button>
+</form>
+{% endblock %}

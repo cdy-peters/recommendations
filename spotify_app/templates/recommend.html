@@ -1,0 +1,10 @@
+{% extends 'layout.html' %}
+
+{% block content %}
+
+<h1>Recommended Songs</h1>
+{% for i in recommendations %}
+    <p>{{ i }}</p>
+{% endfor %}
+
+{% endblock %}
