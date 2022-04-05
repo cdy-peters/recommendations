@@ -3,8 +3,39 @@
 {% block content %}
 
 <h1>Recommended Songs</h1>
-{% for i in recommendations %}
-    <p>{{ i }}</p>
-{% endfor %}
+
+<table class="track_table">
+    <tr>
+        <th style="text-align: center;">v</th>
+        <th></th>
+        <th>Similarity</th>
+        <th>Name</th>
+    </tr>
+    {% for i in recommendations %}
+        <tr class="track_row">
+            <td>
+                <input type="checkbox">
+            </td>
+
+            <td id="{{ i.preview }}" onclick="playPreview('{{ i.preview }}')">
+                {% if i.preview != None %}
+                    <i class="bi bi-play-fill"></i>
+                {% endif %}
+                <audio>
+                    <source src="{{ i.preview }}" type="audio/mpeg">
+                </audio>
+            </td>
+
+            <td>{{ i.similarity | round(5) }}</td>
+            <td>
+                <a href="https://open.spotify.com/track/{{ i.id }}" target="_blank" class="recommended_songs">{{ i.name }}</a> <br> 
+                <!-- {% if i.explicit == True %}
+                    <span class="bi bi-explicit-fill"></span>
+                {% endif %} -->
+                <p class="recommended_artists">{{ i.artists | join(', ')}}</p>
+            </td>
+        </tr>
+    {% endfor %}
+</table>
 
 {% endblock %}

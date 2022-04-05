@@ -1,8 +1,6 @@
 {% extends "layout.html" %}
 
-{% block head %}
-<!-- <script src="../static/js/jquery-3.6.0.js"></script> -->
-{% endblock %}
+{% block head %}{% endblock %}
 
 {% block content %}
     <div id="selected_playlist">
@@ -21,7 +19,7 @@
             <br>
             <div>
                 <div id="playlist_row">
-                    <div class="playlist_container" style="background-color: #1877f2;">
+                    <div class="playlist_container">
                         <div class="playlist_info">
                             <img src='../static/images/liked_songs_cover.png'>
                             <p>Liked Songs</p>
@@ -45,7 +43,5 @@
         <p>Select a private playlist<br>Copy and paste the playlist URL below</p>
         <input type="text">
     </div>
-
-    <script src="../static/js/home.js"></script>
 
 {% endblock %}

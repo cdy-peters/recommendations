@@ -349,6 +349,8 @@ def recommend():
 
         recommendations = recommendations_features(recommendations)
         recommendations = recommendations_similarity(recommendations, average_features)
+        # TODO: Remove duplicate tracks
+        # TODO: Remove tracks with no comparable genres
         
         return render_template('recommend.html', recommendations=recommendations)
 
