@@ -1,4 +1,4 @@
-# Portfolio Project - Spotify App (EARLY IN DEVELOPMENT, CURRENTLY ONLY FUNCTIONAL IN TERMINAL)
+# Portfolio Project - Spotify App
 
 ## Description
 

@@ -1,5 +1,6 @@
 $(document).ready(() => {
     localStorage.clear()
+    localStorage.setItem('checkboxCount', 0)
 })
 
 // Home
@@ -55,15 +56,90 @@ function playPreview(url) {
     localStorage.setItem('audio', url)
 }
 
+// On checkbox change
+function checkboxChange(id) {
+    var checkboxCount = localStorage.getItem('checkboxCount')
+
+    if (document.getElementById('existingPlaylist').innerHTML === 'Songs added') {
+        document.getElementById('existingPlaylist').innerHTML = 'Add to this Playlist'
+    }
+    if (document.getElementById('newPlaylist').innerHTML === 'Songs added') {
+        document.getElementById('newPlaylist').innerHTML = 'Add to New playlist'
+    }
+
+    if (document.getElementById(id).checked === true) {
+        localStorage.setItem('checkboxCount', ++checkboxCount)
+    } else {
+        localStorage.setItem('checkboxCount', --checkboxCount)
+    }
+    
+    $('#selected_songs').html(checkboxCount + ' songs selected')
+
+    if (checkboxCount === 0) {
+        $('#existingPlaylist').prop('disabled', true)
+        $('#newPlaylist').prop('disabled', true)
+    } else {
+        $('#existingPlaylist').prop('disabled', false)
+        $('#newPlaylist').prop('disabled', false)
+    }
+}
+
+function selectAll() {
+    checkboxes = $('.trackCheckbox')
+    select_btn = $("#select_all_btn")[0]
+
+    if (document.getElementById('existingPlaylist').innerHTML === 'Songs added') {
+        document.getElementById('existingPlaylist').innerHTML = 'Add to this Playlist'
+    }
+    if (document.getElementById('newPlaylist').innerHTML === 'Songs added') {
+        document.getElementById('newPlaylist').innerHTML = 'Add to New playlist'
+    }
+
+    if (select_btn.value === 'select all') {
+        for (let i = 0; i < checkboxes.length; i++) {
+            checkboxes[i].checked = true
+        }
+
+        localStorage.setItem('checkboxCount', checkboxes.length)
+
+        $('#selected_songs').html(checkboxes.length + ' songs selected')
+        select_btn.value = 'deselect all'
+        select_btn.innerHTML = 'Deselect all songs'
+
+        $('#existingPlaylist').prop('disabled', false)
+        $('#newPlaylist').prop('disabled', false)
+    } else {
+        for (let i = 0; i < checkboxes.length; i++) {
+            checkboxes[i].checked = false
+        }
+
+        localStorage.setItem('checkboxCount', 0)
+
+        $('#selected_songs').html(0 + ' songs selected')
+        select_btn.value = 'select all'
+        select_btn.innerHTML = 'Select all songs'
+
+        $('#existingPlaylist').prop('disabled', true)
+        $('#newPlaylist').prop('disabled', true)
+    }
+}
+
 function addToPlaylist(playlist) {
-    checkboxes = document.getElementsByClassName('trackCheckbox')
+    checkboxes = $('.trackCheckbox')
     tracks = []
-    console.log(playlist)
 
     for (let i = 0; i < checkboxes.length; i++) {
         if (checkboxes[i].checked === true) {
             tracks.push(checkboxes[i].value)
         }
+    }
+
+    if (playlist === 'new') {
+        $('#newPlaylist').prop('disabled', true)
+        $('#newPlaylist').html('Pending')
+    } else {
+        $('#existingPlaylist').prop('disabled', true)
+        $('#existingPlaylist').html('Pending')
     }
 
     $.ajax({
@@ -72,23 +148,39 @@ function addToPlaylist(playlist) {
         data: {
             playlist: playlist,
             tracks: JSON.stringify(tracks)
+        },
+        success: function() {
+            if (playlist === 'new') {
+                $('#newPlaylist').prop('disabled', true)
+                $('#newPlaylist').html('Songs added')
+            } else {
+                $('#existingPlaylist').prop('disabled', true)
+                $('#existingPlaylist').html('Songs added')
+            }
+        },
+        error: function() {
+            if (playlist === 'new') {
+                $('#newPlaylist').prop('disabled', true)
+                $('#newPlaylist').html('Adding failed')
+            } else {
+                $('#existingPlaylist').prop('disabled', true)
+                $('#existingPlaylist').html('Adding failed')
+            }
         }
     })
 }
 
 // Scroll Top button
-scrollTopBtn = document.getElementById('scrollTopBtn')
-window.onscroll = function() {scrollFunction()}
-
-function scrollFunction() {
-    if (document.body.scrollTop > 20 || document.documentElement.scrollTop > 20) {
-        scrollTopBtn.style.display = "block"
-    } else {
-        scrollTopBtn.style.display = "none"
-    }
-}
-
-function scrollToTop() {
-    document.body.scrollTop = 0
-    document.documentElement.scrollTop = 0
-}
+$(document).ready(function() {
+    $(window).scroll(function() {
+      if ($(this).scrollTop() > 100) {
+        $('#scrollTopBtn').fadeIn();
+      } else {
+        $('#scrollTopBtn').fadeOut();
+      }
+    });
+    $('#scrollTopBtn').click(function() {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      return false;
+    });
+  });

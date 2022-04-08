@@ -4,8 +4,8 @@
 
 <div id="recommend_content">
 
-    <div style="float: left; margin: 0 160px 0 20px;">
-        <img src="{{ playlist[1] }}" class="playlist_cover">
+    <div style="margin: 0 160px 0 20px; position: fixed;">
+        <img src="{{ playlist[1] }}" class="playlist_cover" style="margin: 0 20px 20px 0;">
 
         <div style="float: left;">
             <h5>{{ playlist[2] }}</h5>
@@ -20,11 +20,27 @@
                 {{ i }}: {{ average_features[i] }}<br>
             {% endfor %}
         </div>
+
+        <div id="add_tracks_container">
+            <div>
+                <p id="selected_songs" style="float: left;">0 songs selected</p>
+                <button class="add_songs_btn grow" id="select_all_btn" value="select all" onclick="selectAll()" style="float: right;">Select all songs</button>
+            </div>
+
+            <div style="clear: both;">
+                {% if playlist[0] == 'liked songs' %}
+                    <button class="add_songs_btn" style="float: left;" disabled>Add to this Playlist</button>
+                {% else %}
+                    <button class="add_songs_btn grow" id="existingPlaylist" onclick="addToPlaylist('{{ playlist[0] }}')" style="float: left;" disabled>Add to this Playlist</button>
+                {% endif %}
+                <button class="add_songs_btn grow" id="newPlaylist" onclick="addToPlaylist('new')" style="float: right;" disabled>Add to New Playlist</button>
+            </div>
+        </div>
     </div>
 
     <table class="track_table">
-        <tr>
-            <th style="text-align: center;">v</th>
+        <tr style="pointer-events: none;">
+            <th></th>
             <th></th>
             <th>Similarity</th>
             <th>Name</th>
@@ -32,7 +48,7 @@
         {% for i in recommendations %}
             <tr class="track_row">
                 <td>
-                    <input class="trackCheckbox" type="checkbox" value="{{ i.id }}">
+                    <input class="trackCheckbox" id="{{ i.id }}" onclick="checkboxChange('{{ i.id }}')" type="checkbox" value="{{ i.id }}">
                 </td>
 
                 <td id="{{ i.preview }}" onclick="playPreview('{{ i.preview }}')">
@@ -60,16 +76,9 @@
             </tr>
         {% endfor %}
     </table>
-    <div>
-        {% if playlist[0] == 'liked songs' %}
-            <button disabled>Add to this Playlist</button>
-        {% else %}
-            <button onclick="addToPlaylist('{{ playlist[0] }}')">Add to this Playlist</button>
-        {% endif %}
-        <button onclick="addToPlaylist('new')">Add to New Playlist</button>
-    </div>
+    
 </div>
 
-<button onclick="scrollToTop()" id="scrollTopBtn" title="Go to top">Top</button>
+<button id="scrollTopBtn" title="Go to top"><i class="bi bi-arrow-up-short"></i></button>
 
 {% endblock %}

@@ -3,18 +3,19 @@
 }
 
 html, body {
-    /* font-family: 'Inter'; */
     color: white;
     height: 100%;
 }
 
 body {
     background-color: #121212;
+    padding-top: 76px !important;
 }
 
 .playlist_cover {
     max-height: 200px;
     max-width: 200px;
+    border-radius: 5px;
     float: left;
 }
 
@@ -33,6 +34,16 @@ body {
 
 .navbar a:hover {
     color: white;
+}
+
+.sign_out_btn {
+    background-color: #090909;
+    color: white !important;
+    border-radius: 20px;
+}
+
+.sign_out_btn:hover {
+    background-color: #282828;
 }
 
 /* Index */
@@ -180,6 +191,10 @@ body {
 }
 
 /* Recommended */
+.track_table {
+    margin-left: 650px;
+}
+
 .track_table td {
     color: white;
     padding: 10px 15px;
@@ -194,13 +209,11 @@ body {
     background-color: #2a2a2a;
 }
 
-.track_table:first-child:hover {
-    background-color: #121212 !important;
-}
 
 .bi {
     font-size: 25px;
 }
+
 
 .recommended_songs {
     text-decoration: none;
@@ -212,7 +225,91 @@ body {
     color: white;
 }
 
+
 .recommended_artists {
     color: #b3b3b3;
     margin-bottom: 0;
+}
+
+
+#add_tracks_container {
+    width: 360px;
+    margin-top: 50px;
+}
+
+#add_tracks_container p {
+    min-width: 175px;
+    height: 45px;
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+#select_all_btn {
+    background-color: #121212;
+    border: 1px #b2b2b2 solid;
+}
+
+#select_all_btn:hover {
+    border-color: white;
+}
+
+.add_songs_btn {
+    min-width: 175px;
+    height: 45px;
+
+    /* Button styling */
+    background-color: #1DB954;
+    border-radius: 50px;
+    border: none;
+    cursor: pointer;
+
+    /* Text styling */
+    color: white;
+    text-decoration: none;
+    font-style: normal;
+    font-weight: 400;
+    font-size: 18px;
+    line-height: 40px;
+
+    /* Vertically and horizontally center text */
+    display: flex;
+    justify-content: center;
+    align-content: center;
+}
+
+.add_songs_btn:disabled {
+    background-color: #020a05;
+    color: #2a2a2a;
+    pointer-events: none;
+}
+
+
+#scrollTopBtn {
+    display: none;
+    position: fixed;
+    left: 20px;
+    bottom: 20px;
+
+    width: 50px;
+    height: 50px;
+
+    /* Button styling */
+    background-color: #090909;
+    border-radius: 50px;
+    border: none;
+}
+
+#scrollTopBtn i {
+    font-size: 35px;
+    color: white;
+
+    display: flex;
+    justify-content: center;
+    align-content: center;
+}
+
+#scrollTopBtn:hover {
+    background-color: #282828;
 }
