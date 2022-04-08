@@ -2,40 +2,74 @@
 
 {% block content %}
 
-<h1>Recommended Songs</h1>
+<div id="recommend_content">
 
-<table class="track_table">
-    <tr>
-        <th style="text-align: center;">v</th>
-        <th></th>
-        <th>Similarity</th>
-        <th>Name</th>
-    </tr>
-    {% for i in recommendations %}
-        <tr class="track_row">
-            <td>
-                <input type="checkbox">
-            </td>
+    <div style="float: left; margin: 0 160px 0 20px;">
+        <img src="{{ playlist[1] }}" class="playlist_cover">
 
-            <td id="{{ i.preview }}" onclick="playPreview('{{ i.preview }}')">
-                {% if i.preview != None %}
-                    <i class="bi bi-play-fill"></i>
-                {% endif %}
-                <audio>
-                    <source src="{{ i.preview }}" type="audio/mpeg">
-                </audio>
-            </td>
+        <div style="float: left;">
+            <h5>{{ playlist[2] }}</h5>
+            <p>{{ results[0] }} songs scanned with {{ results[3] }} errors</p>
+            <p>{{ results[1] }} artists retrieved</p>
+            <p>{{ results[2] }} genres retrieved</p>
+        </div>
 
-            <td>{{ i.similarity | round(5) }}</td>
-            <td>
-                <a href="https://open.spotify.com/track/{{ i.id }}" target="_blank" class="recommended_songs">{{ i.name }}</a> <br> 
-                <!-- {% if i.explicit == True %}
-                    <span class="bi bi-explicit-fill"></span>
-                {% endif %} -->
-                <p class="recommended_artists">{{ i.artists | join(', ')}}</p>
-            </td>
+        <div style="clear: both;">
+            <strong>Average Features</strong><br>
+            {% for i in average_features %}
+                {{ i }}: {{ average_features[i] }}<br>
+            {% endfor %}
+        </div>
+    </div>
+
+    <table class="track_table">
+        <tr>
+            <th style="text-align: center;">v</th>
+            <th></th>
+            <th>Similarity</th>
+            <th>Name</th>
         </tr>
-    {% endfor %}
-</table>
+        {% for i in recommendations %}
+            <tr class="track_row">
+                <td>
+                    <input class="trackCheckbox" type="checkbox" value="{{ i.id }}">
+                </td>
+
+                <td id="{{ i.preview }}" onclick="playPreview('{{ i.preview }}')">
+                    {% if i.preview != None %}
+                        <i class="bi bi-play-fill"></i>
+                    {% endif %}
+                    <audio>
+                        <source src="{{ i.preview }}" type="audio/mpeg">
+                    </audio>
+                </td>
+
+                <td>{{ i.similarity | round(5) }}</td>
+                <td>
+                    <a href="https://open.spotify.com/track/{{ i.id }}" target="_blank" class="recommended_songs">{{ i.name }}</a> <br> 
+                    <!-- {% if i.explicit == True %}
+                        <span class="bi bi-explicit-fill"></span>
+                    {% endif %} -->
+                    <p class="recommended_artists">
+                        {% for j in range((i.artists | length) - 1) %}
+                            {{ i.artists[j].name }}, 
+                        {% endfor %}
+                        {{ i.artists[-1].name }}
+                    </p>
+                </td>
+            </tr>
+        {% endfor %}
+    </table>
+    <div>
+        {% if playlist[0] == 'liked songs' %}
+            <button disabled>Add to this Playlist</button>
+        {% else %}
+            <button onclick="addToPlaylist('{{ playlist[0] }}')">Add to this Playlist</button>
+        {% endif %}
+        <button onclick="addToPlaylist('new')">Add to New Playlist</button>
+    </div>
+</div>
+
+<button onclick="scrollToTop()" id="scrollTopBtn" title="Go to top">Top</button>
 
 {% endblock %}

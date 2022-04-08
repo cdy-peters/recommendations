@@ -4,7 +4,7 @@
 
 {% block content %}
     <div id="selected_playlist">
-        <img src="../static/images/placeholder.png" style="height: 200px; width: 200px; float: left;">
+        <img src="../static/images/placeholder.png" class="playlist_cover">
         <div style="float: left;">
             <h5>Select a playlist below</h5>
             <p></p>
@@ -15,11 +15,11 @@
     </div>
     <div style="clear: both;">
         {% if playlists %}
-            <h3 style="text-align: center;">{{ playlists | length }} public playlists</h3>
+            <h3 style="text-align: center;">{{ playlists | length }} playlists retrieved</h3>
             <br>
             <div>
                 <div id="playlist_row">
-                    <div class="playlist_container">
+                    <div class="playlist_container" onclick="playlistClick({'type': 'liked', 'total': '{{ liked_total }}'})">
                         <div class="playlist_info">
                             <img src='../static/images/liked_songs_cover.png'>
                             <p>Liked Songs</p>
@@ -27,7 +27,7 @@
                     </div>
                     <br>
                     {% for i in playlists %}
-                        <div class="playlist_container" onclick="playlistClick({'url': '{{ i.images[0].url }}', 'name': '{{ i.name }}', 'total': '{{ i.tracks.total }}', 'id': '{{ i.id }}'})">
+                        <div class="playlist_container" onclick="playlistClick({'type': 'playlist', 'url': '{{ i.images[0].url }}', 'name': '{{ i.name }}', 'total': '{{ i.tracks.total }}', 'id': '{{ i.id }}'})">
                             <div class="playlist_info">
                                 <img src='{{ i["images"][0]["url"] }}'>
                                 <p>{{ i['name'] }}</p>
@@ -38,10 +38,8 @@
                 </div>
             </div>
         {% else %}
-            <p>You have no public playlists</p>
+            <p>You have no playlists valid for Spotify App</p>
         {% endif %}
-        <p>Select a private playlist<br>Copy and paste the playlist URL below</p>
-        <input type="text">
     </div>
 
 {% endblock %}

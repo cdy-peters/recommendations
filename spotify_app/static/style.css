@@ -12,6 +12,12 @@ body {
     background-color: #121212;
 }
 
+.playlist_cover {
+    max-height: 200px;
+    max-width: 200px;
+    float: left;
+}
+
 /* Layout */
 .navbar {
     background-color: #121212;
@@ -29,8 +35,7 @@ body {
     color: white;
 }
 
-
-/* Home */
+/* Index */
 .grow {
     transition: all;
 }
@@ -39,6 +44,7 @@ body {
     transform: scale(1.1)
 }
 
+/* Home */
 #selected_playlist {
     display: flex;
     justify-content: center;
