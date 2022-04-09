@@ -4,21 +4,23 @@
 
 {% block content %}
     <div id="selected_playlist">
-        <img src="../static/images/placeholder.png" class="playlist_cover">
-        <div style="float: left;">
+        <img src="" class="playlist_cover">
+        <div class="playlist_cover" id="placeholder_cover">
+            <i class="bi bi-music-note-beamed"></i>
+        </div>
+        <div style="float: left; margin-left: 20px; position: relative;">
             <h5>Select a playlist below</h5>
             <p></p>
-            <form action="/scan" method="POST">
+            <form action="/scan" method="POST" style="position: absolute; bottom: 0;">
                 <button class="btn" id="scan_btn" type="submit" name="scan_btn" disabled>Scan Playlist</button>
             </form>
         </div>
     </div>
-    <div style="clear: both;">
+    <div style="clear: both; margin: 20px 0 0 0;">
         {% if playlists %}
-            <h3 style="text-align: center;">{{ playlists | length }} playlists retrieved</h3>
-            <br>
-            <div>
-                <div id="playlist_row">
+        <h3 style="text-align: center; margin: 0;">{{ playlists | length }} playlists retrieved</h3>
+        <div>
+            <div id="playlist_row">
                     <div class="playlist_container" onclick="playlistClick({'type': 'liked', 'total': '{{ liked_total }}'})">
                         <div class="playlist_info">
                             <img src='../static/images/liked_songs_cover.png'>

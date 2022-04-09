@@ -3,6 +3,19 @@ $(document).ready(() => {
     localStorage.setItem('checkboxCount', 0)
 })
 
+
+function _calculateScrollbarWidth() {
+    document.documentElement.style.setProperty('--scrollbar-width', (window.innerWidth - document.documentElement.clientWidth) + "px");
+  }
+  // recalculate on resize
+  window.addEventListener('resize', _calculateScrollbarWidth, false);
+  // recalculate on dom load
+  document.addEventListener('DOMContentLoaded', _calculateScrollbarWidth, false); 
+  // recalculate on load (assets loaded as well)
+  window.addEventListener('load', _calculateScrollbarWidth);
+
+
+
 // Home
 function playlistClick(playlistArr) {
     if (playlistArr.type === 'playlist') {
@@ -17,6 +30,7 @@ function playlistClick(playlistArr) {
         var id = 'liked songs'
     }
     
+    $('#placeholder_cover').hide()
     $('#selected_playlist > img').attr("src", url) // Change image of selected playlist
     $('#selected_playlist > div > h5').html(name)
     $('#selected_playlist > div > p').html(total + ' songs')
