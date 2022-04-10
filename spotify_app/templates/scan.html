@@ -1,13 +1,69 @@
 {% extends 'layout.html' %}
 
+
 {% block content %}
 <h1>Scan</h1>
-<p>{{ results[0] }} songs scanned with {{ results[3] }} errors</p>
-<p>{{ results[1] }} artists retrieved</p>
-<p>{{ results[2] }} genres retrieved</p>
 
-<form action="/recommend" method="POST">
-    <button name="type" value="track">Track</button>
-</form>
 
+
+<p><span id="retrieved_songs">0</span> of <span id="total_songs">0</span> scanned with <span id="failed_scans">0</span> errors</p>
+Artists retrieved: <p id="retrieved_artists">0</p>
+Genres retrieved: <p id="retrieved_genres">0</p>
+<br>
+<p><span id="recommended">0</span> of <span id="total_songs2">0</span> recommendations retrieved</p>
+
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js" integrity="sha512-bLT0Qm9VnAYZDflyKcBaQ2gg0hSYNQrJ8RilYldYQ1FxQYoCLtUjuuRuZo+fjqhx/qtq/1itJ0C2ejDxltZVFg==" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/3.0.4/socket.io.js" integrity="sha512-aMGMvNYu8Ue4G+fHa359jcPb1u+ytAF+P2SCb+PxrjCdO3n3ZTxJ30zuH39rimUggmTwmh2u7wvQsDTHESnmfQ==" crossorigin="anonymous"></script>
+<script type="text/javascript" charset="utf-8">
+    $(document).ready(function() {
+        var socket = io()
+
+        socket.on('connect', function() {
+            socket.emit('my_event', {data: '{{ id }}'});
+        });
+
+        socket.on('total_songs', function(msg, cb) {
+            $('#total_songs').text(msg.data).html();
+            $('#total_songs2').text(msg.data).html();
+            if (cb)
+                cb();
+        });
+
+        socket.on('retrieved_songs', function(msg, cb) {
+            $('#retrieved_songs').text(msg.data).html();
+            if (cb)
+                cb();
+        });
+
+        socket.on('failed_scans', function(msg, cb) {
+            $('#failed_scans').text(msg.data).html();
+            if (cb)
+                cb();
+        });
+
+        socket.on('retrieved_artists', function(msg, cb) {
+            $('#retrieved_artists').text(msg.data).html();
+            if (cb)
+                cb();
+        });
+
+        socket.on('retrieved_genres', function(msg, cb) {
+            $('#retrieved_genres').text(msg.data).html();
+            if (cb)
+                cb();
+        });
+
+        // Recommend
+        socket.on('recommended', function(msg, cb) {
+            $('#recommended').text(msg.data).html();
+            if (cb)
+                cb();
+        });
+
+        socket.on('redirect', function(data) {
+            window.location = data.url
+        })
+    })
+</script>
 {% endblock %}

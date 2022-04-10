@@ -1,19 +1,28 @@
-from datetime import date
-import json
-from django.shortcuts import render
-import spotipy, os, requests, base64, config, six, uuid, time
+import eventlet
+eventlet.monkey_patch(os=False)
+
+import json, spotipy, os, config, uuid
 from spotipy.oauth2 import SpotifyOAuth, SpotifyClientCredentials
 from flask import Flask, render_template, request, redirect, session
 from flask_session import Session
-from numpy import dot, rec
+from numpy import dot
 from numpy.linalg import norm
+from threading import Lock
+from flask_socketio import SocketIO, emit
 
-# Init App
+
 app = Flask(__name__)
 app.config['SECRET_KEY'] = os.urandom(64)
 app.config['SESSION_TYPE'] = 'filesystem'
 app.config['SESSION_FILE_DIR'] = './.flask_session/'
 Session(app)
+
+async_mode = None
+
+app.config['SECRET_KEY'] = 'secret!'
+socketio = SocketIO(app, async_mode=async_mode, manage_session=False, logger=True, engineio_logger=True)
+thread = None
+thread_lock = Lock()
 
 os.environ['SPOTIPY_CLIENT_ID']=config.spotipy_client_id
 os.environ['SPOTIPY_CLIENT_SECRET']=config.spotipy_client_secret
@@ -45,7 +54,6 @@ def cache_auth():
                                                 show_dialog=True)
     return cache_handler, auth_manager
 
-
 # # Scan Song Functions
 def append_songs(tracks, artists, results):
     for i in results['items']:
@@ -53,6 +61,9 @@ def append_songs(tracks, artists, results):
         tracks.append(track_id)
 
         for j in i['track']['artists']:
+            session['retrieved_artists'] += 1
+            emit('retrieved_artists', {'data': session['retrieved_artists']})
+
             if j['id'] not in artists:
                 artists.append(j['id'])
         
@@ -77,6 +88,8 @@ def artist_genres(artists):
     for i in genres:
         if genres[i] != 1:
             genres_lst.append(i)
+            session['retrieved_genres'] += 1
+            emit('retrieved_genres', {'data': session['retrieved_genres']})
         else:
             break
 
@@ -98,6 +111,8 @@ def collate_features(tracks):
 
     for i in tracks:
         features = scc.audio_features(i)
+        session['retrieved_songs'] += 1
+        emit('retrieved_songs', {'data': session['retrieved_songs']})
 
         if type(features[0]) is dict:
             average_features['acousticness'] += features[0]['acousticness']
@@ -110,47 +125,26 @@ def collate_features(tracks):
             average_features['tempo'] += features[0]['tempo']
             average_features['valence'] += features[0]['valence']
         else:
+            session['song_error_counter'] += 1
+            emit('failed_scans', {'data': session['song_error_counter']})
             song_error_count += 1
     
     return average_features, song_error_count
-
-def scan_liked():
-    cache_handler, auth_manager = cache_auth()
-    sp = spotipy.Spotify(auth_manager=auth_manager)
-
-    # Get liked details
-    results = sp.current_user_saved_tracks(limit=10)
-    playlist = ['liked songs', '../static/images/liked_songs_cover.png', 'Liked Songs', results['total']]
-
-    session['playlist'] = playlist
-
-    # Get songs and artists of liked songs
-    results = sp.current_user_saved_tracks(limit=20)
-    tracks, artists = append_songs([], [], results)
-    
-    # Get genres of artists
-    genres = artist_genres(artists)
-
-    # Get average feature values
-    average_features, song_error_count = collate_features(tracks)
-    for i in average_features:
-        average_features[i] = round(average_features[i] / (len(tracks) - song_error_count), 5)    
-
-    session['tracks'] = tracks
-    session['artists'] = artists
-    session['genres'] = genres
-    session['average_features'] = average_features
-    session['song_error_count'] = song_error_count
-
 
 def scan_playlist(id):
     cache_handler, auth_manager = cache_auth()
     sp = spotipy.Spotify(auth_manager=auth_manager)
 
+    session['retrieved_songs'] = 0
+    session['retrieved_artists'] = 0
+    session['retrieved_genres'] = 0
+    session['song_error_counter'] = 0
+
     if id == 'liked songs':
         # Get liked details
         results = sp.current_user_saved_tracks(limit=10)
         playlist = ['liked songs', '../static/images/liked_songs_cover.png', 'Liked Songs', results['total']]
+        emit('total_songs', {'data': results['total']})
 
         session['playlist'] = playlist
 
@@ -162,6 +156,7 @@ def scan_playlist(id):
         # Get playlist details
         results = sp.playlist(id)
         playlist = [id, results['images'][0]['url'], results['name'], results['tracks']['total']]
+        emit('total_songs', {'data': results['tracks']['total']})
 
         session['playlist'] = playlist
 
@@ -186,11 +181,30 @@ def scan_playlist(id):
     session['average_features'] = average_features
     session['song_error_count'] = song_error_count
 
+# Recommendations
+def recommendations():
+    tracks = session['tracks']
+    genres = session['genres']
+    artists = session['artists']
+    average_features = session['average_features']
+
+    recommendations = get_recommendations(tracks, genres)
+    recommendations = recommendations_features(recommendations)
+    recommendations = recommendations_similarity(recommendations, average_features)
+    session['recommendations'] = recommendations
+
+    results = [
+            len(tracks),
+            len(artists),
+            len(genres),
+            session['song_error_count']
+        ]
 
 # Recommended Song Functions
 def get_recommendations(tracks, genres):
     recommendations = []
     recommended_ids = []
+    session['recommendations_counter'] = 0
 
     while len(recommended_ids) < len(tracks):
         for i in tracks:
@@ -205,17 +219,19 @@ def get_recommendations(tracks, genres):
                 if id not in tracks:
                     recommended_artists = []
                     for j in track['artists']:
-                        # Check for duplicate genres
-                        recommended_genres = scc.artist(j['id'])
-                        recommended_set = set(recommended_genres['genres'])
-                        given_set = set(genres)
-                        if (recommended_set & given_set):
-                            recommended_artists.append({
-                                'id': j['id'],
-                                'name': j['name']
-                            })
-
-                            if id not in recommended_ids:
+                        # Check if track has been added already
+                        if id not in recommended_ids:
+                            # Check for duplicate genres
+                            recommended_genres = scc.artist(j['id'])
+                            recommended_set = set(recommended_genres['genres'])
+                            given_set = set(genres)
+                            if (recommended_set & given_set):
+                                # Add artist to recommended artists
+                                recommended_artists.append({
+                                    'id': j['id'],
+                                    'name': j['name']
+                                })
+                                # Add song to recommendations
                                 recommended_ids.append(id)
                                 recommendations.append({
                                     'id': id,
@@ -224,6 +240,9 @@ def get_recommendations(tracks, genres):
                                     'artists': recommended_artists,
                                     'preview': track['preview_url']
                                 })
+
+                                session['recommendations_counter'] += 1
+                                emit('recommended', {'data': session['recommendations_counter']})
             except:
                 print(i, 'no results')
 
@@ -330,49 +349,20 @@ def scan():
 
     if request.method == 'POST':
         id = request.form['scan_btn']
-        
-        print(id)
+        return render_template('scan.html', async_mode=socketio.async_mode, id=id)
 
-        scan_playlist(id)
-        
-        results = [
+    return redirect('/')
+
+@app.route('/recommend')
+def recommend():
+    results = [
             len(session['tracks']),
             len(session['artists']),
             len(session['genres']),
             session['song_error_count']
         ]
+    return render_template('recommend.html', recommendations=session['recommendations'], playlist=session['playlist'], results=results, average_features=session['average_features'])
 
-        return render_template('scan.html', results=results)
-
-    return redirect('/')
-
-@app.route('/recommend', methods=['GET', 'POST'])
-def recommend():
-    cache_handler, auth_manager = cache_auth()
-    if not auth_manager.validate_token(cache_handler.get_cached_token()):
-        return redirect('/')
-
-    if request.method == 'POST':
-        tracks = session['tracks']
-        genres = session['genres']
-        artists = session['artists']
-        average_features = session['average_features']
-
-        recommendations = get_recommendations(tracks, genres)
-        recommendations = recommendations_features(recommendations)
-        recommendations = recommendations_similarity(recommendations, average_features)
-
-
-        results = [
-                len(tracks),
-                len(artists),
-                len(genres),
-                session['song_error_count']
-            ] 
-        
-        return render_template('recommend.html', recommendations=recommendations, playlist=session['playlist'], results=results, average_features=session['average_features'])
-
-    return redirect('/')
 
 @app.route('/addToPlaylist', methods=['GET', 'POST'])
 def addToPlaylist():
@@ -395,3 +385,19 @@ def addToPlaylist():
         return 'success'
     
     return redirect('/')
+
+
+@socketio.event
+def my_event(message):
+    id = message['data']
+    
+    scan_playlist(id)
+    recommendations()
+
+    emit('redirect', {'url': '/recommend'})
+
+
+
+
+if __name__ == '__main__':
+    socketio.run(app)
