@@ -61,11 +61,11 @@ def append_songs(tracks, artists, results):
         tracks.append(track_id)
 
         for j in i['track']['artists']:
-            session['retrieved_artists'] += 1
-            emit('retrieved_artists', {'data': session['retrieved_artists']})
-
             if j['id'] not in artists:
                 artists.append(j['id'])
+
+                session['retrieved_artists'] += 1
+                emit('retrieved_artists', {'data': session['retrieved_artists']})
         
     return tracks, artists
 
@@ -88,6 +88,7 @@ def artist_genres(artists):
     for i in genres:
         if genres[i] != 1:
             genres_lst.append(i)
+
             session['retrieved_genres'] += 1
             emit('retrieved_genres', {'data': session['retrieved_genres']})
         else:
@@ -111,8 +112,6 @@ def collate_features(tracks):
 
     for i in tracks:
         features = scc.audio_features(i)
-        session['retrieved_songs'] += 1
-        emit('retrieved_songs', {'data': session['retrieved_songs']})
 
         if type(features[0]) is dict:
             average_features['acousticness'] += features[0]['acousticness']
@@ -126,8 +125,11 @@ def collate_features(tracks):
             average_features['valence'] += features[0]['valence']
         else:
             session['song_error_counter'] += 1
-            emit('failed_scans', {'data': session['song_error_counter']})
             song_error_count += 1
+            emit('failed_scans', {'data': session['song_error_counter']})
+        
+        session['retrieved_songs'] += 1
+        emit('retrieved_songs', {'data': session['retrieved_songs']})
     
     return average_features, song_error_count
 
@@ -144,11 +146,11 @@ def scan_playlist(id):
         # Get liked details
         results = sp.current_user_saved_tracks(limit=10)
         playlist = ['liked songs', '../static/images/liked_songs_cover.png', 'Liked Songs', results['total']]
-        emit('total_songs', {'data': results['total']})
 
         session['playlist'] = playlist
 
         # Get songs and artists of liked songs
+        emit('retrieving_songs', {'data': playlist[-1]})
         results = sp.current_user_saved_tracks(limit=20)
         tracks, artists = append_songs([], [], results)
     
@@ -156,24 +158,25 @@ def scan_playlist(id):
         # Get playlist details
         results = sp.playlist(id)
         playlist = [id, results['images'][0]['url'], results['name'], results['tracks']['total']]
-        emit('total_songs', {'data': results['tracks']['total']})
 
         session['playlist'] = playlist
 
         # Get songs and artists of playlist
+        emit('retrieving_songs', {'data': playlist[-1]})
         results = sp.playlist_tracks(id)
         tracks, artists = append_songs([], [], results)
         while results['next']:
             results = sp.next(results)
             tracks, artists = append_songs(tracks, artists, results)
 
-    # Get genres of artists
-    genres = artist_genres(artists)
-
     # Get average feature values
     average_features, song_error_count = collate_features(tracks)
     for i in average_features:
         average_features[i] = round(average_features[i] / (len(tracks) - song_error_count), 5)    
+    
+    # Get genres of artists
+    emit('retrieving_genres')
+    genres = artist_genres(artists)
 
     session['tracks'] = tracks
     session['artists'] = artists
@@ -188,8 +191,11 @@ def recommendations():
     artists = session['artists']
     average_features = session['average_features']
 
+    emit('getting_recommendations')
     recommendations = get_recommendations(tracks, genres)
+    emit('analysing_recommendations')
     recommendations = recommendations_features(recommendations)
+    emit('scoring_recommendations')
     recommendations = recommendations_similarity(recommendations, average_features)
     session['recommendations'] = recommendations
 
@@ -204,7 +210,7 @@ def recommendations():
 def get_recommendations(tracks, genres):
     recommendations = []
     recommended_ids = []
-    session['recommendations_counter'] = 0
+    session['get_recommendations_counter'] = 0
 
     while len(recommended_ids) < len(tracks):
         for i in tracks:
@@ -241,14 +247,16 @@ def get_recommendations(tracks, genres):
                                     'preview': track['preview_url']
                                 })
 
-                                session['recommendations_counter'] += 1
-                                emit('recommended', {'data': session['recommendations_counter']})
+                                session['get_recommendations_counter'] += 1
+                                emit('get_recommendations', {'data': session['get_recommendations_counter']})
             except:
                 print(i, 'no results')
 
     return recommendations
 
 def recommendations_features(recommendations):
+    session['analyse_recommendations_counter'] = 0
+
     for i in recommendations:
         features = scc.audio_features(i['id'])
 
@@ -267,9 +275,13 @@ def recommendations_features(recommendations):
         else:
             recommendations.pop(i)
 
+        session['analyse_recommendations_counter'] += 1
+        emit('analyse_recommendations', {'data': session['analyse_recommendations_counter']})
     return recommendations
 
 def recommendations_similarity(recommendations, average_features):
+    session['similarity_recommendations_counter'] = 0
+
     # Append average feature values to a list
     average_values = []
     for v in average_features.values():
@@ -286,6 +298,9 @@ def recommendations_similarity(recommendations, average_features):
         cos_similarity = dot(average_values, feature_values) / (norm(average_values) * norm(feature_values))
         i['similarity'] = cos_similarity
 
+        session['similarity_recommendations_counter'] += 1
+        emit('similarity_recommendations', {'data': session['similarity_recommendations_counter']})
+    emit('sorting_recommendations')
     return sorted(recommendations, key=lambda d: d['similarity'], reverse=True) # Return dictionary sorted by similarity
 
 
@@ -349,7 +364,7 @@ def scan():
 
     if request.method == 'POST':
         id = request.form['scan_btn']
-        return render_template('scan.html', async_mode=socketio.async_mode, id=id)
+        return render_template('scan.html', async_mode=socketio.async_mode, id=id, playlist=session['playlist'])
 
     return redirect('/')
 

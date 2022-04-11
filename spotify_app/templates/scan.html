@@ -2,15 +2,26 @@
 
 
 {% block content %}
-<h1>Scan</h1>
+<div id="scan_content">
+    <div style="margin: 0 160px 0 20px;">
+        <img src="{{ playlist[1] }}" class="playlist_cover" style="margin: 0 20px 20px 0;">
 
+        <div>
+            <h5>{{ playlist[2] }}</h5>
+            <p id="songs_retrieved"></p>
+            <p id="artists_retrieved"></p>
+            <p id="genres_retrieved"></p>
+        </div>
+    </div>
 
-
-<p><span id="retrieved_songs">0</span> of <span id="total_songs">0</span> scanned with <span id="failed_scans">0</span> errors</p>
-Artists retrieved: <p id="retrieved_artists">0</p>
-Genres retrieved: <p id="retrieved_genres">0</p>
-<br>
-<p><span id="recommended">0</span> of <span id="total_songs2">0</span> recommendations retrieved</p>
+    <div style="clear: both;">
+        <h5 id="current_process"></h5>
+        <p id="process_message"></p>
+        <p id="process_message2"></p>
+        
+        <button class="add_songs_btn grow" id="newPlaylist" disabled>Stop Scanning</button>
+    </div>
+</div>
 
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js" integrity="sha512-bLT0Qm9VnAYZDflyKcBaQ2gg0hSYNQrJ8RilYldYQ1FxQYoCLtUjuuRuZo+fjqhx/qtq/1itJ0C2ejDxltZVFg==" crossorigin="anonymous"></script>
@@ -18,49 +29,123 @@ Genres retrieved: <p id="retrieved_genres">0</p>
 <script type="text/javascript" charset="utf-8">
     $(document).ready(function() {
         var socket = io()
+        localStorage.setItem('songs', 0)
+        localStorage.setItem('failed_songs', 0)
+        localStorage.setItem('artists', 0)
+        localStorage.setItem('genres', 0)
 
         socket.on('connect', function() {
             socket.emit('my_event', {data: '{{ id }}'});
         });
 
-        socket.on('total_songs', function(msg, cb) {
-            $('#total_songs').text(msg.data).html();
-            $('#total_songs2').text(msg.data).html();
-            if (cb)
-                cb();
+        // Update current process
+        socket.on('retrieving_songs', function(msg) {
+            localStorage.setItem('total_songs', msg.data)
+
+            $('#current_process').text('Retrieving songs from playlist')
+        })
+
+        socket.on('retrieving_genres', function() {
+            var songs = localStorage.getItem('songs')
+            var artists = localStorage.getItem('artists')
+            $('#songs_retrieved').text(`${songs} songs retrieved`)
+            $('#artists_retrieved').text(`${artists} artists retrieved`)
+
+            $('#current_process').text('Retrieving genres from playlist')
+        })
+
+        socket.on('getting_recommendations', function() {
+            var genres = localStorage.getItem('genres')
+            $('#genres_retrieved').text(`${genres} genres retrieved`)
+
+            $('#current_process').text('Getting song recommendations')
+        })
+
+        socket.on('analysing_recommendations', function() {
+            $('#current_process').text('Analysing recommendations')
+        })
+
+        socket.on('scoring_recommendations', function() {
+            $('#current_process').text('Scoring similarity of recommendations')
+        })
+
+        socket.on('sorting_recommendations', function() {
+            $('#current_process').text('Sorting recommendations')
+            $('#process_message').text('')
+        })
+        
+        // Update process message
+        socket.on('retrieved_songs', function(msg) {
+            localStorage.setItem('songs', msg.data)
+
+            var songs = localStorage.getItem('songs')
+            var total_songs = localStorage.getItem('total_songs')
+            var failed_songs = localStorage.getItem('failed_songs')
+            var artists = localStorage.getItem('artists')
+
+            var message_songs = `${songs} of ${total_songs} with ${failed_songs} errors`
+            var message_artists = `${artists} unique artists retrieved`
+            
+            $('#process_message').text(message_songs)
+            $('#process_message2').text(message_artists)
         });
 
-        socket.on('retrieved_songs', function(msg, cb) {
-            $('#retrieved_songs').text(msg.data).html();
-            if (cb)
-                cb();
+        socket.on('failed_scans', function(msg) {
+            localStorage.setItem('failed_songs', msg.data)
+            
+            var songs = localStorage.getItem('songs')
+            var total_songs = localStorage.getItem('total_songs')
+            var failed_songs = localStorage.getItem('failed_songs')
+            var artists = localStorage.getItem('artists')
+            
+            var message_songs = `${songs} of ${total_songs} with ${failed_songs} errors`
+            var message_artists = `${artists} unique artists retrieved`
+            
+            $('#process_message').text(message_songs)
+            $('#process_message2').text(message_artists)
         });
 
-        socket.on('failed_scans', function(msg, cb) {
-            $('#failed_scans').text(msg.data).html();
-            if (cb)
-                cb();
+        socket.on('retrieved_artists', function(msg) {
+            localStorage.setItem('artists', msg.data)
+            
+            var songs = localStorage.getItem('songs')
+            var total_songs = localStorage.getItem('total_songs')
+            var failed_songs = localStorage.getItem('failed_songs')
+            var artists = localStorage.getItem('artists')
+            
+            var message_songs = `${songs} of ${total_songs} with ${failed_songs} errors`
+            var message_artists = `${artists} unique artists retrieved`
+            
+            $('#process_message').text(message_songs)
+            $('#process_message2').text(message_artists)
         });
 
-        socket.on('retrieved_artists', function(msg, cb) {
-            $('#retrieved_artists').text(msg.data).html();
-            if (cb)
-                cb();
+        socket.on('retrieved_genres', function(msg) {
+            $('#process_message2').text('')
+            localStorage.setItem('genres', msg.data)
+
+            $('#process_message').text(`${msg.data} genres retrieved`)
         });
 
-        socket.on('retrieved_genres', function(msg, cb) {
-            $('#retrieved_genres').text(msg.data).html();
-            if (cb)
-                cb();
+        socket.on('get_recommendations', function(msg) {
+            var total_songs = localStorage.getItem('total_songs')
+
+            $('#process_message').text(`${msg.data} of ${total_songs} suggestions retrieved`)
         });
 
-        // Recommend
-        socket.on('recommended', function(msg, cb) {
-            $('#recommended').text(msg.data).html();
-            if (cb)
-                cb();
+        socket.on('analyse_recommendations', function(msg) {
+            var total_songs = localStorage.getItem('total_songs')
+
+            $('#process_message').text(`${msg.data} of ${total_songs} suggestions analysed`)
         });
 
+        socket.on('similarity_recommendations', function(msg) {
+            var total_songs = localStorage.getItem('total_songs')
+
+            $('#process_message').text(`${msg.data} of ${total_songs} songs scored`)
+        });
+
+        // Redirect
         socket.on('redirect', function(data) {
             window.location = data.url
         })
