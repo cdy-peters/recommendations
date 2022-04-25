@@ -1,6 +1,21 @@
 $(document).ready(() => {
     localStorage.clear()
     localStorage.setItem('checkboxCount', 0)
+
+    $('#playlist_search').on('input', (e) => {
+        var input = $(e.target).val()
+        var playlists = $('.playlist_container')
+
+        for (let i = 1; i < playlists.length; i++) {
+            var name = $(playlists[i]).attr('name')
+
+            if (!input || input === name) {
+                $(`[name="${name}"]`).show()
+            } else {
+                $(`[name="${name}"]`).hide()
+            }
+        }
+    })
 })
 
 
@@ -13,7 +28,6 @@ function _calculateScrollbarWidth() {
   document.addEventListener('DOMContentLoaded', _calculateScrollbarWidth, false); 
   // recalculate on load (assets loaded as well)
   window.addEventListener('load', _calculateScrollbarWidth);
-
 
 
 // Home

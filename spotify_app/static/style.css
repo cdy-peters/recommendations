@@ -222,10 +222,36 @@ footer a:hover path {
     justify-content: center;
 }
 
+.inner_addon {
+    position: relative;
+}
+
+.inner_addon .bi {
+    position: absolute;
+    padding: 0 0 0 10px;
+    pointer-events: none;
+    color: black;
+    left: 0px;
+    font-size: 16px;
+    margin-top: 3px;
+}
+
+#playlist_search {
+    border: none;
+    border-radius: 50px;
+    width: 250px;
+    height: 30px;
+    padding-left: 40px;
+    
+    font-size: 12px;
+}
+
+#playlist_search:focus-visible {
+    outline: none;
+}
+
 #playlist_row {
-    /* max-width: 100vw; */
     display: flex;
-    align-items: center;
     flex-wrap: wrap;
 }
 

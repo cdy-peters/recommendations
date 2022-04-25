@@ -19,6 +19,14 @@
     <div style="clear: both; margin: 20px 0 0 0;">
         {% if playlists %}
         <h3 style="text-align: center; margin: 0;">{{ playlists | length }} playlists retrieved</h3>
+
+        <div class="center" style="margin-top: 15px;">
+            <div class="inner_addon">
+                <i class="bi bi-search"></i>
+                <input type="text" name="playlist_search" id="playlist_search" placeholder="Search for playlists">
+            </div>
+        </div>
+
         <div>
             <div id="playlist_row">
                     <div class="playlist_container" onclick="playlistClick({'type': 'liked', 'total': '{{ liked_total }}'})">
@@ -29,7 +37,7 @@
                     </div>
                     <br>
                     {% for i in playlists %}
-                        <div class="playlist_container" onclick="playlistClick({'type': 'playlist', 'url': '{{ i.images[0].url }}', 'name': '{{ i.name }}', 'total': '{{ i.tracks.total }}', 'id': '{{ i.id }}'})">
+                        <div class="playlist_container" name="{{ i.name }}" onclick="playlistClick({'type': 'playlist', 'url': '{{ i.images[0].url }}', 'name': '{{ i.name }}', 'total': '{{ i.tracks.total }}', 'id': '{{ i.id }}'})">
                             <div class="playlist_info">
                                 <img src='{{ i["images"][0]["url"] }}'>
                                 <p>{{ i['name'] }}</p>
