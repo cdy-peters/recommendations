@@ -142,25 +142,15 @@ def scan_playlist(id):
     session['retrieved_genres'] = 0
     session['song_error_counter'] = 0
 
+    playlist = session['playlist']
+
     if id == 'liked songs':
-        # Get liked details
-        results = sp.current_user_saved_tracks(limit=10)
-        playlist = ['liked songs', '../static/images/liked_songs_cover.png', 'Liked Songs', results['total']]
-
-        session['playlist'] = playlist
-
         # Get songs and artists of liked songs
         emit('retrieving_songs', {'data': playlist[-1]})
         results = sp.current_user_saved_tracks(limit=20)
         tracks, artists = append_songs([], [], results)
-    
+
     else:
-        # Get playlist details
-        results = sp.playlist(id)
-        playlist = [id, results['images'][0]['url'], results['name'], results['tracks']['total']]
-
-        session['playlist'] = playlist
-
         # Get songs and artists of playlist
         emit('retrieving_songs', {'data': playlist[-1]})
         results = sp.playlist_tracks(id)
@@ -173,7 +163,7 @@ def scan_playlist(id):
     average_features, song_error_count = collate_features(tracks)
     for i in average_features:
         average_features[i] = round(average_features[i] / (len(tracks) - song_error_count), 5)    
-    
+
     # Get genres of artists
     emit('retrieving_genres')
     genres = artist_genres(artists)
@@ -364,7 +354,19 @@ def scan():
 
     if request.method == 'POST':
         id = request.form['scan_btn']
-        return render_template('scan.html', async_mode=socketio.async_mode, id=id, playlist=session['playlist'])
+
+        sp = spotipy.Spotify(auth_manager=auth_manager)
+        if id == 'liked songs':
+            # Get liked details 
+            results = sp.current_user_saved_tracks(limit=1)
+            playlist = ['liked songs', '../static/images/liked_songs_cover.png', 'Liked Songs', results['total']]
+        else:
+            # Get playlist details
+            results = sp.playlist(id)
+            playlist = [id, results['images'][0]['url'], results['name'], results['tracks']['total']]
+
+        session['playlist'] = playlist
+        return render_template('scan.html', async_mode=socketio.async_mode, id=id, playlist=playlist)
 
     return redirect('/')
 

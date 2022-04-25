@@ -82,13 +82,19 @@ body {
 
 .navbar-brand {
     color: white !important;
+    margin: 0;
+    left: 50%;
+    top: 50%;
+    position: absolute;
+    -ms-transform: translate(-50%, -50%);
+    transform: translate(-50%, -50%);
 }
 
 .navbar a {
     color: #b2b2b2;
 }
 
-.navbar a:hover {
+.navbar a:hover, .navbar a:active, .navbar a:focus {
     color: white;
 }
 
@@ -257,7 +263,7 @@ footer a:hover path {
 
 .playlist_info p {
     clear: both;
-    margin: 0;
+    margin: 7px 0 0 0;
 }
 
 #scan_btn {
