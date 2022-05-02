@@ -149,6 +149,9 @@ def scan_playlist(id):
         emit('retrieving_songs', {'data': playlist[-1]})
         results = sp.current_user_saved_tracks(limit=20)
         tracks, artists = append_songs([], [], results)
+        while results['next']:
+            results = sp.next(results)
+            tracks, artists = append_songs(tracks, artists, results)
 
     else:
         # Get songs and artists of playlist
@@ -403,18 +406,21 @@ def addToPlaylist():
     
     return redirect('/')
 
-
-@socketio.event
-def my_event(message):
+# @socketio.event
+@socketio.on('connect_event')
+def connect_event(message):
     id = message['data']
-    
+    session['scan_state'] = True
+
     scan_playlist(id)
     recommendations()
 
     emit('redirect', {'url': '/recommend'})
 
-
-
+@socketio.on('disconnect_event')
+def disconnect_event():
+    session['scan_state'] = False
+    print('scan state changed,', session['scan_state'])
 
 if __name__ == '__main__':
     socketio.run(app)

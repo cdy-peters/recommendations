@@ -2,14 +2,16 @@ $(document).ready(() => {
     localStorage.clear()
     localStorage.setItem('checkboxCount', 0)
 
+    // Search playlists
     $('#playlist_search').on('input', (e) => {
         var input = $(e.target).val()
+        var regex = new RegExp(input, 'g')
         var playlists = $('.playlist_container')
 
         for (let i = 1; i < playlists.length; i++) {
             var name = $(playlists[i]).attr('name')
 
-            if (!input || input === name) {
+            if (regex.test(name)) {
                 $(`[name="${name}"]`).show()
             } else {
                 $(`[name="${name}"]`).hide()

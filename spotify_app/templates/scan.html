@@ -35,8 +35,12 @@
         localStorage.setItem('genres', 0)
 
         socket.on('connect', function() {
-            socket.emit('my_event', {data: '{{ id }}'});
+            socket.emit('connect_event', {data: '{{ id }}'});
         });
+
+        window.onunload = function() {
+            socket.emit('disconnect_event')
+        }
 
         // Update current process
         socket.on('retrieving_songs', function(msg) {
