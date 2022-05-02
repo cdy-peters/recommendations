@@ -150,8 +150,32 @@
         });
 
         // Redirect
-        socket.on('redirect', function(data) {
-            window.location = data.url
+        socket.on('store_data', function(data) {
+            tracks = data.tracks
+            artists = data.artists
+            genres = data.genres
+            song_error_count = data.song_error_count
+            recommendations = data.recommendations
+            playlist = data.playlist
+            average_features = data.average_features
+
+            $.ajax({
+                url: '/store_data',
+                type: 'POST',
+                data: {
+                    tracks: JSON.stringify(tracks),
+                    artists: JSON.stringify(artists),
+                    genres: JSON.stringify(genres),
+                    song_error_count: song_error_count,
+                    recommendations: JSON.stringify(recommendations),
+                    playlist: JSON.stringify(playlist),
+                    average_features: JSON.stringify(average_features)
+                }
+            })
+        })
+
+        socket.on('redirect', function() {
+            window.location = '/recommend'
         })
     })
 </script>
