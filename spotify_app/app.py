@@ -159,14 +159,19 @@ class Worker(object):
                             genres[j] += 1
 
         # Order genres by value
-        genres = dict(sorted(genres.items(), key=lambda item: item[1], reverse=True))
-        
-        # Put all keys of genres into a list
-        new_genres_lst = []
-        for i in genres.keys():
-            new_genres_lst.append(i)
-        
-        return new_genres_lst
+        if self.retrieved_genres != 0:
+            genres = dict(sorted(genres.items(), key=lambda item: item[1], reverse=True))
+            
+            # Put all keys of genres into a list
+            new_genres_lst = []
+            for i in genres.keys():
+                new_genres_lst.append(i)
+            
+            return new_genres_lst
+        else:
+            print('---------------0 genres')
+            print(genres_lst)
+            return genres_lst
 
     def collate_features(self, tracks):
         average_features = {
