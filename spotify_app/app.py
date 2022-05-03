@@ -47,10 +47,11 @@ class Worker(object):
 
     switch = False
 
-    def __init__(self, socketio, id, playlist, uuid):
+    def __init__(self, socketio, id, amount, playlist, uuid):
         self.socketio = socketio
 
         self.id = id
+        self.amount = amount
         self.playlist = playlist
         self.uuid = uuid
 
@@ -95,7 +96,7 @@ class Worker(object):
         if self.switch == True:
             average_features, song_error_count = self.collate_features(tracks)
             for i in average_features:
-                average_features[i] = round(average_features[i] / (len(tracks) - song_error_count), 5)
+                average_features[i] = round(average_features[i] / (self.amount - song_error_count), 5)
         
         # Get genres of artists
         if self.switch == True:
@@ -249,9 +250,9 @@ class Worker(object):
         recommendations = []
         recommended_ids = []
 
-        while len(recommended_ids) < len(tracks) and self.switch == True:
+        while len(recommended_ids) < self.amount and self.switch == True:
             for i in tracks:
-                if len(recommended_ids) == len(tracks):
+                if len(recommended_ids) == self.amount:
                     return recommendations
 
                 results = scc.recommendations(seed_tracks=[i], limit=1)
@@ -423,6 +424,7 @@ def scan():
         return redirect('/')
 
     if request.method == 'POST':
+        amount = request.form['amount']
         id = request.form['scan_btn']
 
         sp = spotipy.Spotify(auth_manager=auth_manager)
@@ -436,7 +438,7 @@ def scan():
             playlist = [id, results['images'][0]['url'], results['name'], results['tracks']['total']]
 
         session['playlist'] = playlist
-        return render_template('scan.html', async_mode=socketio.async_mode, id=id, playlist=playlist)
+        return render_template('scan.html', async_mode=socketio.async_mode, id=id, amount=amount, playlist=playlist)
 
     return redirect('/')
 
@@ -497,10 +499,11 @@ def addToPlaylist():
 @socketio.on('connect_event')
 def connect_event(message):
     id = message['data']
+    amount = int(message['amount'])
     playlist = session['playlist']
 
     global worker
-    worker = Worker(socketio, id, playlist, session.get('uuid'))
+    worker = Worker(socketio, id, amount, playlist, session.get('uuid'))
 
     socketio.start_background_task(target=worker.scan_playlist)
 

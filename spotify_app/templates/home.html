@@ -8,10 +8,14 @@
         <div class="playlist_cover" id="placeholder_cover">
             <i class="bi bi-music-note-beamed"></i>
         </div>
-        <div style="float: left; margin-left: 20px; position: relative;">
+        <div id="playlist_details">
             <h5>Select a playlist below</h5>
             <p></p>
-            <form action="/scan" method="POST" style="position: absolute; bottom: 0;">
+            <form action="/scan" method="POST">
+                <div id="amount_input">
+                    <p>Amount of recommendations to get:</p>
+                    <input type="number" name="amount" placeholder="Max 1000" min="1" max="1000" required>
+                </div>
                 <button class="btn grow" id="scan_btn" type="submit" name="scan_btn" disabled>Scan Playlist</button>
             </form>
         </div>

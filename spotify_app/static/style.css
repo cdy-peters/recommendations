@@ -222,6 +222,25 @@ footer a:hover path {
     justify-content: center;
 }
 
+#playlist_details {
+    float: left;
+    margin-left: 20px;
+    width: 200px;
+    height: fit-content;
+    min-height: 200px;
+    position: relative;
+}
+
+#playlist_details h5 {
+    white-space: nowrap;
+    overflow: hidden;
+}
+
+#playlist_details form {
+    position: absolute;
+    bottom: 0;
+}
+
 .inner_addon {
     position: relative;
 }
@@ -314,6 +333,40 @@ footer a:hover path {
     display: flex;
     justify-content: center;
     align-content: center;
+}
+
+#amount_input {
+    margin-bottom: 8px;
+}
+
+#amount_input p {
+    margin: 0;
+    line-height: normal;
+}
+
+#amount_input input {
+    width: 175px;
+    height: 30px;
+
+    border: none;
+    border-radius: 50px;
+
+    padding: 0 7px;
+
+    font-size: 12px;
+}
+
+/* Remove number input arrows */
+/* Chrome, Safari, Edge, Opera */
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+/* Firefox */
+input[type=number] {
+  -moz-appearance: textfield;
 }
 
 /* Scan */

@@ -35,7 +35,8 @@
         localStorage.setItem('genres', 0)
 
         socket.on('connect', function() {
-            socket.emit('connect_event', {data: '{{ id }}'});
+            localStorage.setItem('total_recommendations', '{{ amount }}')
+            socket.emit('connect_event', {data: '{{ id }}', amount: '{{ amount }}'});
         });
 
         window.onunload = function() {
@@ -136,21 +137,21 @@
         });
 
         socket.on('get_recommendations', function(msg) {
-            var total_songs = localStorage.getItem('total_songs')
+            var total_recommendations = localStorage.getItem('total_recommendations')
 
-            $('#process_message').text(`${msg.data} of ${total_songs} suggestions retrieved`)
+            $('#process_message').text(`${msg.data} of ${total_recommendations} suggestions retrieved`)
         });
 
         socket.on('analyse_recommendations', function(msg) {
-            var total_songs = localStorage.getItem('total_songs')
+            var total_recommendations = localStorage.getItem('total_recommendations')
 
-            $('#process_message').text(`${msg.data} of ${total_songs} suggestions analysed`)
+            $('#process_message').text(`${msg.data} of ${total_recommendations} suggestions analysed`)
         });
 
         socket.on('similarity_recommendations', function(msg) {
-            var total_songs = localStorage.getItem('total_songs')
+            var total_recommendations = localStorage.getItem('total_recommendations')
 
-            $('#process_message').text(`${msg.data} of ${total_songs} songs scored`)
+            $('#process_message').text(`${msg.data} of ${total_recommendations} songs scored`)
         });
 
         // Redirect
