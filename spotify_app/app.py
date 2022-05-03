@@ -138,34 +138,35 @@ class Worker(object):
         return tracks, artists
     
     def artist_genres(self, artists):
+        genres_lst = []
         genres = {}
+
         # Get genres of each artist
         for i in artists:
             if self.switch == True:
                 results = scc.artist(i)
 
                 for j in results['genres']: # TODO: Do something if no results are returned
-                    if self.switch == True:
+                    if j not in genres_lst and self.switch == True:
+                        genres_lst.append(j)
+                    elif self.switch == True:
                         if j not in genres:
-                            genres[j] = 1
+                            genres[j] = 2
+
+                            self.retrieved_genres += 1
+                            self.socketio.emit('retrieved_genres', {'data': self.retrieved_genres})
                         else:
                             genres[j] += 1
+
         # Order genres by value
         genres = dict(sorted(genres.items(), key=lambda item: item[1], reverse=True))
-
-        # Make list of keys with values greater than 1
-        genres_lst = []
-        for i in genres:
-            if self.switch == True:
-                if genres[i] != 1:
-                    genres_lst.append(i)
-
-                    self.retrieved_genres += 1
-                    self.socketio.emit('retrieved_genres', {'data': self.retrieved_genres})
-                else:
-                    break
         
-        return genres_lst
+        # Put all keys of genres into a list
+        new_genres_lst = []
+        for i in genres.keys():
+            new_genres_lst.append(i)
+        
+        return new_genres_lst
 
     def collate_features(self, tracks):
         average_features = {
