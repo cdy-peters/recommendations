@@ -140,9 +140,12 @@ class Worker(object):
     def artist_genres(self, artists):
         genres_lst = []
         genres = {}
+        self.artist_scan_count = 0
 
         # Get genres of each artist
         for i in artists:
+            self.artist_scan_count += 1
+            self.socketio.emit('retrieved_genres', {'data': self.retrieved_genres, 'artist_count': self.artist_scan_count})
             if self.switch == True:
                 results = scc.artist(i)
 
@@ -154,7 +157,7 @@ class Worker(object):
                             genres[j] = 2
 
                             self.retrieved_genres += 1
-                            self.socketio.emit('retrieved_genres', {'data': self.retrieved_genres})
+                            self.socketio.emit('retrieved_genres', {'data': self.retrieved_genres, 'artist_count': self.artist_scan_count})
                         else:
                             genres[j] += 1
 
@@ -185,7 +188,7 @@ class Worker(object):
             "tempo": 0,
             "valence": 0
         }
-        song_error_count = 0
+        self.song_error_count = 0
 
         for i in tracks:
             if self.switch == True:
@@ -203,14 +206,13 @@ class Worker(object):
                     average_features['valence'] += features[0]['valence']
                 else:
                     self.song_error_count += 1
-                    song_error_count += 1
-                    self.socketio.emit('failed_scans', {'data': self.song_error_counter})
+                    self.socketio.emit('failed_scans', {'data': self.song_error_count})
 
             if self.switch == True:
                 self.retrieved_songs += 1
                 self.socketio.emit('retrieved_songs', {'data': self.retrieved_songs})
 
-        return average_features, song_error_count
+        return average_features, self.song_error_count
 
 
     def recommendations(self):

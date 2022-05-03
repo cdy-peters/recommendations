@@ -126,9 +126,13 @@
 
         socket.on('retrieved_genres', function(msg) {
             $('#process_message2').text('')
-            localStorage.setItem('genres', msg.data)
 
-            $('#process_message').text(`${msg.data} genres retrieved`)
+            localStorage.setItem('genres', msg.data)
+            localStorage.setItem('artist_count', msg.artist_count)
+
+            var artists = localStorage.getItem('artists')
+
+            $('#process_message').text(`${msg.data} genres retrieved from ${msg.artist_count} of ${artists} artists`)
         });
 
         socket.on('get_recommendations', function(msg) {
