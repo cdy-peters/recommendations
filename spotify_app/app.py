@@ -57,7 +57,9 @@ class Worker(object):
         self.playlist = playlist
         self.uuid = uuid
 
-        self.switch = True
+        self.skip1 = False # Skip scanning songs
+        self.skip2 = False # Skip getting recommendations
+        self.switch = True # Stop task
 
     def session_cache_path(self):
         return caches_folder + self.uuid
@@ -79,6 +81,7 @@ class Worker(object):
         self.song_error_counter = 0
 
         # Get songs from playlist
+        # ! Get artists per song, not before scanning songs
         if self.id == 'liked songs':
             self.socketio.emit('retrieving_songs', {'data': self.playlist[-1]}, namespace=f'/{self.id}')
             results = sp.current_user_saved_tracks(limit=20)
@@ -194,6 +197,9 @@ class Worker(object):
         self.song_error_count = 0
 
         for i in tracks:
+            if self.skip1 == True:
+                return average_features, self.song_error_count
+
             if self.switch == True:
                 features = scc.audio_features(i)
 
@@ -252,7 +258,7 @@ class Worker(object):
         recommendations = []
         recommended_ids = []
 
-        while len(recommended_ids) < self.amount and self.switch == True:
+        while len(recommended_ids) < self.amount and self.switch == True and self.skip2 == False:
             for i in tracks:
                 if len(recommended_ids) == self.amount:
                     return recommendations
@@ -265,6 +271,9 @@ class Worker(object):
                     if id not in tracks:
                         recommended_artists = []
                         for j in track['artists']:
+                            # Check if user has skipped recommendations
+                            if self.skip2 == True:
+                                return recommendations
                             # Check if track has been added already
                             if id not in recommended_ids and self.switch == True:
                                 # Check for duplicate genres
@@ -346,9 +355,12 @@ class Worker(object):
             self.socketio.emit('sorting_recommendations', namespace=f'/{self.id}')
             return sorted(recommendations, key=lambda d: d['similarity'], reverse=True)
 
+    def skip_songs(self):
+        self.skip1 = True
 
+    def skip_recommendations(self):
+        self.skip2 = True
 
-    
     def stop(self):
         self.switch = False
 
@@ -510,6 +522,14 @@ def connect_event(message):
     worker = Worker(socketio, id, amount, playlist, session.get('uuid'))
 
     socketio.start_background_task(target=worker.scan_playlist)
+
+@socketio.on('skip_songs_event')
+def skip_songs_event():
+    worker.skip_songs()
+
+@socketio.on('skip_recommendations_event')
+def skip_recommendations_event():
+    worker.skip_recommendations()
 
 @socketio.on('disconnect_event')
 def disconnect_event():

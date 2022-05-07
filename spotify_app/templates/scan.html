@@ -46,6 +46,19 @@
             socket1.emit('disconnect_event')
         }
 
+        socket2.on('redirect', function() {
+            window.location = '/recommend'
+        })
+
+        $('#processes > button').on('click', function() {
+            var text = $(this).text()
+            if (text === 'Skip Scanning') {
+                socket1.emit('skip_songs_event')
+            } else if (text === 'Skip Recommendations') {
+                socket1.emit('skip_recommendations_event')
+            }
+        })
+
         // Update current process
         socket2.on('retrieving_songs', function(msg) {
             localStorage.setItem('total_songs', msg.data)
@@ -192,10 +205,6 @@
                     average_features: JSON.stringify(average_features)
                 }
             })
-        })
-
-        socket2.on('redirect', function() {
-            window.location = '/recommend'
         })
     })
 </script>
