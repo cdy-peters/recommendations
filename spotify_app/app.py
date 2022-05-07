@@ -78,12 +78,9 @@ class Worker(object):
         self.retrieved_songs = 0
         self.retrieved_artists = 0
         self.retrieved_genres = 0
-        # ! 2 different counts?
-        self.song_error_counter = 0
         self.song_error_count = 0
 
         # Get songs from playlist
-        # ! Get artists per song, not before scanning songs
         if self.id == 'liked songs':
             self.socketio.emit('retrieving_songs', {'data': self.playlist[-1]}, namespace=f'/{self.id}')
             results = sp.current_user_saved_tracks(limit=20)

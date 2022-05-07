@@ -55,6 +55,9 @@
             if (text === 'Skip Scanning') {
                 socket1.emit('skip_songs_event')
             } else if (text === 'Skip Recommendations') {
+                var recommendations_count = localStorage.getItem('recommendations_count')
+
+                localStorage.setItem('total_recommendations', recommendations_count)
                 socket1.emit('skip_recommendations_event')
             }
         })
@@ -163,8 +166,9 @@
 
         socket2.on('get_recommendations', function(msg) {
             var total_recommendations = localStorage.getItem('total_recommendations')
-
+            
             $('#process_message').text(`${msg.data} of ${total_recommendations} suggestions retrieved`)
+            localStorage.setItem('recommendations_count', msg.data)
 
             $('#processes > button').prop('disabled', false)
         });
