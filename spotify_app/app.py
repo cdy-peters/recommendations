@@ -78,30 +78,31 @@ class Worker(object):
         self.retrieved_songs = 0
         self.retrieved_artists = 0
         self.retrieved_genres = 0
+        # ! 2 different counts?
         self.song_error_counter = 0
+        self.song_error_count = 0
 
         # Get songs from playlist
         # ! Get artists per song, not before scanning songs
         if self.id == 'liked songs':
             self.socketio.emit('retrieving_songs', {'data': self.playlist[-1]}, namespace=f'/{self.id}')
             results = sp.current_user_saved_tracks(limit=20)
-            tracks, artists = self.append_songs([], [], results)
+            tracks, artists, average_features = self.append_songs([], [], results, None)
             while results['next'] and self.switch == True:
                 results = sp.next(results)
-                tracks, artists = self.append_songs(tracks, artists, results)
+                tracks, artists = self.append_songs(tracks, artists, results, average_features)
         else:
             self.socketio.emit('retrieving_songs', {'data': self.playlist[-1]}, namespace=f'/{self.id}')
             results = sp.playlist_tracks(self.id)
-            tracks, artists = self.append_songs([], [], results)
+            tracks, artists, average_features = self.append_songs([], [], results, None)
             while results['next'] and self.switch == True:
                 results = sp.next(results)
-                tracks, artists = self.append_songs(tracks, artists, results)
+                tracks, artists = self.append_songs(tracks, artists, results, average_features)
 
-        # Get average feature values
+        # Average average feature values
         if self.switch == True:
-            average_features, song_error_count = self.collate_features(tracks)
             for i in average_features:
-                average_features[i] = round(average_features[i] / (self.amount - song_error_count), 5)
+                average_features[i] = round(average_features[i] / (self.amount - self.song_error_count), 5)
         
         # Get genres of artists
         if self.switch == True:
@@ -112,7 +113,6 @@ class Worker(object):
             self.artists = artists
             self.genres = genres
             self.average_features = average_features
-            self.song_error_count = song_error_count
 
         if self.switch == True:
             self.recommendations()
@@ -129,10 +129,13 @@ class Worker(object):
             }, namespace=f'/{self.id}')
 
 
-    def append_songs(self, tracks, artists, results):
+    def append_songs(self, tracks, artists, results, average_features):
         for i in results['items']:
+            if self.skip1 == True:
+                return tracks, artists, average_features
             track_id = i['track']['id']
             tracks.append(track_id)
+            average_features = self.collate_features(track_id, average_features)
 
             for j in i['track']['artists']:
                 if j['id'] not in artists and self.switch == True:
@@ -141,7 +144,7 @@ class Worker(object):
                     self.retrieved_artists += 1
                     self.socketio.emit('retrieved_artists', {'data': self.retrieved_artists}, namespace=f'/{self.id}')
 
-        return tracks, artists
+        return tracks, artists, average_features
     
     def artist_genres(self, artists):
         genres_lst = []
@@ -182,46 +185,42 @@ class Worker(object):
             print(genres_lst)
             return genres_lst
 
-    def collate_features(self, tracks):
-        average_features = {
-            "acousticness": 0,
-            "danceability": 0,
-            "energy": 0,
-            "instrumentalness": 0,
-            "liveness": 0,
-            "loudness": 0,
-            "speechiness": 0,
-            "tempo": 0,
-            "valence": 0
-        }
-        self.song_error_count = 0
+    def collate_features(self, track_id, average_features):
+        if average_features is None:
+            average_features = {
+                "acousticness": 0,
+                "danceability": 0,
+                "energy": 0,
+                "instrumentalness": 0,
+                "liveness": 0,
+                "loudness": 0,
+                "speechiness": 0,
+                "tempo": 0,
+                "valence": 0
+            }
 
-        for i in tracks:
-            if self.skip1 == True:
-                return average_features, self.song_error_count
+        if self.switch == True:
+            features = scc.audio_features(track_id)
 
-            if self.switch == True:
-                features = scc.audio_features(i)
+            if type(features[0]) is dict:
+                average_features['acousticness'] += features[0]['acousticness']
+                average_features['danceability'] += features[0]['danceability']
+                average_features['energy'] += features[0]['energy']
+                average_features['instrumentalness'] += features[0]['instrumentalness']
+                average_features['liveness'] += features[0]['liveness']
+                average_features['loudness'] += features[0]['loudness']
+                average_features['speechiness'] += features[0]['speechiness']
+                average_features['tempo'] += features[0]['tempo']
+                average_features['valence'] += features[0]['valence']
+            else:
+                self.song_error_count += 1
+                self.socketio.emit('failed_scans', {'data': self.song_error_count}, namespace=f'/{self.id}')
 
-                if type(features[0]) is dict:
-                    average_features['acousticness'] += features[0]['acousticness']
-                    average_features['danceability'] += features[0]['danceability']
-                    average_features['energy'] += features[0]['energy']
-                    average_features['instrumentalness'] += features[0]['instrumentalness']
-                    average_features['liveness'] += features[0]['liveness']
-                    average_features['loudness'] += features[0]['loudness']
-                    average_features['speechiness'] += features[0]['speechiness']
-                    average_features['tempo'] += features[0]['tempo']
-                    average_features['valence'] += features[0]['valence']
-                else:
-                    self.song_error_count += 1
-                    self.socketio.emit('failed_scans', {'data': self.song_error_count}, namespace=f'/{self.id}')
+        if self.switch == True:
+            self.retrieved_songs += 1
+            self.socketio.emit('retrieved_songs', {'data': self.retrieved_songs}, namespace=f'/{self.id}')
 
-            if self.switch == True:
-                self.retrieved_songs += 1
-                self.socketio.emit('retrieved_songs', {'data': self.retrieved_songs}, namespace=f'/{self.id}')
-
-        return average_features, self.song_error_count
+        return average_features
 
 
     def recommendations(self):
