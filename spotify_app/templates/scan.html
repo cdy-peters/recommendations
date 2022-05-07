@@ -19,7 +19,7 @@
         <p id="process_message"></p>
         <p id="process_message2"></p>
         
-        <!-- <button class="add_songs_btn grow" id="newPlaylist" disabled>Stop Scanning</button> -->
+        <button class="add_songs_btn grow" id="newPlaylist skip_scan" disabled>Skip Scanning</button>
     </div>
 </div>
 
@@ -28,59 +28,69 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/3.0.4/socket.io.js" integrity="sha512-aMGMvNYu8Ue4G+fHa359jcPb1u+ytAF+P2SCb+PxrjCdO3n3ZTxJ30zuH39rimUggmTwmh2u7wvQsDTHESnmfQ==" crossorigin="anonymous"></script>
 <script type="text/javascript" charset="utf-8">
     $(document).ready(function() {
-        var socket = io()
         localStorage.setItem('songs', 0)
         localStorage.setItem('failed_songs', 0)
         localStorage.setItem('artists', 0)
         localStorage.setItem('genres', 0)
+        
+        var namespace = `/${'{{ id }}'}`
+        var socket1 = io()
+        var socket2 = io(namespace)
 
-        socket.on('connect', function() {
+        socket1.on('connect', function() {
             localStorage.setItem('total_recommendations', '{{ amount }}')
-            socket.emit('connect_event', {data: '{{ id }}', amount: '{{ amount }}'});
+            socket1.emit('connect_event', {data: '{{ id }}', amount: '{{ amount }}'});
         });
 
         window.onunload = function() {
-            socket.emit('disconnect_event')
+            socket1.emit('disconnect_event')
         }
 
         // Update current process
-        socket.on('retrieving_songs', function(msg) {
+        socket2.on('retrieving_songs', function(msg) {
             localStorage.setItem('total_songs', msg.data)
 
             $('#current_process').text('Retrieving songs from playlist')
         })
 
-        socket.on('retrieving_genres', function() {
+        socket2.on('retrieving_genres', function() {
             var songs = localStorage.getItem('songs')
             var artists = localStorage.getItem('artists')
+
             $('#songs_retrieved').text(`${songs} songs retrieved`)
             $('#artists_retrieved').text(`${artists} artists retrieved`)
 
             $('#current_process').text('Retrieving genres from playlist')
+
+            $('#processes > button').prop('disabled', true)
         })
 
-        socket.on('getting_recommendations', function() {
+        socket2.on('getting_recommendations', function() {
             var genres = localStorage.getItem('genres')
             $('#genres_retrieved').text(`${genres} genres retrieved`)
+            $('#processes > button').text('Skip Recommendations')
+            $('#processes > button').prop('disabled', true)
 
             $('#current_process').text('Getting song recommendations')
         })
 
-        socket.on('analysing_recommendations', function() {
+        socket2.on('analysing_recommendations', function() {
             $('#current_process').text('Analysing recommendations')
+
+            $('#processes > button').prop('disabled', true)
         })
 
-        socket.on('scoring_recommendations', function() {
+        socket2.on('scoring_recommendations', function() {
             $('#current_process').text('Scoring similarity of recommendations')
         })
 
-        socket.on('sorting_recommendations', function() {
+        socket2.on('sorting_recommendations', function() {
             $('#current_process').text('Sorting recommendations')
             $('#process_message').text('')
         })
         
         // Update process message
-        socket.on('retrieved_songs', function(msg) {
+        socket2.on('retrieved_songs', function(msg) {
             localStorage.setItem('songs', msg.data)
 
             var songs = localStorage.getItem('songs')
@@ -93,9 +103,11 @@
             
             $('#process_message').text(message_songs)
             $('#process_message2').text(message_artists)
+
+            $('#processes > button').prop('disabled', false)
         });
 
-        socket.on('failed_scans', function(msg) {
+        socket2.on('failed_scans', function(msg) {
             localStorage.setItem('failed_songs', msg.data)
             
             var songs = localStorage.getItem('songs')
@@ -110,7 +122,7 @@
             $('#process_message2').text(message_artists)
         });
 
-        socket.on('retrieved_artists', function(msg) {
+        socket2.on('retrieved_artists', function(msg) {
             localStorage.setItem('artists', msg.data)
             
             var songs = localStorage.getItem('songs')
@@ -125,7 +137,7 @@
             $('#process_message2').text(message_artists)
         });
 
-        socket.on('retrieved_genres', function(msg) {
+        socket2.on('retrieved_genres', function(msg) {
             $('#process_message2').text('')
 
             localStorage.setItem('genres', msg.data)
@@ -136,26 +148,28 @@
             $('#process_message').text(`${msg.data} genres retrieved from ${msg.artist_count} of ${artists} artists`)
         });
 
-        socket.on('get_recommendations', function(msg) {
+        socket2.on('get_recommendations', function(msg) {
             var total_recommendations = localStorage.getItem('total_recommendations')
 
             $('#process_message').text(`${msg.data} of ${total_recommendations} suggestions retrieved`)
+
+            $('#processes > button').prop('disabled', false)
         });
 
-        socket.on('analyse_recommendations', function(msg) {
+        socket2.on('analyse_recommendations', function(msg) {
             var total_recommendations = localStorage.getItem('total_recommendations')
 
             $('#process_message').text(`${msg.data} of ${total_recommendations} suggestions analysed`)
         });
 
-        socket.on('similarity_recommendations', function(msg) {
+        socket2.on('similarity_recommendations', function(msg) {
             var total_recommendations = localStorage.getItem('total_recommendations')
 
             $('#process_message').text(`${msg.data} of ${total_recommendations} songs scored`)
         });
 
         // Redirect
-        socket.on('store_data', function(data) {
+        socket2.on('store_data', function(data) {
             tracks = data.tracks
             artists = data.artists
             genres = data.genres
@@ -168,6 +182,7 @@
                 url: '/store_data',
                 type: 'POST',
                 data: {
+                    namespace: namespace,
                     tracks: JSON.stringify(tracks),
                     artists: JSON.stringify(artists),
                     genres: JSON.stringify(genres),
@@ -179,7 +194,7 @@
             })
         })
 
-        socket.on('redirect', function() {
+        socket2.on('redirect', function() {
             window.location = '/recommend'
         })
     })

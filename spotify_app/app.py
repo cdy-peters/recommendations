@@ -40,9 +40,11 @@ caches_folder = './.spotify_caches/'
 if not os.path.exists(caches_folder):
     os.makedirs(caches_folder)
 
-
 workerObject = None
-
+# ! After 1 song is received, show scan skip button
+    # ! Skip from song retrieval to genres
+# ! After 1 recommended song is retrieved, show recommendations skip button
+    # ! Skip from getting recommendations to analysing recommendations
 class Worker(object):
 
     switch = False
@@ -78,14 +80,14 @@ class Worker(object):
 
         # Get songs from playlist
         if self.id == 'liked songs':
-            self.socketio.emit('retrieving_songs', {'data': self.playlist[-1]})
+            self.socketio.emit('retrieving_songs', {'data': self.playlist[-1]}, namespace=f'/{self.id}')
             results = sp.current_user_saved_tracks(limit=20)
             tracks, artists = self.append_songs([], [], results)
             while results['next'] and self.switch == True:
                 results = sp.next(results)
                 tracks, artists = self.append_songs(tracks, artists, results)
         else:
-            self.socketio.emit('retrieving_songs', {'data': self.playlist[-1]})
+            self.socketio.emit('retrieving_songs', {'data': self.playlist[-1]}, namespace=f'/{self.id}')
             results = sp.playlist_tracks(self.id)
             tracks, artists = self.append_songs([], [], results)
             while results['next'] and self.switch == True:
@@ -100,7 +102,7 @@ class Worker(object):
         
         # Get genres of artists
         if self.switch == True:
-            self.socketio.emit('retrieving_genres')
+            self.socketio.emit('retrieving_genres', namespace=f'/{self.id}')
             genres = self.artist_genres(artists)
 
             self.tracks = tracks
@@ -121,7 +123,7 @@ class Worker(object):
                 'recommendations': self.recommendations,
                 'playlist': self.playlist,
                 'average_features': self.average_features
-            })
+            }, namespace=f'/{self.id}')
 
 
     def append_songs(self, tracks, artists, results):
@@ -134,7 +136,7 @@ class Worker(object):
                     artists.append(j['id'])
 
                     self.retrieved_artists += 1
-                    self.socketio.emit('retrieved_artists', {'data': self.retrieved_artists})
+                    self.socketio.emit('retrieved_artists', {'data': self.retrieved_artists}, namespace=f'/{self.id}')
 
         return tracks, artists
     
@@ -146,7 +148,7 @@ class Worker(object):
         # Get genres of each artist
         for i in artists:
             self.artist_scan_count += 1
-            self.socketio.emit('retrieved_genres', {'data': self.retrieved_genres, 'artist_count': self.artist_scan_count})
+            self.socketio.emit('retrieved_genres', {'data': self.retrieved_genres, 'artist_count': self.artist_scan_count}, namespace=f'/{self.id}')
             if self.switch == True:
                 results = scc.artist(i)
 
@@ -158,7 +160,7 @@ class Worker(object):
                             genres[j] = 2
 
                             self.retrieved_genres += 1
-                            self.socketio.emit('retrieved_genres', {'data': self.retrieved_genres, 'artist_count': self.artist_scan_count})
+                            self.socketio.emit('retrieved_genres', {'data': self.retrieved_genres, 'artist_count': self.artist_scan_count}, namespace=f'/{self.id}')
                         else:
                             genres[j] += 1
 
@@ -207,11 +209,11 @@ class Worker(object):
                     average_features['valence'] += features[0]['valence']
                 else:
                     self.song_error_count += 1
-                    self.socketio.emit('failed_scans', {'data': self.song_error_count})
+                    self.socketio.emit('failed_scans', {'data': self.song_error_count}, namespace=f'/{self.id}')
 
             if self.switch == True:
                 self.retrieved_songs += 1
-                self.socketio.emit('retrieved_songs', {'data': self.retrieved_songs})
+                self.socketio.emit('retrieved_songs', {'data': self.retrieved_songs}, namespace=f'/{self.id}')
 
         return average_features, self.song_error_count
 
@@ -227,15 +229,15 @@ class Worker(object):
         self.similarity_recommendations_counter = 0
 
         if self.switch == True:
-            self.socketio.emit('getting_recommendations')
+            self.socketio.emit('getting_recommendations', namespace=f'/{self.id}')
             recommendations = self.get_recommendations(tracks, genres)
 
         if self.switch == True:
-            self.socketio.emit('analysing_recommendations')
+            self.socketio.emit('analysing_recommendations', namespace=f'/{self.id}')
             recommendations = self.recommendations_features(recommendations)
 
         if self.switch == True:
-            self.socketio.emit('scoring_recommendations')
+            self.socketio.emit('scoring_recommendations', namespace=f'/{self.id}')
             recommendations = self.recommendations_similarity(recommendations, average_features)
             self.recommendations = recommendations
 
@@ -286,7 +288,7 @@ class Worker(object):
                                     })
 
                                     self.get_recommendations_counter += 1
-                                    self.socketio.emit('get_recommendations', {'data': self.get_recommendations_counter})
+                                    self.socketio.emit('get_recommendations', {'data': self.get_recommendations_counter}, namespace=f'/{self.id}')
                 except:
                     print(i, 'no results')
 
@@ -314,7 +316,7 @@ class Worker(object):
 
             if self.switch == True:
                 self.analyse_recommendations_counter += 1
-                self.socketio.emit('analyse_recommendations', {'data': self.analyse_recommendations_counter})
+                self.socketio.emit('analyse_recommendations', {'data': self.analyse_recommendations_counter}, namespace=f'/{self.id}')
 
         return recommendations
 
@@ -338,10 +340,10 @@ class Worker(object):
                 i['similarity'] = cos_similarity
 
                 self.similarity_recommendations_counter += 1
-                self.socketio.emit('similarity_recommendations', {'data': self.similarity_recommendations_counter})
+                self.socketio.emit('similarity_recommendations', {'data': self.similarity_recommendations_counter}, namespace=f'/{self.id}')
         
         if self.switch == True:
-            self.socketio.emit('sorting_recommendations')
+            self.socketio.emit('sorting_recommendations', namespace=f'/{self.id}')
             return sorted(recommendations, key=lambda d: d['similarity'], reverse=True)
 
 
@@ -398,6 +400,7 @@ def index():
                 'id': i['id']
             })
 
+    session['scan_count'] = 0
     return render_template('home.html', liked_total=liked_total, playlists=playlists)
 
 
@@ -444,6 +447,7 @@ def scan():
 
 @app.route('/store_data', methods=['GET', 'POST'])
 def store_data():
+    namespace = request.form['namespace']
     tracks = json.loads(request.form['tracks'])
     artists = json.loads(request.form['artists'])
     genres = json.loads(request.form['genres'])
@@ -460,7 +464,7 @@ def store_data():
     session['playlist'] = playlist
     session['average_features'] = average_features
 
-    socketio.emit('redirect')
+    socketio.emit('redirect', namespace=namespace)
     return 'success'
 
 @app.route('/recommend')
