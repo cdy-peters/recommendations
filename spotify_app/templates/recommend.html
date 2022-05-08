@@ -40,6 +40,12 @@
 
     <table class="track_table">
         <tr style="pointer-events: none;">
+            <th colspan="4">
+                <h5 style="text-align: center;">{{ recommendations | length }} recommendations</h5>
+            </th>
+        </tr>
+
+        <tr style="pointer-events: none;">
             <th style="width: 5%;"></th>
             <th style="width: 5%;"></th>
             <th style="width: 10%;">Similarity</th>
@@ -48,7 +54,7 @@
 
         {% for i in recommendations %}
             <tr class="track_row">
-                <td>
+                <td style="border-radius: 5px 0 0 5px">
                     <input class="trackCheckbox" id="{{ i.id }}" onclick="checkboxChange('{{ i.id }}')" type="checkbox" value="{{ i.id }}">
                 </td>
 
@@ -62,7 +68,7 @@
                 </td>
 
                 <td>{{ i.similarity | round(5) }}</td>
-                <td>
+                <td style="border-radius: 0 5px 5px 0;">
                     <a href="https://open.spotify.com/track/{{ i.id }}" target="_blank" class="recommended_songs">{{ i.name }}</a> <br> 
                     <!-- {% if i.explicit == True %}
                         <span class="bi bi-explicit-fill"></span>
