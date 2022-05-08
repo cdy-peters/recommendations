@@ -509,14 +509,11 @@ def addToPlaylist():
 
 @app.route('/close_thread', methods=['GET', 'POST'])
 def close_thread():
-    if request.method == 'POST':
+    if request.method == 'POST' and 'thread' in session:
         session.pop('thread')
         worker.stop()
 
-        if 'data' in request.form:
-            return 'success'
-        else:
-            return redirect('/')
+        return 'success' if 'data' in request.form else redirect('/')
     return redirect('/')
 
 @socketio.on('connect_event')
