@@ -433,7 +433,18 @@ input[type=number] {
 
 .recommended_artists {
     color: #b3b3b3;
-    margin-bottom: 0;
+}
+
+.recommended_artists svg {
+    float: left;
+    margin-right: 5px;
+}
+
+.recommended_artists p {
+    float: left;
+    margin: 0;
+    line-height: normal;
+    height: 15px;
 }
 
 

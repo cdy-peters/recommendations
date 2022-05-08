@@ -70,15 +70,19 @@
                 <td>{{ i.similarity | round(5) }}</td>
                 <td style="border-radius: 0 5px 5px 0;">
                     <a href="https://open.spotify.com/track/{{ i.id }}" target="_blank" class="recommended_songs">{{ i.name }}</a> <br> 
-                    <!-- {% if i.explicit == True %}
-                        <span class="bi bi-explicit-fill"></span>
-                    {% endif %} -->
-                    <p class="recommended_artists">
-                        {% for j in range((i.artists | length) - 1) %}
+                    <div class="recommended_artists">
+                        {% if i.explicit == True %}
+                            <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" fill="currentColor" class="bi bi-explicit-fill" viewBox="0 0 16 16">
+                                <path d="M2.5 0A2.5 2.5 0 0 0 0 2.5v11A2.5 2.5 0 0 0 2.5 16h11a2.5 2.5 0 0 0 2.5-2.5v-11A2.5 2.5 0 0 0 13.5 0h-11Zm4.326 10.88H10.5V12h-5V4.002h5v1.12H6.826V7.4h3.457v1.073H6.826v2.408Z"/>
+                            </svg>
+                        {% endif %}
+
+                        
+                        <p>{% for j in range((i.artists | length) - 1) %}
                             {{ i.artists[j].name }}, 
                         {% endfor %}
-                        {{ i.artists[-1].name }}
-                    </p>
+                        {{ i.artists[-1].name }}</p>
+                    </div>
                 </td>
             </tr>
         {% endfor %}
