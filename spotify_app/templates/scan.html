@@ -33,7 +33,7 @@
         localStorage.setItem('artists', 0)
         localStorage.setItem('genres', 0)
         
-        var namespace = `/${'{{ id }}'}`
+        var namespace = `/${'{{ uuid }}'}_${'{{ id }}'}`
         var socket1 = io()
         var socket2 = io(namespace)
 

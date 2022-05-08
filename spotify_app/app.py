@@ -78,14 +78,14 @@ class Worker(object):
 
         # Get songs from playlist
         if self.id == 'liked songs':
-            self.socketio.emit('retrieving_songs', {'data': self.playlist[-1]}, namespace=f'/{self.id}')
+            self.socketio.emit('retrieving_songs', {'data': self.playlist[-1]}, namespace=f'/{self.uuid}_{self.id}')
             results = sp.current_user_saved_tracks(limit=20)
             tracks, artists, average_features = self.append_songs([], [], results, None)
             while results['next'] and self.switch == True:
                 results = sp.next(results)
                 tracks, artists, average_features = self.append_songs(tracks, artists, results, average_features)
         else:
-            self.socketio.emit('retrieving_songs', {'data': self.playlist[-1]}, namespace=f'/{self.id}')
+            self.socketio.emit('retrieving_songs', {'data': self.playlist[-1]}, namespace=f'/{self.uuid}_{self.id}')
             results = sp.playlist_tracks(self.id)
             tracks, artists, average_features = self.append_songs([], [], results, None)
             while results['next'] and self.switch == True:
@@ -99,7 +99,7 @@ class Worker(object):
         
         # Get genres of artists
         if self.switch == True:
-            self.socketio.emit('retrieving_genres', namespace=f'/{self.id}')
+            self.socketio.emit('retrieving_genres', namespace=f'/{self.uuid}_{self.id}')
             genres = self.artist_genres(artists)
 
             self.tracks = tracks
@@ -119,7 +119,7 @@ class Worker(object):
                 'recommendations': self.recommendations,
                 'playlist': self.playlist,
                 'average_features': self.average_features
-            }, namespace=f'/{self.id}')
+            }, namespace=f'/{self.uuid}_{self.id}')
 
 
     def append_songs(self, tracks, artists, results, average_features):
@@ -135,7 +135,7 @@ class Worker(object):
                     artists.append(j['id'])
 
                     self.retrieved_artists += 1
-                    self.socketio.emit('retrieved_artists', {'data': self.retrieved_artists}, namespace=f'/{self.id}')
+                    self.socketio.emit('retrieved_artists', {'data': self.retrieved_artists}, namespace=f'/{self.uuid}_{self.id}')
 
         return tracks, artists, average_features
     
@@ -147,7 +147,7 @@ class Worker(object):
         # Get genres of each artist
         for i in artists:
             self.artist_scan_count += 1
-            self.socketio.emit('retrieved_genres', {'data': self.retrieved_genres, 'artist_count': self.artist_scan_count}, namespace=f'/{self.id}')
+            self.socketio.emit('retrieved_genres', {'data': self.retrieved_genres, 'artist_count': self.artist_scan_count}, namespace=f'/{self.uuid}_{self.id}')
             if self.switch == True:
                 results = scc.artist(i)
 
@@ -159,7 +159,7 @@ class Worker(object):
                             genres[j] = 2
 
                             self.retrieved_genres += 1
-                            self.socketio.emit('retrieved_genres', {'data': self.retrieved_genres, 'artist_count': self.artist_scan_count}, namespace=f'/{self.id}')
+                            self.socketio.emit('retrieved_genres', {'data': self.retrieved_genres, 'artist_count': self.artist_scan_count}, namespace=f'/{self.uuid}_{self.id}')
                         else:
                             genres[j] += 1
 
@@ -207,11 +207,11 @@ class Worker(object):
                 average_features['valence'] += features[0]['valence']
             else:
                 self.song_error_count += 1
-                self.socketio.emit('failed_scans', {'data': self.song_error_count}, namespace=f'/{self.id}')
+                self.socketio.emit('failed_scans', {'data': self.song_error_count}, namespace=f'/{self.uuid}_{self.id}')
 
         if self.switch == True:
             self.retrieved_songs += 1
-            self.socketio.emit('retrieved_songs', {'data': self.retrieved_songs}, namespace=f'/{self.id}')
+            self.socketio.emit('retrieved_songs', {'data': self.retrieved_songs}, namespace=f'/{self.uuid}_{self.id}')
 
         return average_features
 
@@ -227,15 +227,15 @@ class Worker(object):
         self.similarity_recommendations_counter = 0
 
         if self.switch == True:
-            self.socketio.emit('getting_recommendations', namespace=f'/{self.id}')
+            self.socketio.emit('getting_recommendations', namespace=f'/{self.uuid}_{self.id}')
             recommendations = self.get_recommendations(tracks, genres)
 
         if self.switch == True:
-            self.socketio.emit('analysing_recommendations', namespace=f'/{self.id}')
+            self.socketio.emit('analysing_recommendations', namespace=f'/{self.uuid}_{self.id}')
             recommendations = self.recommendations_features(recommendations)
 
         if self.switch == True:
-            self.socketio.emit('scoring_recommendations', namespace=f'/{self.id}')
+            self.socketio.emit('scoring_recommendations', namespace=f'/{self.uuid}_{self.id}')
             recommendations = self.recommendations_similarity(recommendations, average_features)
             self.recommendations = recommendations
 
@@ -289,7 +289,7 @@ class Worker(object):
                                     })
 
                                     self.get_recommendations_counter += 1
-                                    self.socketio.emit('get_recommendations', {'data': self.get_recommendations_counter}, namespace=f'/{self.id}')
+                                    self.socketio.emit('get_recommendations', {'data': self.get_recommendations_counter}, namespace=f'/{self.uuid}_{self.id}')
                 except:
                     print(i, 'no results')
 
@@ -317,7 +317,7 @@ class Worker(object):
 
             if self.switch == True:
                 self.analyse_recommendations_counter += 1
-                self.socketio.emit('analyse_recommendations', {'data': self.analyse_recommendations_counter}, namespace=f'/{self.id}')
+                self.socketio.emit('analyse_recommendations', {'data': self.analyse_recommendations_counter}, namespace=f'/{self.uuid}_{self.id}')
 
         return recommendations
 
@@ -341,10 +341,10 @@ class Worker(object):
                 i['similarity'] = cos_similarity
 
                 self.similarity_recommendations_counter += 1
-                self.socketio.emit('similarity_recommendations', {'data': self.similarity_recommendations_counter}, namespace=f'/{self.id}')
+                self.socketio.emit('similarity_recommendations', {'data': self.similarity_recommendations_counter}, namespace=f'/{self.uuid}_{self.id}')
         
         if self.switch == True:
-            self.socketio.emit('sorting_recommendations', namespace=f'/{self.id}')
+            self.socketio.emit('sorting_recommendations', namespace=f'/{self.uuid}_{self.id}')
             return sorted(recommendations, key=lambda d: d['similarity'], reverse=True)
 
     def skip_songs(self):
@@ -448,7 +448,7 @@ def scan():
             playlist = [id, results['images'][0]['url'], results['name'], results['tracks']['total']]
 
         session['playlist'] = playlist
-        return render_template('scan.html', async_mode=socketio.async_mode, id=id, amount=amount, playlist=playlist)
+        return render_template('scan.html', async_mode=socketio.async_mode, id=id, uuid=session['uuid'], amount=amount, playlist=playlist)
 
     return redirect('/')
 
@@ -526,7 +526,6 @@ def connect_event(message):
     playlist = session['playlist']
 
     session['thread'] = True
-    print('------------- thread added to session')
 
     global worker
     worker = Worker(socketio, id, amount, playlist, session.get('uuid'))
