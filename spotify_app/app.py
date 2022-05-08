@@ -81,14 +81,14 @@ class Worker(object):
             self.socketio.emit('retrieving_songs', {'data': self.playlist[-1]}, namespace=f'/{self.uuid}_{self.id}')
             results = sp.current_user_saved_tracks(limit=20)
             tracks, artists, average_features = self.append_songs([], [], results, None)
-            while results['next'] and self.switch == True:
+            while results['next'] and self.switch == True and self.skip1 == False:
                 results = sp.next(results)
                 tracks, artists, average_features = self.append_songs(tracks, artists, results, average_features)
         else:
             self.socketio.emit('retrieving_songs', {'data': self.playlist[-1]}, namespace=f'/{self.uuid}_{self.id}')
             results = sp.playlist_tracks(self.id)
             tracks, artists, average_features = self.append_songs([], [], results, None)
-            while results['next'] and self.switch == True:
+            while results['next'] and self.switch == True and self.skip1 == False:
                 results = sp.next(results)
                 tracks, artists, average_features = self.append_songs(tracks, artists, results, average_features)
 
