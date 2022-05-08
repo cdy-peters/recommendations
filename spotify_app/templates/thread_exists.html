@@ -1,0 +1,14 @@
+{% extends "layout.html" %}
+
+{% block content %}
+    <h1 style="text-align: center;">A playlist is already being scanned</h1>
+    <p style="text-align: center;">You can only scan 1 playlist at a time. Please wait for the current process to complete and reload the page, or end it, then try again.</p>
+    <div class="center">
+        <form action="/">
+            <button class="btn grow" id="scan_btn" style="float: left; margin-right: 20px;">Reload Page</button>
+        </form>
+        <form action="/close_thread" method="POST">
+            <button class="btn grow" id="scan_btn" style="float: left;">End Process</button>
+        </form>
+    </div>
+{% endblock %}

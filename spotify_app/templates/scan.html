@@ -42,9 +42,20 @@
             socket1.emit('connect_event', {data: '{{ id }}', amount: '{{ amount }}'});
         });
 
-        window.onunload = function() {
-            socket1.emit('disconnect_event')
-        }
+        $(window).on('beforeunload', function() {
+            // Close thread
+            $.ajax({
+                url: '/close_thread',
+                type: 'POST',
+                data: {
+                    data: 'unload - thread'
+                },
+                success: function() {
+                    // End background task
+                    // socket1.emit('disconnect_event')
+                }
+            })
+        })
 
         socket2.on('redirect', function() {
             window.location = '/recommend'

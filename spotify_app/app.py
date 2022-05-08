@@ -41,10 +41,6 @@ if not os.path.exists(caches_folder):
     os.makedirs(caches_folder)
 
 workerObject = None
-# ! After 1 song is received, show scan skip button
-    # ! Skip from song retrieval to genres
-# ! After 1 recommended song is retrieved, show recommendations skip button
-    # ! Skip from getting recommendations to analysing recommendations
 class Worker(object):
 
     switch = False
@@ -87,14 +83,14 @@ class Worker(object):
             tracks, artists, average_features = self.append_songs([], [], results, None)
             while results['next'] and self.switch == True:
                 results = sp.next(results)
-                tracks, artists = self.append_songs(tracks, artists, results, average_features)
+                tracks, artists, average_features = self.append_songs(tracks, artists, results, average_features)
         else:
             self.socketio.emit('retrieving_songs', {'data': self.playlist[-1]}, namespace=f'/{self.id}')
             results = sp.playlist_tracks(self.id)
             tracks, artists, average_features = self.append_songs([], [], results, None)
             while results['next'] and self.switch == True:
                 results = sp.next(results)
-                tracks, artists = self.append_songs(tracks, artists, results, average_features)
+                tracks, artists, average_features = self.append_songs(tracks, artists, results, average_features)
 
         # Average average feature values
         if self.switch == True:
@@ -392,6 +388,9 @@ def index():
     if not auth_manager.validate_token(cache_handler.get_cached_token()):
         return render_template('index.html')
 
+    if 'thread' in session:
+        return render_template('thread_exists.html')
+
     sp = spotipy.Spotify(auth_manager=auth_manager)
 
     results = sp.current_user_saved_tracks(limit=1)
@@ -508,11 +507,26 @@ def addToPlaylist():
     
     return redirect('/')
 
+@app.route('/close_thread', methods=['GET', 'POST'])
+def close_thread():
+    if request.method == 'POST':
+        session.pop('thread')
+        worker.stop()
+
+        if 'data' in request.form:
+            return 'success'
+        else:
+            return redirect('/')
+    return redirect('/')
+
 @socketio.on('connect_event')
 def connect_event(message):
     id = message['data']
     amount = int(message['amount'])
     playlist = session['playlist']
+
+    session['thread'] = True
+    print('------------- thread added to session')
 
     global worker
     worker = Worker(socketio, id, amount, playlist, session.get('uuid'))
@@ -527,9 +541,9 @@ def skip_songs_event():
 def skip_recommendations_event():
     worker.skip_recommendations()
 
-@socketio.on('disconnect_event')
-def disconnect_event():
-    worker.stop()
+# @socketio.on('disconnect_event')
+# def disconnect_event():
+#     worker.stop()
 
 if __name__ == '__main__':
     socketio.run(app)
