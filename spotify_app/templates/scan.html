@@ -15,6 +15,7 @@
     </div>
 
     <div id="processes">
+        <h5 id="process_step"></h5>
         <h5 id="current_process"></h5>
         <p id="process_message"></p>
         <p id="process_message2"></p>
@@ -77,6 +78,7 @@
         socket2.on('retrieving_songs', function(msg) {
             localStorage.setItem('total_songs', msg.data)
 
+            $('#process_step').text('Step 1/6')
             $('#current_process').text('Retrieving songs from playlist')
         })
 
@@ -87,6 +89,7 @@
             $('#songs_retrieved').text(`${songs} songs retrieved`)
             $('#artists_retrieved').text(`${artists} artists retrieved`)
 
+            $('#process_step').text('Step 2/6')
             $('#current_process').text('Retrieving genres from playlist')
 
             $('#processes > button').prop('disabled', true)
@@ -98,20 +101,24 @@
             $('#processes > button').text('Skip Recommendations')
             $('#processes > button').prop('disabled', true)
 
+            $('#process_step').text('Step 3/6')
             $('#current_process').text('Getting song recommendations')
         })
 
         socket2.on('analysing_recommendations', function() {
+            $('#process_step').text('Step 4/6')
             $('#current_process').text('Analysing recommendations')
 
             $('#processes > button').prop('disabled', true)
         })
 
         socket2.on('scoring_recommendations', function() {
+            $('#process_step').text('Step 5/6')
             $('#current_process').text('Scoring similarity of recommendations')
         })
 
         socket2.on('sorting_recommendations', function() {
+            $('#process_step').text('Step 6/6')
             $('#current_process').text('Sorting recommendations')
             $('#process_message').text('')
         })
