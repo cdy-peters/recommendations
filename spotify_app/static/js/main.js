@@ -1,5 +1,5 @@
 $(document).ready(() => {
-    localStorage.clear()
+    localStorage.removeItem('audio')
     localStorage.setItem('checkboxCount', 0)
 
     // Search playlists
