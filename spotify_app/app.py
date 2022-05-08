@@ -260,39 +260,47 @@ class Worker(object):
                     track = results['tracks'][0]
                     id = track['id']
 
-                    if id not in tracks:
-                        recommended_artists = []
-                        for j in track['artists']:
-                            # Check if user has skipped recommendations
-                            if self.skip2 == True:
-                                return recommendations
-                            # Check if track has been added already
-                            if id not in recommended_ids and self.switch == True:
-                                # Check for duplicate genres
-                                recommended_genres = scc.artist(j['id'])
-                                recommended_set = set(recommended_genres['genres'])
-                                given_set = set(genres)
-                                if (recommended_set & given_set):
-                                    # Add artist to recommended artists
-                                    recommended_artists.append({
-                                        'id': j['id'],
-                                        'name': j['name']
-                                    })
-                                    # Add song to recommendations
-                                    recommended_ids.append(id)
-                                    recommendations.append({
-                                        'id': id,
-                                        'explicit': track['explicit'],
-                                        'name': track['name'],
-                                        'artists': recommended_artists,
-                                        'preview': track['preview_url']
-                                    })
+                    if id not in tracks and id not in recommended_ids:
+                        # Check if user has skipped recommendations
+                        if self.skip2 == True:
+                            return recommendations
 
-                                    self.get_recommendations_counter += 1
-                                    self.socketio.emit('get_recommendations', {'data': self.get_recommendations_counter}, namespace=f'/{self.uuid}_{self.id}')
+                        # Loop through artists to get genres of recommended song
+                        recommended_artists = []
+                        recommended_genres = []
+                        for j in track['artists']:
+                            # Add artist to recommended artists
+                            recommended_artists.append({
+                                'id': j['id'],
+                                'name': j['name']
+                            })
+
+                            recommended_artist = scc.artist(j['id'])
+                            artist_genres = recommended_artist['genres']
+                            
+                            # Loop through genres, adding unique ones to recommended_genres
+                            for k in artist_genres:
+                                if k not in recommended_genres:
+                                    recommended_genres.append(k)
+                        
+                        # Check if any recommended genres are relevant to the playlist
+                        recommended_genres_set = set(recommended_genres)
+                        playlist_genres_set = set(genres)
+                        if (recommended_genres_set & playlist_genres_set):
+                            recommended_ids.append(id)
+                            recommendations.append({
+                                'id': id,
+                                'explicit': track['explicit'],
+                                'name': track['name'],
+                                'artists': recommended_artists,
+                                'preview': track['preview_url']
+                            })
+
+                            self.get_recommendations_counter += 1
+                            self.socketio.emit('get_recommendations', {'data': self.get_recommendations_counter}, namespace=f'/{self.uuid}_{self.id}')
                 except:
                     print(i, 'no results')
-
+                    
         return recommendations
     
     def recommendations_features(self, recommendations):

@@ -52,6 +52,7 @@
             <th style="width: 80%;">Name</th>
         </tr>
 
+        
         {% for i in recommendations %}
             <tr class="track_row">
                 <td style="border-radius: 5px 0 0 5px">
@@ -78,10 +79,12 @@
                         {% endif %}
 
                         
-                        <p>{% for j in range((i.artists | length) - 1) %}
-                            {{ i.artists[j].name }}, 
-                        {% endfor %}
-                        {{ i.artists[-1].name }}</p>
+                        <p>
+                            {% for j in range((i.artists | length) - 1) %}
+                                {{ i.artists[j].name }}, 
+                            {% endfor %}
+                            {{ i.artists[-1].name }}
+                        </p>
                     </div>
                 </td>
             </tr>
