@@ -380,7 +380,9 @@ input[type=number] {
 /* Scan */
 #scan_info {
     width: 200px;
+    min-height: 200px;
     overflow: hidden;
+    margin: 0 20px;
 }
 
 #scan_info {
@@ -400,6 +402,9 @@ input[type=number] {
 }
 
 #processes button {
+    width: fit-content;
+    padding: 0 10px;
+
     margin: 0;
     margin-top: 30px;
     position: absolute;
@@ -509,7 +514,6 @@ input[type=number] {
 
 .add_songs_btn {
     min-width: 175px;
-    height: 45px;
 
     /* Button styling */
     background-color: #1DB954;

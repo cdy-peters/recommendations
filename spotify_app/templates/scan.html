@@ -5,28 +5,29 @@
 {% endblock %}
 
 {% block content %}
-<div id="scan_content">
-    <div class="center">
-        <img src="{{ playlist[1] }}" class="playlist_cover" style="margin: 0 20px 20px 0;">
-
-        <div id="scan_info">
-            <h5>{{ playlist[2] }}</h5>
-            <p id="songs_retrieved"></p>
-            <p id="artists_retrieved"></p>
-            <p id="genres_retrieved"></p>
-        </div>
+<div id="selected_playlist" style="margin-bottom: 20px;">
+    <div style="max-width: 200px; max-height: 200px;">
+        <img src="{{ playlist[1] }}" id="playlist_cover" class="img-fluid">
     </div>
 
-    <div id="processes">
-        <h5 id="process_step"></h5>
-        <h5 id="current_process"></h5>
-        <p id="process_message"></p>
-        <p id="process_message2"></p>
-        
-        <button class="add_songs_btn grow" id="newPlaylist skip_scan" disabled>Skip Scanning</button>
+    <div id="playlist_details">
+        <div style="overflow: hidden; width: 200px;">
+            <h5 id="scan_playlist_title">{{ playlist[2] }}</h5>
+        </div>
+        <p id="songs_retrieved"></p>
+        <p id="artists_retrieved"></p>
+        <p id="genres_retrieved"></p>
     </div>
 </div>
 
+<div id="processes">
+    <h5 id="process_step"></h5>
+    <h5 id="current_process"></h5>
+    <p id="process_message"></p>
+    <p id="process_message2"></p>
+    
+    <button class="add_songs_btn grow" id="newPlaylist skip_scan" disabled>Skip Scanning</button>
+</div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js" integrity="sha512-bLT0Qm9VnAYZDflyKcBaQ2gg0hSYNQrJ8RilYldYQ1FxQYoCLtUjuuRuZo+fjqhx/qtq/1itJ0C2ejDxltZVFg==" crossorigin="anonymous"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/3.0.4/socket.io.js" integrity="sha512-aMGMvNYu8Ue4G+fHa359jcPb1u+ytAF+P2SCb+PxrjCdO3n3ZTxJ30zuH39rimUggmTwmh2u7wvQsDTHESnmfQ==" crossorigin="anonymous"></script>
