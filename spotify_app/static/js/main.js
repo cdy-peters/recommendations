@@ -1,23 +1,6 @@
 $(document).ready(() => {
     localStorage.removeItem('audio')
     localStorage.setItem('checkboxCount', 0)
-
-    // Search playlists
-    $('#playlist_search').on('input', (e) => {
-        var input = $(e.target).val()
-        var regex = new RegExp(input, 'g')
-        var playlists = $('.playlist_container')
-
-        for (let i = 1; i < playlists.length; i++) {
-            var name = $(playlists[i]).attr('name')
-
-            if (regex.test(name)) {
-                $(`[name="${name}"]`).show()
-            } else {
-                $(`[name="${name}"]`).hide()
-            }
-        }
-    })
 })
 
 
@@ -30,28 +13,6 @@ function _calculateScrollbarWidth() {
   document.addEventListener('DOMContentLoaded', _calculateScrollbarWidth, false); 
   // recalculate on load (assets loaded as well)
   window.addEventListener('load', _calculateScrollbarWidth);
-
-
-// Home
-function playlistClick(playlistArr) {
-    if (playlistArr.type === 'playlist') {
-        var url = playlistArr.url
-        var name = playlistArr.name
-        var total = playlistArr.total
-        var id = playlistArr.id
-    } else {
-        var url = '../static//images/liked_songs_cover.png'
-        var name = 'Liked Songs'
-        var total = playlistArr.total
-        var id = 'liked songs'
-    }
-    
-    $('#placeholder_cover').hide()
-    $('#selected_playlist > img').attr("src", url) // Change image of selected playlist
-    $('#selected_playlist > div > h5').html(name)
-    $('#selected_playlist > div > p').html(total + ' songs')
-    $('#scan_btn').attr("value", id).prop("disabled", false)
-}
 
 // Recommend
 function playPreview(url) {
