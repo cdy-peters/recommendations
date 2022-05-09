@@ -78,16 +78,10 @@ body {
 /* Layout */
 .navbar {
     background-color: #121212;
-}
-
-.navbar-brand {
-    color: white !important;
-    margin: 0;
-    left: 50%;
-    top: 50%;
-    position: absolute;
-    -ms-transform: translate(-50%, -50%);
-    transform: translate(-50%, -50%);
+    position: fixed;
+    top: 0;
+    width: 100%;
+    z-index: 1;
 }
 
 .navbar a {
