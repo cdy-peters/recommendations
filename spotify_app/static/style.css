@@ -33,9 +33,7 @@ body {
     font-size: 48px;
 }
 
-.playlist_cover {
-    max-height: 200px;
-    max-width: 200px;
+#playlist_cover {
     border-radius: 5px;
     float: left;
     box-shadow: 0 1px 7px 1px #040404;
@@ -212,6 +210,7 @@ footer a:hover path {
 
 /* Home */
 #selected_playlist {
+    margin: 0 20px;
     display: flex;
     justify-content: center;
 }

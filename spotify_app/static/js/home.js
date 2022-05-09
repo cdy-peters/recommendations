@@ -43,8 +43,7 @@ function playlistClick(playlistArr) {
         var id = 'liked songs'
     }
     
-    $('#placeholder_cover').hide()
-    $('#selected_playlist > img').attr("src", url) // Change image of selected playlist
+    $('#playlist_cover').attr("src", url) // Change image of selected playlist
 
     // Marquee
     // Change playlist title
