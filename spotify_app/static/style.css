@@ -385,6 +385,15 @@ input[type=number] {
 }
 
 /* Scan */
+#scan_info {
+    width: 200px;
+    overflow: hidden;
+}
+
+#scan_info {
+    white-space: nowrap;
+}
+
 #processes {
     clear: both;
 }

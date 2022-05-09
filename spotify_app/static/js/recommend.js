@@ -5,7 +5,6 @@ $(document).ready(() => {
     // Marquee
     // Change playlist title
     var txt = $('#scan_results > h5')
-    // txt.html(name)
 
     // Get width of text
     var html_txt = txt.html()
