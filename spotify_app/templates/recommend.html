@@ -1,13 +1,17 @@
 {% extends 'layout.html' %}
 
+{% block head %}
+<script src="../static/js/recommend.js"></script>
+{% endblock %}
+
 {% block content %}
 
 <div id="recommend_content">
 
-    <div style="margin: 0 160px 0 20px; position: fixed;">
+    <div id="playlist_info">
         <img src="{{ playlist[1] }}" class="playlist_cover" style="margin: 0 20px 20px 0;">
 
-        <div style="float: left;">
+        <div id="scan_results" style="float: left;">
             <h5>{{ playlist[2] }}</h5>
             <p>{{ results[0] }} songs scanned</p>
             <p>{{ results[1] }} artists retrieved</p>
@@ -41,7 +45,7 @@
     <table class="track_table">
         <tr style="pointer-events: none;">
             <th colspan="4">
-                <h5 style="text-align: center;">{{ recommendations | length }} recommendations</h5>
+                <h5>{{ recommendations | length }} recommendations</h5>
             </th>
         </tr>
 

@@ -411,6 +411,20 @@ input[type=number] {
     margin-bottom: 20px;
 }
 
+#playlist_info {
+    margin: 0 160px 0 20px;
+    position: fixed;
+    width: 600px;
+    overflow: hidden;
+}
+
+#scan_results {
+    float: left;
+    width: 380px;
+    white-space: nowrap;
+    overflow: hidden;
+}
+
 .track_table {
     margin-left: 650px;
 }
