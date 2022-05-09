@@ -79,4 +79,6 @@ function playlistClick(playlistArr) {
         $('#scan_btn').attr("value", id).prop("disabled", true)
     }
 
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+
 }
