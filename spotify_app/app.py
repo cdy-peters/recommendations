@@ -94,8 +94,9 @@ class Worker(object):
 
         # Average average feature values
         if self.switch == True:
+            print('----------------', len(tracks))
             for i in average_features:
-                average_features[i] = round(average_features[i] / (self.amount - self.song_error_count), 5)
+                average_features[i] = round(average_features[i] / (len(tracks) - self.song_error_count), 5)
         
         # Get genres of artists
         if self.switch == True:

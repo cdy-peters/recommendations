@@ -427,6 +427,10 @@ input[type=number] {
     overflow: hidden;
 }
 
+.bi-question-circle-fill {
+    font-size: 16px !important;
+}
+
 #scan_results {
     float: left;
     width: 380px;
