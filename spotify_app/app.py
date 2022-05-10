@@ -79,14 +79,14 @@ class Worker(object):
         # Get songs from playlist
         if self.id == 'liked songs':
             self.socketio.emit('retrieving_songs', {'data': self.playlist[-1]}, namespace=f'/{self.uuid}_{self.id}')
-            results = sp.current_user_saved_tracks(limit=20)
+            results = sp.current_user_saved_tracks(limit=50)
             tracks, artists, average_features = self.append_songs([], [], results, None)
             while results['next'] and self.switch == True and self.skip1 == False:
                 results = sp.next(results)
                 tracks, artists, average_features = self.append_songs(tracks, artists, results, average_features)
         else:
             self.socketio.emit('retrieving_songs', {'data': self.playlist[-1]}, namespace=f'/{self.uuid}_{self.id}')
-            results = sp.playlist_tracks(self.id)
+            results = sp.playlist_tracks(self.id, limit=50)
             tracks, artists, average_features = self.append_songs([], [], results, None)
             while results['next'] and self.switch == True and self.skip1 == False:
                 results = sp.next(results)
@@ -152,17 +152,18 @@ class Worker(object):
             if self.switch == True:
                 results = scc.artist(i)
 
-                for j in results['genres']: # TODO: Do something if no results are returned
-                    if j not in genres_lst and self.switch == True:
-                        genres_lst.append(j)
-                    elif self.switch == True:
-                        if j not in genres:
-                            genres[j] = 2
+                if 'genres' in results:
+                    for j in results['genres']: # ! Not sure what happens when no results are returned
+                        if j not in genres_lst and self.switch == True:
+                            genres_lst.append(j)
+                        elif self.switch == True:
+                            if j not in genres:
+                                genres[j] = 2
 
-                            self.retrieved_genres += 1
-                            self.socketio.emit('retrieved_genres', {'data': self.retrieved_genres, 'artist_count': self.artist_scan_count}, namespace=f'/{self.uuid}_{self.id}')
-                        else:
-                            genres[j] += 1
+                                self.retrieved_genres += 1
+                                self.socketio.emit('retrieved_genres', {'data': self.retrieved_genres, 'artist_count': self.artist_scan_count}, namespace=f'/{self.uuid}_{self.id}')
+                            else:
+                                genres[j] += 1
 
         # Order genres by value
         if self.retrieved_genres != 0:
@@ -300,7 +301,7 @@ class Worker(object):
                             self.get_recommendations_counter += 1
                             self.socketio.emit('get_recommendations', {'data': self.get_recommendations_counter}, namespace=f'/{self.uuid}_{self.id}')
                 except:
-                    print(i, 'no results')
+                    print(i, 'no results-----------------------------------')
                     
         return recommendations
     
@@ -370,7 +371,6 @@ class Worker(object):
 
 # --------------------------- Functions -----------------------------------
 
-# ? Can I call the below functions from the class
 def session_cache_path():
     return caches_folder + session.get('uuid')
 
@@ -509,9 +509,12 @@ def addToPlaylist():
             new_playlist = sp.user_playlist_create(user_id, name='Spotify App Playlist')
             id = new_playlist['id']
 
-        # TODO: Loop for every 100 tracks
-        sp.playlist_add_items(id, uris)
-
+        # Add songs to playlist
+        while uris:
+            new_uris = uris[:100]
+            sp.playlist_add_items(id, new_uris)
+            uris = uris[100:]
+        
         return 'success'
     
     return redirect('/')
