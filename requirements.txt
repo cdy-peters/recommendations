@@ -1,7 +1,6 @@
-Django==4.0.3
+eventlet==0.33.0
 Flask==2.0.2
 Flask_Session==0.4.0
+Flask_SocketIO==5.1.1
 numpy==1.22.3
-requests==2.27.1
-six==1.16.0
 spotipy==2.19.0
