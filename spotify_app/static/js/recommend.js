@@ -4,7 +4,7 @@ $(document).ready(() => {
 
     // Marquee
     // Change playlist title
-    var txt = $('#scan_results > h5')
+    var txt = $('#recommend_playlist_title')
 
     // Get width of text
     var html_txt = txt.html()
@@ -15,8 +15,8 @@ $(document).ready(() => {
     $(txt).html(html_txt)
 
     // Add marquee class
-    if (width > 380) {
-        txt.css('width', `${width - 380}px`)
+    if (width > 200) {
+        txt.css('width', `${width - 200}px`)
         txt.addClass('marquee')
     }
 })
@@ -87,10 +87,10 @@ function selectAll() {
     select_btn = $("#select_all_btn")[0]
 
     if (document.getElementById('existingPlaylist').innerHTML === 'Songs added') {
-        document.getElementById('existingPlaylist').innerHTML = 'Add to this Playlist'
+        document.getElementById('existingPlaylist').innerHTML = 'This Playlist'
     }
     if (document.getElementById('newPlaylist').innerHTML === 'Songs added') {
-        document.getElementById('newPlaylist').innerHTML = 'Add to New playlist'
+        document.getElementById('newPlaylist').innerHTML = 'New playlist'
     }
 
     if (select_btn.value === 'select all') {
@@ -102,7 +102,7 @@ function selectAll() {
 
         $('#selected_songs').html(checkboxes.length + ' songs selected')
         select_btn.value = 'deselect all'
-        select_btn.innerHTML = 'Deselect all songs'
+        select_btn.innerHTML = 'Deselect all'
 
         $('#existingPlaylist').prop('disabled', false)
         $('#newPlaylist').prop('disabled', false)
@@ -115,7 +115,7 @@ function selectAll() {
 
         $('#selected_songs').html(0 + ' songs selected')
         select_btn.value = 'select all'
-        select_btn.innerHTML = 'Select all songs'
+        select_btn.innerHTML = 'Select all'
 
         $('#existingPlaylist').prop('disabled', true)
         $('#newPlaylist').prop('disabled', true)

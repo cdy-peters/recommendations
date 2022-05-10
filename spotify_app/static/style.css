@@ -210,7 +210,6 @@ footer a:hover path {
 
 /* Home */
 #selected_playlist {
-    margin: 0 20px;
     display: flex;
     justify-content: center;
 }
@@ -414,15 +413,24 @@ input[type=number] {
 }
 
 /* Recommended */
-#recommend_content {
-    margin-bottom: 20px;
+#playlist_info {
+    /* overflow: hidden; */
+    /* width: 420px; */
+    float: left;
+    margin: 0 20px 40px 20px;
 }
 
-#playlist_info {
-    margin: 0 160px 0 20px;
-    position: fixed;
-    width: 600px;
-    overflow: hidden;
+#recommended_playlist_details {
+    float: left;
+    margin-left: 20px;
+    width: 200px;
+    /* height: fit-content;
+    min-height: 200px; */
+    position: relative;
+}
+
+#recommended_playlist_details h5 {
+    white-space: nowrap;
 }
 
 .bi-question-circle-fill {
@@ -430,14 +438,14 @@ input[type=number] {
 }
 
 #scan_results {
-    float: left;
-    width: 380px;
+    /* float: left; */
+    width: 200px;
     white-space: nowrap;
     overflow: hidden;
 }
 
 .track_table {
-    margin-left: 650px;
+    min-width: 350px;
 }
 
 .track_table td {
@@ -487,20 +495,15 @@ input[type=number] {
     height: 15px;
 }
 
-
-#add_tracks_container {
-    width: 360px;
-    /* margin-top: 10px; */
-    margin-top: 50px;
+#recommended_sticky {
+    position: sticky;
+    bottom: 20px;
+    margin: 0 0 20px 20px;
 }
 
-#add_tracks_container p {
-    min-width: 175px;
-    height: 45px;
-
-    display: flex;
-    justify-content: center;
-    align-items: center;
+#add_tracks_container {
+    width: 270px;
+    height: 98px;
 }
 
 #select_all_btn {
@@ -513,7 +516,7 @@ input[type=number] {
 }
 
 .add_songs_btn {
-    min-width: 175px;
+    width: 130px;
 
     /* Button styling */
     background-color: #1DB954;
@@ -536,9 +539,21 @@ input[type=number] {
 }
 
 .add_songs_btn:disabled {
-    opacity: .65;
+    background-color: #187d3c;
+    color: #ababab; 
     pointer-events: none;
 }
+
+#selected_songs {
+    float: left;
+    width: 130px;
+    line-height: normal;
+    height: 44px;
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+}
+
 
 
 #scrollTopBtn {
@@ -570,6 +585,27 @@ input[type=number] {
     background-color: #282828;
 }
 
+/* Recommend media queries */
+@media (min-width: 650px) {
+    #playlist_info {
+        position: fixed;
+    }
+
+    .track_table {
+        margin-left: max(40%, 460px);
+    }
+}
+
+@media (max-width: 919px) {
+    #playlist_info {
+        position: static;
+    }
+
+    .track_table {
+        clear: both;
+        margin: 0 5px;
+    }
+}
 
 
 
