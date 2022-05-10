@@ -502,8 +502,14 @@ input[type=number] {
 }
 
 #add_tracks_container {
-    width: 270px;
-    height: 98px;
+    width: 290px;
+    height: 118px;
+
+    background-color: #090909;
+    border-radius: 15px;
+    padding: 10px;
+
+    clear: both;
 }
 
 #select_all_btn {
@@ -539,8 +545,9 @@ input[type=number] {
 }
 
 .add_songs_btn:disabled {
-    background-color: #187d3c;
-    color: #ababab; 
+    /* background-color: #187d3c;
+    color: #ababab;  */
+    opacity: .65;
     pointer-events: none;
 }
 
@@ -604,6 +611,15 @@ input[type=number] {
     .track_table {
         clear: both;
         margin: 0 5px;
+    }
+
+    #recommended_sticky {
+        float: right;
+        margin: 0 20px 20px 0;
+    }
+
+    #scrollTopBtn {
+        float: right;
     }
 }
 
