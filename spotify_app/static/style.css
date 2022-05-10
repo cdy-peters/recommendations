@@ -112,8 +112,8 @@ footer {
     width: calc(100vw - var(--scrollbar-width));
 
     background-color: black;
-    height: 75px;
-    padding: 0 20px;
+    /* height: 75px; */
+    padding: 10px 20px;
 
     display: flex;
     justify-content: space-between;
@@ -149,6 +149,28 @@ footer a:hover path {
 .social_background:hover {
     color: #1DB954;
     cursor: pointer;
+}
+
+/* Footer Media Queries */
+@media (max-width: 650px) {
+    #footer_inner {
+        display: block;
+    }
+
+    #footer_inner a {
+        display: flex;
+        justify-content: center;
+        margin-bottom: 10px;
+    }
+
+    #footer_inner p {
+        text-align: center;
+    }
+
+    #footer_inner div {
+        display: flex;
+        justify-content: center;
+    }
 }
 
 /* Index */
@@ -624,28 +646,9 @@ input[type=number] {
 
     #scrollTopBtn {
         float: right;
+        right: 20px;
     }
 }
-/* 
-@media (max-height: 550px) {
-    #playlist_info {
-        position: static;
-    }
-
-    .track_table {
-        clear: both;
-        margin: 0 5px;
-    }
-
-    #recommended_sticky {
-        float: right;
-        margin: 0 20px 20px 0;
-    }
-
-    #scrollTopBtn {
-        float: right;
-    }
-} */
 
 
 
