@@ -184,7 +184,7 @@ function selectAll(id) {
     }
 }
 
-function addToPlaylist(playlist) {
+function addToPlaylist(playlist, playlist_name) {
     checkboxes = $('.trackCheckbox')
     tracks = []
 
@@ -207,6 +207,7 @@ function addToPlaylist(playlist) {
         type: 'POST',
         data: {
             playlist: playlist,
+            playlist_name: playlist_name,
             tracks: JSON.stringify(tracks)
         },
         success: function() {

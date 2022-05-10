@@ -160,9 +160,9 @@
             {% if playlist[0] == 'liked songs' %}
                 <button class="add_songs_btn" id="existingPlaylist" style="float: left;" disabled>This Playlist</button>
             {% else %}
-                <button class="add_songs_btn grow" id="existingPlaylist" style="float: left; " onclick="addToPlaylist('{{ playlist[0] }}')" disabled>This Playlist</button>
+                <button class="add_songs_btn grow" id="existingPlaylist" style="float: left; " onclick="addToPlaylist('{{ playlist[0] }}', '{{ playlist[2] }}')" disabled>This Playlist</button>
             {% endif %}
-            <button class="add_songs_btn grow" id="newPlaylist" style="float: right;" onclick="addToPlaylist('new')" disabled>New Playlist</button>
+            <button class="add_songs_btn grow" id="newPlaylist" style="float: right;" onclick="addToPlaylist('new', '{{ playlist[2] }}')" disabled>New Playlist</button>
         </div>
     </div>
 </div>

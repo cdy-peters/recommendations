@@ -504,12 +504,13 @@ def addToPlaylist():
         sp = spotipy.Spotify(auth_manager=auth_manager)
 
         id = request.form['playlist']
+        name = request.form['playlist_name']
         tracks = json.loads(request.form['tracks'])
         uris = ["spotify:track:" + i for i in tracks]
 
         if request.form['playlist'] == 'new':
             user_id = sp.me()['id']
-            new_playlist = sp.user_playlist_create(user_id, name='Spotto Playlist')
+            new_playlist = sp.user_playlist_create(user_id, name=f'Spotto based on {name}')
             id = new_playlist['id']
 
         # Add songs to playlist
