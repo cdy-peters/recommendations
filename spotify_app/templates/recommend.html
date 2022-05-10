@@ -106,14 +106,16 @@
                     <input class="trackCheckbox" id="{{ i.id }}" onclick="checkboxChange('{{ i.id }}')" type="checkbox" value="{{ i.id }}">
                 </td>
 
+                {% if i.preview != None %}
                 <td id="{{ i.preview }}" onclick="playPreview('{{ i.preview }}')">
-                    {% if i.preview != None %}
-                        <i class="bi bi-play-fill"></i>
-                    {% endif %}
+                    <i class="bi bi-play-fill"></i>
                     <audio>
                         <source src="{{ i.preview }}" type="audio/mpeg">
                     </audio>
                 </td>
+                {% else %}
+                <td></td>
+                {% endif %}
 
                 <td>{{ i.similarity | round(5) }}</td>
                 <td class="song_details" style="border-radius: 0 5px 5px 0;">
