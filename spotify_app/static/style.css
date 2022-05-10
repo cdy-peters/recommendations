@@ -39,12 +39,14 @@ body {
     box-shadow: 0 1px 7px 1px #040404;
 }
 
-.grow {
-    transition: all;
-}
-
-.grow:hover {
-    transform: scale(1.1)
+@media (hover: hover) {
+    .grow {
+        transition: all;
+    }
+    
+    .grow:hover {
+        transform: scale(1.1)
+    }
 }
 
 /* Scrollbar */
@@ -595,7 +597,8 @@ input[type=number] {
 /* Recommend media queries */
 @media (min-width: 650px) {
     #playlist_info {
-        position: fixed;
+        position: sticky;
+        top: 76px;
     }
 
     .track_table {
@@ -603,7 +606,7 @@ input[type=number] {
     }
 }
 
-@media (max-width: 919px) {
+@media (max-width: 919px), (max-height: 700px) {
     #playlist_info {
         position: static;
     }
@@ -622,6 +625,26 @@ input[type=number] {
         float: right;
     }
 }
+/* 
+@media (max-height: 550px) {
+    #playlist_info {
+        position: static;
+    }
+
+    .track_table {
+        clear: both;
+        margin: 0 5px;
+    }
+
+    #recommended_sticky {
+        float: right;
+        margin: 0 20px 20px 0;
+    }
+
+    #scrollTopBtn {
+        float: right;
+    }
+} */
 
 
 
