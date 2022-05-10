@@ -288,7 +288,7 @@ class Worker(object):
                         # Check if any recommended genres are relevant to the playlist
                         recommended_genres_set = set(recommended_genres)
                         playlist_genres_set = set(genres)
-                        if (recommended_genres_set & playlist_genres_set):
+                        if (recommended_genres_set & playlist_genres_set and self.switch == True and self.skip2 == False):
                             recommended_ids.append(id)
                             recommendations.append({
                                 'id': id,
