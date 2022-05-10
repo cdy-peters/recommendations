@@ -442,6 +442,9 @@ def scan():
     if not auth_manager.validate_token(cache_handler.get_cached_token()):
         return redirect('/')
 
+    if 'thread' in session:
+        return redirect('/')
+
     if request.method == 'POST':
         amount = request.form['amount']
         id = request.form['scan_btn']
