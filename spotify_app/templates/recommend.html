@@ -103,7 +103,7 @@
         {% for i in recommendations %}
             <tr class="track_row">
                 <td style="border-radius: 5px 0 0 5px">
-                    <input class="trackCheckbox" id="{{ i.id }}" onclick="checkboxChange('{{ i.id }}')" type="checkbox" value="{{ i.id }}">
+                    <input class="trackCheckbox" id="{{ i.id }}" onclick="checkboxChange('{{ playlist[0] }}', '{{ i.id }}')" type="checkbox" value="{{ i.id }}">
                 </td>
 
                 {% if i.preview != None %}
@@ -151,12 +151,12 @@
     <div id="add_tracks_container">
         <div>
             <p id="selected_songs" style="float: left; width: 130px; line-height: normal;">0 songs selected</p>
-            <button class="add_songs_btn grow" id="select_all_btn" style="float: right; margin-bottom: 10px;" value="select all" onclick="selectAll()">Select all</button>
+            <button class="add_songs_btn grow" id="select_all_btn" style="float: right; margin-bottom: 10px;" value="select all" onclick="selectAll('{{ playlist[0] }}')">Select all</button>
         </div>
 
         <div>
             {% if playlist[0] == 'liked songs' %}
-                <button class="add_songs_btn" disabled>Playlist</button>
+                <button class="add_songs_btn" id="existingPlaylist" style="float: left;" disabled>This Playlist</button>
             {% else %}
                 <button class="add_songs_btn grow" id="existingPlaylist" style="float: left; " onclick="addToPlaylist('{{ playlist[0] }}')" disabled>This Playlist</button>
             {% endif %}
@@ -164,5 +164,4 @@
         </div>
     </div>
 </div>
-
 {% endblock %}

@@ -113,10 +113,10 @@ function playPreview(url) {
 }
 
 // On checkbox change
-function checkboxChange(id) {
+function checkboxChange(playlist_id, id) {
     var checkboxCount = localStorage.getItem('checkboxCount')
 
-    if (document.getElementById('existingPlaylist').innerHTML === 'Songs added') {
+    if (document.getElementById('existingPlaylist').innerHTML === 'Songs added' && playlist_id !== 'liked songs') {
         document.getElementById('existingPlaylist').innerHTML = 'Add to this Playlist'
     }
     if (document.getElementById('newPlaylist').innerHTML === 'Songs added') {
@@ -135,16 +135,18 @@ function checkboxChange(id) {
         $('#existingPlaylist').prop('disabled', true)
         $('#newPlaylist').prop('disabled', true)
     } else {
-        $('#existingPlaylist').prop('disabled', false)
+        if (playlist_id !== 'liked songs') {
+            $('#existingPlaylist').prop('disabled', false)
+        }
         $('#newPlaylist').prop('disabled', false)
     }
 }
 
-function selectAll() {
+function selectAll(id) {
     checkboxes = $('.trackCheckbox')
     select_btn = $("#select_all_btn")[0]
 
-    if (document.getElementById('existingPlaylist').innerHTML === 'Songs added') {
+    if (document.getElementById('existingPlaylist').innerHTML === 'Songs added' && id !== 'liked songs') {
         document.getElementById('existingPlaylist').innerHTML = 'This Playlist'
     }
     if (document.getElementById('newPlaylist').innerHTML === 'Songs added') {
@@ -162,7 +164,9 @@ function selectAll() {
         select_btn.value = 'deselect all'
         select_btn.innerHTML = 'Deselect all'
 
-        $('#existingPlaylist').prop('disabled', false)
+        if (id !== 'liked songs') {
+            $('#existingPlaylist').prop('disabled', false)
+        }
         $('#newPlaylist').prop('disabled', false)
     } else {
         for (let i = 0; i < checkboxes.length; i++) {
