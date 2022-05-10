@@ -479,6 +479,9 @@ input[type=number] {
 .track_table td {
     color: white;
     padding: 10px 15px;
+    white-space: nowrap;
+    overflow: hidden;
+    max-width: 1px;
 }
 
 .track_table tr {
@@ -495,6 +498,14 @@ input[type=number] {
     font-size: 25px;
 }
 
+.song_details_inner {
+    background-color: inherit;
+    overflow: hidden;
+}
+
+/* .song_details_inner:hover {
+    background-color: #2a2a2a;
+} */
 
 .recommended_songs {
     text-decoration: none;

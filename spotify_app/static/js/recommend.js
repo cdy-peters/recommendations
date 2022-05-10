@@ -21,7 +21,65 @@ $(document).ready(() => {
     }
 })
 
-// Recommend
+
+function songs_overflow() {
+    // Get row width
+    var rows = $('.track_row > .song_details')
+    var row_width = rows.width()
+
+    var songs = $('.recommended_songs')
+    var artists = $('.recommended_artists > p')
+    
+    for (let i = 0; i < songs.length; i++) {
+        // Get song width
+        var song = $(songs[i])
+
+        var html_song = song.html()
+        var html_song_calc = '<span>' + html_song + '</span>'
+
+        $(song).html(html_song_calc)
+        var song_width = $(song).find('span:first').width()
+        $(song).html(html_song)
+
+        // Get artist width
+        var artist = $(artists[i])
+
+        var html_artist = artist.html()
+        var html_artist_calc = '<span>' + html_artist + '</span>'
+
+        $(artist).html(html_artist_calc)
+        var artist_width = $(artist).find('span:first').width()
+        $(artist).html(html_artist)
+
+        if (artist.children('svg').length) {
+            artist_width += 20
+        }
+
+        // Add marquee to song
+        if (song_width > row_width) {
+            song.parent().css('width', `${song_width - row_width}px`)
+            song.parent().addClass('marquee')
+        } else {
+            song.parent().css('width', '')
+            song.parent().removeClass('marquee')
+        }
+
+        // Add marquee to artist
+        if (artist_width > row_width) {
+            artist.css('width', `${artist_width - row_width}px`)
+            artist.addClass('marquee')
+        } else {
+            artist.css('width', '')
+            artist.removeClass('marquee')
+        }
+    }
+}
+
+window.addEventListener('resize', songs_overflow)
+document.addEventListener('DOMContentLoaded', songs_overflow)
+window.addEventListener('load', songs_overflow)
+
+
 function playPreview(url) {
     const id = document.getElementById(url)
     const audio = id.getElementsByTagName('audio')[0]
