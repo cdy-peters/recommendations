@@ -1,6 +1,8 @@
 {% extends "layout.html" %}
 
 {% block head %}
+<title>Spotto - Home</title>
+
 <script src="../static/js/home.js"></script>
 {% endblock %}
 
@@ -55,7 +57,7 @@
                 </div>
             </div>
         {% else %}
-            <p>You have no playlists valid for Spotify App</p>
+            <p>No playlists could be retrieved</p>
         {% endif %}
     </div>
 

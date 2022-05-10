@@ -509,7 +509,7 @@ def addToPlaylist():
 
         if request.form['playlist'] == 'new':
             user_id = sp.me()['id']
-            new_playlist = sp.user_playlist_create(user_id, name='Spotify App Playlist')
+            new_playlist = sp.user_playlist_create(user_id, name='Spotto Playlist')
             id = new_playlist['id']
 
         # Add songs to playlist
