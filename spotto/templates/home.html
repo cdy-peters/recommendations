@@ -7,60 +7,63 @@
 {% endblock %}
 
 {% block content %}
-    <div id="selected_playlist">
-        <div style="max-width: 200px; max-height: 200px;">
-            <img src="../static/images/placeholder_cover.png" class="img-fluid" id="playlist_cover">
+<div id="selected_playlist">
+    <div style="max-width: 200px; max-height: 200px;">
+        <img src="../static/images/placeholder_cover.png" class="img-fluid" id="playlist_cover">
+    </div>
+    <div id="playlist_details">
+        <div style="overflow: hidden; width: 200px;">
+            <h5 id="selected_playlist_title">Select a playlist below</h5>
         </div>
-        <div id="playlist_details">
-            <div style="overflow: hidden; width: 200px;">
-                <h5 id="selected_playlist_title">Select a playlist below</h5>
+        <p></p>
+        <form action="/scan" method="POST">
+            <div id="amount_input">
+                <p>Amount of recommendations to get:</p>
+                <input id="recommendations_amount" type="number" name="amount" placeholder="Max 250" min="1" max="250"
+                    required>
             </div>
-            <p></p>
-            <form action="/scan" method="POST">
-                <div id="amount_input">
-                    <p>Amount of recommendations to get:</p>
-                    <input id="recommendations_amount" type="number" name="amount" placeholder="Max 1000" min="1" max="1000" required>
-                </div>
-                <button class="btn grow" id="scan_btn" type="submit" name="scan_btn" disabled>Scan Playlist</button>
-            </form>
+            <button class="btn grow" id="scan_btn" type="submit" name="scan_btn" disabled>Scan Playlist</button>
+        </form>
+    </div>
+</div>
+<div style="clear: both; margin: 20px 0 0 0;">
+    {% if playlists %}
+    <h3 style="text-align: center; margin: 0;">{{ playlists | length }} playlists retrieved</h3>
+
+    <div class="center" style="margin-top: 15px;">
+        <div class="inner_addon">
+            <i class="bi bi-search"></i>
+            <input type="text" name="playlist_search" id="playlist_search" placeholder="Search for playlists">
         </div>
     </div>
-    <div style="clear: both; margin: 20px 0 0 0;">
-        {% if playlists %}
-        <h3 style="text-align: center; margin: 0;">{{ playlists | length }} playlists retrieved</h3>
 
-        <div class="center" style="margin-top: 15px;">
-            <div class="inner_addon">
-                <i class="bi bi-search"></i>
-                <input type="text" name="playlist_search" id="playlist_search" placeholder="Search for playlists">
-            </div>
-        </div>
-
-        <div>
-            <div id="playlist_row">
-                    <div class="playlist_container" id="liked_playlist_container" onclick="playlistClick({'type': 'liked', 'total': '{{ liked_total }}'})">
-                        <div class="playlist_info">
-                            <img src='../static/images/liked_songs_cover.png'>
-                            <p>Liked Songs</p>
-                        </div>
-                    </div>
-                    <br>
-                    {% for i in playlists %}
-                        <div class="playlist_container" name="{{ i.name }}" onclick="playlistClick({'type': 'playlist', 'url': '{{ i.images[0].url }}', 'name': '{{ i.name }}', 'total': '{{ i.tracks.total }}', 'id': '{{ i.id }}'})">
-                            <div class="playlist_info">
-                                <img src='{{ i["images"][0]["url"] }}'>
-                                <p>{{ i['name'] }}</p>
-                            </div>
-                        </div>
-                        <br>
-                    {% endfor %}
+    <div>
+        <div id="playlist_row">
+            <div class="playlist_container" id="liked_playlist_container"
+                onclick="playlistClick({'type': 'liked', 'total': '{{ liked_total }}'})">
+                <div class="playlist_info">
+                    <img src='../static/images/liked_songs_cover.png'>
+                    <p>Liked Songs</p>
                 </div>
             </div>
-        {% else %}
-            <p>No playlists could be retrieved</p>
-        {% endif %}
+            <br>
+            {% for i in playlists %}
+            <div class="playlist_container" name="{{ i.name }}"
+                onclick="playlistClick({'type': 'playlist', 'url': '{{ i.images[0].url }}', 'name': '{{ i.name }}', 'total': '{{ i.tracks.total }}', 'id': '{{ i.id }}'})">
+                <div class="playlist_info">
+                    <img src='{{ i["images"][0]["url"] }}'>
+                    <p>{{ i['name'] }}</p>
+                </div>
+            </div>
+            <br>
+            {% endfor %}
+        </div>
     </div>
+    {% else %}
+    <p>No playlists could be retrieved</p>
+    {% endif %}
+</div>
 
-    <button id="scrollTopBtn" title="Go to top"><i class="bi bi-arrow-up-short"></i></button>
+<button id="scrollTopBtn" title="Go to top"><i class="bi bi-arrow-up-short"></i></button>
 
 {% endblock %}

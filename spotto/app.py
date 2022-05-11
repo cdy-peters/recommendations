@@ -1,14 +1,20 @@
 import eventlet
 eventlet.monkey_patch(os=False)
 
-import json, spotipy, os, config, uuid
-from spotipy.oauth2 import SpotifyOAuth, SpotifyClientCredentials
-from flask import Flask, render_template, request, redirect, session
+import json
+import os
+import uuid
+from threading import Lock
+
+import spotipy
+from flask import Flask, redirect, render_template, request, session
 from flask_session import Session
+from flask_socketio import SocketIO
 from numpy import dot
 from numpy.linalg import norm
-from threading import Lock
-from flask_socketio import SocketIO, emit
+from spotipy.oauth2 import SpotifyClientCredentials, SpotifyOAuth
+
+import config
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = os.urandom(64)
@@ -16,60 +22,103 @@ app.config['SESSION_TYPE'] = 'filesystem'
 app.config['SESSION_FILE_DIR'] = './.flask_session/'
 Session(app)
 
-async_mode = None
+ASYNC_MODE = None
 
 app.config['SECRET_KEY'] = 'secret!'
-socketio = SocketIO(app, async_mode=async_mode, manage_session=False, logger=True, engineio_logger=True)
-thread = None
+socketio = SocketIO(app,
+                    async_mode=ASYNC_MODE,
+                    manage_session=False,
+                    logger=True,
+                    engineio_logger=True)
+THREAD = None
 thread_lock = Lock()
 
-os.environ['SPOTIPY_CLIENT_ID']=config.spotipy_client_id
-os.environ['SPOTIPY_CLIENT_SECRET']=config.spotipy_client_secret
-os.environ['SPOTIPY_REDIRECT_URI']=config.spotipy_redirect_uri
+os.environ['SPOTIPY_CLIENT_ID'] = config.spotipy_client_id
+os.environ['SPOTIPY_CLIENT_SECRET'] = config.spotipy_client_secret
+os.environ['SPOTIPY_REDIRECT_URI'] = config.spotipy_redirect_uri
 
-scope = "user-library-read"
+SCOPE = "user-library-read"
 # OAuth Init
-soa = spotipy.Spotify(auth_manager=SpotifyOAuth(scope=scope))
+soa = spotipy.Spotify(auth_manager=SpotifyOAuth(scope=SCOPE))
 
 # Client Credentials Init
 client_credentials_manager = SpotifyClientCredentials()
 scc = spotipy.Spotify(client_credentials_manager=client_credentials_manager)
 scc.trace = True
 
-caches_folder = './.spotify_caches/'
-if not os.path.exists(caches_folder):
-    os.makedirs(caches_folder)
+CACHES_FOLDER = './.spotify_caches/'
+if not os.path.exists(CACHES_FOLDER):
+    os.makedirs(CACHES_FOLDER)
 
-workerObject = None
+WORKER_OBJECT = None
+
+
 class Worker(object):
+    '''
+    Used to make a thread that can be interrupted during operation
+    '''
 
     switch = False
 
-    def __init__(self, socketio, id, amount, playlist, uuid):
+    def __init__(self, playlist_id, amount, playlist):
         self.socketio = socketio
 
-        self.id = id
+        self.playlist_id = playlist_id
         self.amount = amount
         self.playlist = playlist
-        self.uuid = uuid
+        self.uuid = session.get('uuid')
 
-        self.skip1 = False # Skip scanning songs
-        self.skip2 = False # Skip getting recommendations
-        self.switch = True # Stop task
+        # scan_playlist instances
+        self.retrieved_songs = None
+        self.retrieved_artists = None
+        self.retrieved_genres = None
+        self.song_error_count = None
+        self.tracks = None
+        self.genres = None
+        self.average_features = None
+
+        # artist_genres instances
+        self.artist_scan_count = None
+
+        # recommendations instances
+        self.get_recommendations_counter = None
+        self.analyse_recommendations_counter = None
+        self.similarity_recommendations_counter = None
+        self.song_recommendations = None
+
+        self.skip1 = False  # Skip scanning songs
+        self.skip2 = False  # Skip getting recommendations
+        self.switch = True  # Stop task
 
     def session_cache_path(self):
-        return caches_folder + self.uuid
+        '''
+        Returns the directory of the users cached token
+        '''
+
+        return CACHES_FOLDER + self.uuid
 
     def cache_auth(self):
-        cache_handler = spotipy.cache_handler.CacheFileHandler(cache_path=self.session_cache_path())
-        auth_manager = spotipy.oauth2.SpotifyOAuth(scope='user-library-read playlist-read-private playlist-modify-public playlist-modify-private',
-                                                    cache_handler=cache_handler, 
+        '''
+        Spotipy authentication flow to authenticate requests
+        '''
+
+        cache_handler = spotipy.cache_handler.CacheFileHandler(
+            cache_path=self.session_cache_path())
+        auth_manager = spotipy.oauth2.SpotifyOAuth(scope='''user-library-read
+                                                        playlist-read-private
+                                                        playlist-modify-public
+                                                        playlist-modify-private''',
+                                                    cache_handler=cache_handler,
                                                     show_dialog=True)
         return cache_handler, auth_manager
 
     def scan_playlist(self):
-        cache_handler, auth_manager = self.cache_auth()
-        sp = spotipy.Spotify(auth_manager=auth_manager)
+        '''
+        Retrieves songs from selected playlist
+        '''
+
+        auth_manager = self.cache_auth()[1]
+        sam = spotipy.Spotify(auth_manager=auth_manager)
 
         self.retrieved_songs = 0
         self.retrieved_artists = 0
@@ -77,110 +126,136 @@ class Worker(object):
         self.song_error_count = 0
 
         # Get songs from playlist
-        if self.id == 'liked songs':
-            self.socketio.emit('retrieving_songs', {'data': self.playlist[-1]}, namespace=f'/{self.uuid}_{self.id}')
-            results = sp.current_user_saved_tracks(limit=50)
-            tracks, artists, average_features = self.append_songs([], [], results, None)
-            while results['next'] and self.switch == True and self.skip1 == False:
-                results = sp.next(results)
-                tracks, artists, average_features = self.append_songs(tracks, artists, results, average_features)
+        if self.playlist_id == 'liked songs':
+            self.socketio.emit('retrieving_songs',
+                                {'data': self.playlist[-1]},
+                                namespace=f'/{self.uuid}_{self.playlist_id}')
+            results = sam.current_user_saved_tracks(limit=50)
+            tracks, artists, average_features = self.append_songs(
+                [], [], results, None)
         else:
-            self.socketio.emit('retrieving_songs', {'data': self.playlist[-1]}, namespace=f'/{self.uuid}_{self.id}')
-            results = sp.playlist_tracks(self.id, limit=50)
-            tracks, artists, average_features = self.append_songs([], [], results, None)
-            while results['next'] and self.switch == True and self.skip1 == False:
-                results = sp.next(results)
-                tracks, artists, average_features = self.append_songs(tracks, artists, results, average_features)
+            self.socketio.emit('retrieving_songs',
+                                {'data': self.playlist[-1]},
+                                namespace=f'/{self.uuid}_{self.playlist_id}')
+            results = sam.playlist_tracks(self.playlist_id, limit=50)
+            tracks, artists, average_features = self.append_songs(
+                [], [], results, None)
+
+        while results['next'] and self.switch is True and self.skip1 is False:
+            results = sam.next(results)
+            tracks, artists, average_features = self.append_songs(tracks,
+                                                                    artists,
+                                                                    results,
+                                                                    average_features)
 
         # Average average feature values
-        if self.switch == True:
-            print('----------------', len(tracks))
+        if self.switch is True:
             for i in average_features:
-                average_features[i] = round(average_features[i] / (len(tracks) - self.song_error_count), 5)
-        
+                average_features[i] = round(
+                    average_features[i] / (len(tracks) - self.song_error_count), 5)
+
         # Get genres of artists
-        if self.switch == True:
-            self.socketio.emit('retrieving_genres', namespace=f'/{self.uuid}_{self.id}')
+        if self.switch is True:
+            self.socketio.emit('retrieving_genres',
+                                namespace=f'/{self.uuid}_{self.playlist_id}')
             genres = self.artist_genres(artists)
 
             self.tracks = tracks
-            self.artists = artists
             self.genres = genres
             self.average_features = average_features
 
-        if self.switch == True:
+        if self.switch is True:
             self.recommendations()
 
-        if self.switch == True:
+        if self.switch is True:
             self.socketio.emit('store_data', {
                 'tracks': self.tracks,
-                'artists': self.artists,
+                'artists': artists,
                 'genres': self.genres,
                 'song_error_count': self.song_error_count,
-                'recommendations': self.recommendations,
+                'recommendations': self.song_recommendations,
                 'playlist': self.playlist,
                 'average_features': self.average_features
-            }, namespace=f'/{self.uuid}_{self.id}')
-
+            }, namespace=f'/{self.uuid}_{self.playlist_id}')
 
     def append_songs(self, tracks, artists, results, average_features):
+        '''
+        Retrieves artists from tracks and track features
+        '''
+
         for i in results['items']:
-            if self.skip1 == True:
+            if self.skip1 is True:
                 return tracks, artists, average_features
             track_id = i['track']['id']
             tracks.append(track_id)
-            average_features = self.collate_features(track_id, average_features)
+            average_features = self.collate_features(
+                track_id, average_features)
 
             for j in i['track']['artists']:
-                if j['id'] not in artists and self.switch == True:
+                if j['id'] not in artists and self.switch is True:
                     artists.append(j['id'])
 
                     self.retrieved_artists += 1
-                    self.socketio.emit('retrieved_artists', {'data': self.retrieved_artists}, namespace=f'/{self.uuid}_{self.id}')
+                    self.socketio.emit('retrieved_artists',
+                                        {'data': self.retrieved_artists},
+                                        namespace=f'/{self.uuid}_{self.playlist_id}')
 
         return tracks, artists, average_features
-    
+
     def artist_genres(self, artists):
+        '''
+        Retrieves genres from artists
+        '''
+
         genres_lst = []
         genres = {}
         self.artist_scan_count = 0
 
         # Get genres of each artist
         for i in artists:
-            self.artist_scan_count += 1
-            self.socketio.emit('retrieved_genres', {'data': self.retrieved_genres, 'artist_count': self.artist_scan_count}, namespace=f'/{self.uuid}_{self.id}')
-            if self.switch == True:
+            if self.switch is True:
+                self.artist_scan_count += 1
+                self.socketio.emit('retrieved_genres',
+                                {'data': self.retrieved_genres,
+                                    'artist_count': self.artist_scan_count},
+                                namespace=f'/{self.uuid}_{self.playlist_id}')
                 results = scc.artist(i)
 
                 if 'genres' in results:
-                    for j in results['genres']: # ! Not sure what happens when no results are returned
-                        if j not in genres_lst and self.switch == True:
+                    for j in results['genres']:
+                        if j not in genres_lst and self.switch is True:
                             genres_lst.append(j)
-                        elif self.switch == True:
+                        elif self.switch is True:
                             if j not in genres:
                                 genres[j] = 2
 
                                 self.retrieved_genres += 1
-                                self.socketio.emit('retrieved_genres', {'data': self.retrieved_genres, 'artist_count': self.artist_scan_count}, namespace=f'/{self.uuid}_{self.id}')
+                                self.socketio.emit('retrieved_genres',
+                                                    {'data': self.retrieved_genres,
+                                                        'artist_count': self.artist_scan_count},
+                                                    namespace=f'/{self.uuid}_{self.playlist_id}')
                             else:
                                 genres[j] += 1
 
         # Order genres by value
         if self.retrieved_genres != 0:
-            genres = dict(sorted(genres.items(), key=lambda item: item[1], reverse=True))
-            
+            genres = dict(
+                sorted(genres.items(), key=lambda item: item[1], reverse=True))
+
             # Put all keys of genres into a list
             new_genres_lst = []
             for i in genres.keys():
                 new_genres_lst.append(i)
-            
+
             return new_genres_lst
         else:
-            print('---------------0 genres')
-            print(genres_lst)
             return genres_lst
 
     def collate_features(self, track_id, average_features):
+        '''
+        Retrieves features of tracks
+        '''
+
         if average_features is None:
             average_features = {
                 "acousticness": 0,
@@ -194,10 +269,10 @@ class Worker(object):
                 "valence": 0
             }
 
-        if self.switch == True:
+        if self.switch is True:
             features = scc.audio_features(track_id)
 
-            if type(features[0]) is dict:
+            if isinstance(features[0], dict):
                 average_features['acousticness'] += features[0]['acousticness']
                 average_features['danceability'] += features[0]['danceability']
                 average_features['energy'] += features[0]['energy']
@@ -209,108 +284,128 @@ class Worker(object):
                 average_features['valence'] += features[0]['valence']
             else:
                 self.song_error_count += 1
-                self.socketio.emit('failed_scans', {'data': self.song_error_count}, namespace=f'/{self.uuid}_{self.id}')
+                self.socketio.emit('failed_scans',
+                                    {'data': self.song_error_count},
+                                    namespace=f'/{self.uuid}_{self.playlist_id}')
 
-        if self.switch == True:
+        if self.switch is True:
             self.retrieved_songs += 1
-            self.socketio.emit('retrieved_songs', {'data': self.retrieved_songs}, namespace=f'/{self.uuid}_{self.id}')
+            self.socketio.emit('retrieved_songs',
+                                {'data': self.retrieved_songs},
+                                namespace=f'/{self.uuid}_{self.playlist_id}')
 
         return average_features
 
-
     def recommendations(self):
+        '''
+        Collects and sorts recommendations
+        '''
+
         tracks = self.tracks
         genres = self.genres
-        artists = self.artists
         average_features = self.average_features
 
         self.get_recommendations_counter = 0
         self.analyse_recommendations_counter = 0
         self.similarity_recommendations_counter = 0
 
-        if self.switch == True:
-            self.socketio.emit('getting_recommendations', namespace=f'/{self.uuid}_{self.id}')
+        if self.switch is True:
+            self.socketio.emit('getting_recommendations',
+                                namespace=f'/{self.uuid}_{self.playlist_id}')
             recommendations = self.get_recommendations(tracks, genres)
 
-        if self.switch == True:
-            self.socketio.emit('analysing_recommendations', namespace=f'/{self.uuid}_{self.id}')
+        if self.switch is True:
+            self.socketio.emit('analysing_recommendations',
+                                namespace=f'/{self.uuid}_{self.playlist_id}')
             recommendations = self.recommendations_features(recommendations)
 
-        if self.switch == True:
-            self.socketio.emit('scoring_recommendations', namespace=f'/{self.uuid}_{self.id}')
-            recommendations = self.recommendations_similarity(recommendations, average_features)
-            self.recommendations = recommendations
-
-        results = [
-            len(tracks),
-            len(artists),
-            len(genres),
-            self.song_error_count
-        ]
+        if self.switch is True:
+            self.socketio.emit('scoring_recommendations',
+                                namespace=f'/{self.uuid}_{self.playlist_id}')
+            recommendations = self.recommendations_similarity(
+                recommendations, average_features)
+            self.song_recommendations = recommendations
 
     def get_recommendations(self, tracks, genres):
-        recommendations = []
-        recommended_ids = []
+        '''
+        Gets recommendations based on playlist
+        '''
 
-        while len(recommended_ids) < self.amount and self.switch == True and self.skip2 == False:
+        recommendations = []
+
+        while len(recommendations) < self.amount and self.switch is True and self.skip2 is False:
             for i in tracks:
-                if len(recommended_ids) == self.amount:
+                if len(recommendations) == self.amount or self.skip2 is True:
                     return recommendations
 
                 results = scc.recommendations(seed_tracks=[i], limit=1)
-                try:
-                    track = results['tracks'][0]
-                    id = track['id']
+                recommendation = results['tracks']
 
-                    if id not in tracks and id not in recommended_ids:
-                        # Check if user has skipped recommendations
-                        if self.skip2 == True:
-                            return recommendations
-
-                        # Loop through artists to get genres of recommended song
-                        recommended_artists = []
-                        recommended_genres = []
-                        for j in track['artists']:
-                            # Add artist to recommended artists
-                            recommended_artists.append({
-                                'id': j['id'],
-                                'name': j['name']
-                            })
-
-                            recommended_artist = scc.artist(j['id'])
-                            artist_genres = recommended_artist['genres']
-                            
-                            # Loop through genres, adding unique ones to recommended_genres
-                            for k in artist_genres:
-                                if k not in recommended_genres:
-                                    recommended_genres.append(k)
-                        
-                        # Check if any recommended genres are relevant to the playlist
-                        recommended_genres_set = set(recommended_genres)
-                        playlist_genres_set = set(genres)
-                        if (recommended_genres_set & playlist_genres_set and self.switch == True and self.skip2 == False):
-                            recommended_ids.append(id)
-                            recommendations.append({
-                                'id': id,
-                                'explicit': track['explicit'],
-                                'name': track['name'],
-                                'artists': recommended_artists,
-                                'preview': track['preview_url']
-                            })
-
-                            self.get_recommendations_counter += 1
-                            self.socketio.emit('get_recommendations', {'data': self.get_recommendations_counter}, namespace=f'/{self.uuid}_{self.id}')
-                except:
-                    print(i, 'no results-----------------------------------')
-                    
+                if recommendation:
+                    recommendations = self.check_recommendation(
+                        recommendation, tracks, genres, recommendations)
         return recommendations
-    
+
+    def check_recommendation(self, recommendation, tracks, genres, recommendations):
+        '''
+        Checks recommendation, ensuring its not redundant or a duplicate
+        '''
+
+        track = recommendation[0]
+        track_id = track['id']
+
+        if track_id not in tracks and not any(d['id'] == track_id for d in recommendations):
+            # Check if user has skipped recommendations
+            if self.skip2 is True:
+                return recommendations
+
+            # Loop through artists to get genres of recommended song
+            recommended_artists = []
+            recommended_genres = []
+            for j in track['artists']:
+                # Add artist to recommended artists
+                recommended_artists.append({
+                    'id': j['id'],
+                    'name': j['name']
+                })
+
+                recommended_artist = scc.artist(j['id'])
+                artist_genres = recommended_artist['genres']
+
+                # Loop through genres, adding unique ones to recommended_genres
+                for k in artist_genres:
+                    if k not in recommended_genres:
+                        recommended_genres.append(k)
+
+            # Check if any recommended genres are relevant to the playlist
+            if (set(recommended_genres) & set(genres) and
+                    self.switch is True and self.skip2 is False):
+                recommendations.append({
+                    'id': track_id,
+                    'explicit': track['explicit'],
+                    'name': track['name'],
+                    'artists': recommended_artists,
+                    'preview': track['preview_url']
+                })
+
+                self.get_recommendations_counter += 1
+                self.socketio.emit('get_recommendations',
+                                    {'data': self.get_recommendations_counter},
+                                    namespace=f'/{self.uuid}_{self.playlist_id}')
+
+        return recommendations
+
+
     def recommendations_features(self, recommendations):
+        '''
+        Gets features of recommended tracks
+        '''
+
         for i in recommendations:
-            if self.switch == True:
+            if self.switch is True:
                 features = scc.audio_features(i['id'])
 
-                if type(features[0]) is dict:
+                if isinstance(features[0], dict):
                     i['features'] = {
                         'acousticness': features[0]['acousticness'],
                         'danceability': features[0]['danceability'],
@@ -325,59 +420,94 @@ class Worker(object):
                 else:
                     recommendations.pop(i)
 
-            if self.switch == True:
+            if self.switch is True:
                 self.analyse_recommendations_counter += 1
-                self.socketio.emit('analyse_recommendations', {'data': self.analyse_recommendations_counter}, namespace=f'/{self.uuid}_{self.id}')
+                self.socketio.emit('analyse_recommendations',
+                                    {'data': self.analyse_recommendations_counter},
+                                    namespace=f'/{self.uuid}_{self.playlist_id}')
 
         return recommendations
 
     def recommendations_similarity(self, recommendations, average_features):
+        '''
+        Scores recommended tracks against playlist
+        '''
+
         # Append average feature values to a list
         average_values = []
-        for v in average_features.values():
-            if self.switch == True:
-                average_values.append(v)
-        
+        for val in average_features.values():
+            if self.switch is True:
+                average_values.append(val)
+
         # Iterate through tracks
         for i in recommendations:
-            if self.switch == True:
+            if self.switch is True:
                 features = i['features']
                 # Append track feature values to a list
                 feature_values = []
-                for v in features.values():
-                    feature_values.append(v)
-                
-                cos_similarity = dot(average_values, feature_values) / (norm(average_values) * norm(feature_values))
+                for val in features.values():
+                    feature_values.append(val)
+
+                cos_similarity = dot(
+                    average_values, feature_values) / (norm(average_values) * norm(feature_values))
                 i['similarity'] = cos_similarity
 
                 self.similarity_recommendations_counter += 1
-                self.socketio.emit('similarity_recommendations', {'data': self.similarity_recommendations_counter}, namespace=f'/{self.uuid}_{self.id}')
-        
-        if self.switch == True:
-            self.socketio.emit('sorting_recommendations', namespace=f'/{self.uuid}_{self.id}')
+                self.socketio.emit('similarity_recommendations',
+                                    {'data': self.similarity_recommendations_counter},
+                                    namespace=f'/{self.uuid}_{self.playlist_id}')
+
+        if self.switch is True:
+            self.socketio.emit('sorting_recommendations',
+                                namespace=f'/{self.uuid}_{self.playlist_id}')
             return sorted(recommendations, key=lambda d: d['similarity'], reverse=True)
 
+        return recommendations
+
     def skip_songs(self):
+        '''
+        Interrupts thread to skip song scanning
+        '''
+
         self.skip1 = True
 
     def skip_recommendations(self):
+        '''
+        Interrupts thread to skip recommendation retrieval
+        '''
+
         self.skip2 = True
 
     def stop(self):
+        '''
+        Interrupts and stops thread
+        '''
+
         self.switch = False
-
-
 
 
 # --------------------------- Functions -----------------------------------
 
 def session_cache_path():
-    return caches_folder + session.get('uuid')
+    '''
+    Returns the directory of the users cached token
+    '''
+
+    return CACHES_FOLDER + session.get('uuid')
+
 
 def cache_auth():
-    cache_handler = spotipy.cache_handler.CacheFileHandler(cache_path=session_cache_path())
-    auth_manager = spotipy.oauth2.SpotifyOAuth(scope='user-library-read playlist-read-private playlist-modify-public playlist-modify-private',
-                                                cache_handler=cache_handler, 
+    '''
+    Spotipy authentication flow to authenticate requests
+    '''
+
+    cache_handler = spotipy.cache_handler.CacheFileHandler(
+        cache_path=session_cache_path())
+    auth_manager = spotipy.oauth2.SpotifyOAuth(scope='''user-library-read
+                                                    playlist-read-private
+                                                    playlist-modify-public
+                                                    playlist-modify-private''',
+                                                cache_handler=cache_handler,
                                                 show_dialog=True)
     return cache_handler, auth_manager
 
@@ -385,6 +515,10 @@ def cache_auth():
 # --------------------------- Routes -----------------------------------
 @app.route('/')
 def index():
+    '''
+    Directs user between login, home and thread exists pages
+    '''
+
     if not session.get('uuid'):
         session['uuid'] = str(uuid.uuid4())
 
@@ -400,12 +534,12 @@ def index():
     if 'thread' in session:
         return render_template('thread_exists.html')
 
-    sp = spotipy.Spotify(auth_manager=auth_manager)
+    sam = spotipy.Spotify(auth_manager=auth_manager)
 
-    results = sp.current_user_saved_tracks(limit=1)
+    results = sam.current_user_saved_tracks(limit=1)
     liked_total = results['total']
 
-    results = sp.current_user_playlists()
+    results = sam.current_user_playlists()
     playlists = []
     for i in results['items']:
         if i['tracks']['total'] > 0:
@@ -422,21 +556,34 @@ def index():
 
 @app.route('/login')
 def login():
-    cache_handler, auth_manager = cache_auth()
+    '''
+    Logs user in, creating a session
+    '''
+
+    auth_manager = cache_auth()[1]
     return redirect(auth_manager.get_authorize_url())
+
 
 @app.route('/signout')
 def signout():
+    '''
+    Signs user out, clearing their session
+    '''
+
     try:
         os.remove(session_cache_path())
         session.clear()
-    except OSError as e:
-        print ("Error: %s - %s." % (e.filename, e.strerror))
+    except OSError as err:
+        print(f"Error: {err.filename} - {err.strerror}.")
     return redirect('/')
 
 
 @app.route('/scan', methods=['GET', 'POST'])
 def scan():
+    '''
+    Directs user to scan page
+    '''
+
     cache_handler, auth_manager = cache_auth()
     # Check is user has a valid token
     if not auth_manager.validate_token(cache_handler.get_cached_token()):
@@ -447,25 +594,40 @@ def scan():
 
     if request.method == 'POST':
         amount = request.form['amount']
-        id = request.form['scan_btn']
+        playlist_id = request.form['scan_btn']
 
-        sp = spotipy.Spotify(auth_manager=auth_manager)
-        if id == 'liked songs':
-            # Get liked details 
-            results = sp.current_user_saved_tracks(limit=1)
-            playlist = ['liked songs', '../static/images/liked_songs_cover.png', 'Liked Songs', results['total']]
+        sam = spotipy.Spotify(auth_manager=auth_manager)
+        if playlist_id == 'liked songs':
+            # Get liked details
+            results = sam.current_user_saved_tracks(limit=1)
+            playlist = ['liked songs',
+                        '../static/images/liked_songs_cover.png',
+                        'Liked Songs',
+                        results['total']]
         else:
             # Get playlist details
-            results = sp.playlist(id)
-            playlist = [id, results['images'][0]['url'], results['name'], results['tracks']['total']]
+            results = sam.playlist(playlist_id)
+            playlist = [playlist_id,
+                        results['images'][0]['url'],
+                        results['name'],
+                        results['tracks']['total']]
 
         session['playlist'] = playlist
-        return render_template('scan.html', async_mode=socketio.async_mode, id=id, uuid=session['uuid'], amount=amount, playlist=playlist)
+        return render_template('scan.html',
+                                async_mode=socketio.async_mode,
+                                id=playlist_id, uuid=session['uuid'],
+                                amount=amount,
+                                playlist=playlist)
 
     return redirect('/')
 
+
 @app.route('/store_data', methods=['GET', 'POST'])
 def store_data():
+    '''
+    Stores recommendations information in session
+    '''
+
     namespace = request.form['namespace']
     tracks = json.loads(request.form['tracks'])
     artists = json.loads(request.form['artists'])
@@ -486,76 +648,108 @@ def store_data():
     socketio.emit('redirect', namespace=namespace)
     return 'success'
 
+
 @app.route('/recommend')
 def recommend():
+    '''
+    Directs user to recommendations page
+    '''
+
     results = [
-            len(session['tracks']),
-            len(session['artists']),
-            len(session['genres']),
-            session['song_error_count']
-        ]
+        len(session['tracks']),
+        len(session['artists']),
+        len(session['genres']),
+        session['song_error_count']
+    ]
 
-    return render_template('recommend.html', recommendations=session['recommendations'], playlist=session['playlist'], results=results, average_features=session['average_features'])
+    return render_template('recommend.html',
+                            recommendations=session['recommendations'],
+                            playlist=session['playlist'],
+                            results=results,
+                            average_features=session['average_features'])
 
-@app.route('/addToPlaylist', methods=['GET', 'POST'])
-def addToPlaylist():
+
+@app.route('/add_to_playlist', methods=['GET', 'POST'])
+def add_to_playlist():
+    '''
+    Add selected songs from recommend page to a playlist
+    '''
+
     if request.method == 'POST':
-        cache_handler, auth_manager = cache_auth()
-        sp = spotipy.Spotify(auth_manager=auth_manager)
+        auth_manager = cache_auth()[1]
+        sam = spotipy.Spotify(auth_manager=auth_manager)
 
-        id = request.form['playlist']
+        playlist_id = request.form['playlist']
         name = request.form['playlist_name']
         tracks = json.loads(request.form['tracks'])
         uris = ["spotify:track:" + i for i in tracks]
 
         if request.form['playlist'] == 'new':
-            user_id = sp.me()['id']
-            new_playlist = sp.user_playlist_create(user_id, name=f'Spotto based on {name}')
-            id = new_playlist['id']
+            user_id = sam.me()['id']
+            new_playlist = sam.user_playlist_create(
+                user_id, name=f'Spotto based on {name}')
+            playlist_id = new_playlist['id']
 
         # Add songs to playlist
         while uris:
             new_uris = uris[:100]
-            sp.playlist_add_items(id, new_uris)
+            sam.playlist_add_items(playlist_id, new_uris)
             uris = uris[100:]
-        
+
         return 'success'
-    
+
     return redirect('/')
+
 
 @app.route('/close_thread', methods=['GET', 'POST'])
 def close_thread():
+    '''
+    Interrupts thread to stop it
+    '''
+
     if request.method == 'POST' and 'thread' in session:
         session.pop('thread')
-        worker.stop()
+        WORKER.stop()
 
         return 'success' if 'data' in request.form else redirect('/')
     return redirect('/')
 
+
 @socketio.on('connect_event')
 def connect_event(message):
-    id = message['data']
+    '''
+    Initialises and starts thread
+    '''
+
+    playlist_id = message['data']
     amount = int(message['amount'])
     playlist = session['playlist']
 
     session['thread'] = True
 
-    global worker
-    worker = Worker(socketio, id, amount, playlist, session.get('uuid'))
+    global WORKER
+    WORKER = Worker(playlist_id, amount, playlist)
 
-    socketio.start_background_task(target=worker.scan_playlist)
+    socketio.start_background_task(target=WORKER.scan_playlist)
+
 
 @socketio.on('skip_songs_event')
 def skip_songs_event():
-    worker.skip_songs()
+    '''
+    Interrupts thread to skip song scanning
+    '''
+
+    WORKER.skip_songs()
+
 
 @socketio.on('skip_recommendations_event')
 def skip_recommendations_event():
-    worker.skip_recommendations()
+    '''
+    Interrupts thread to skip recommendations retrieval
+    '''
 
-# @socketio.on('disconnect_event')
-# def disconnect_event():
-#     worker.stop()
+    WORKER.skip_recommendations()
+
 
 if __name__ == '__main__':
     socketio.run(app)
