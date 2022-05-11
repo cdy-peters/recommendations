@@ -1,5 +1,5 @@
 * {
-  font-family: Helvetica, Arial, sans-serif;
+  font-family: sans-serif, Helvetica, Arial;
 }
 
 html,
@@ -93,7 +93,7 @@ body {
 }
 
 .nav_title:hover {
-  color: #1db954;
+  color: #b2b2b2;
 }
 
 .nav_sides {

@@ -17,14 +17,16 @@ from spotipy.oauth2 import SpotifyClientCredentials, SpotifyOAuth
 import config
 
 app = Flask(__name__)
-app.config['SECRET_KEY'] = os.urandom(64)
+os.environ['SPOTIPY_CLIENT_ID'] = config.spotipy_client_id
+os.environ['SPOTIPY_CLIENT_SECRET'] = config.spotipy_client_secret
+os.environ['SPOTIPY_REDIRECT_URI'] = config.spotipy_redirect_uri
+app.config['SECRET_KEY'] = config.spotipy_client_id
 app.config['SESSION_TYPE'] = 'filesystem'
 app.config['SESSION_FILE_DIR'] = './.flask_session/'
 Session(app)
 
 ASYNC_MODE = None
 
-app.config['SECRET_KEY'] = 'secret!'
 socketio = SocketIO(app,
                     async_mode=ASYNC_MODE,
                     manage_session=False,
@@ -33,9 +35,6 @@ socketio = SocketIO(app,
 THREAD = None
 thread_lock = Lock()
 
-os.environ['SPOTIPY_CLIENT_ID'] = config.spotipy_client_id
-os.environ['SPOTIPY_CLIENT_SECRET'] = config.spotipy_client_secret
-os.environ['SPOTIPY_REDIRECT_URI'] = config.spotipy_redirect_uri
 
 SCOPE = "user-library-read"
 # OAuth Init
@@ -687,7 +686,7 @@ def add_to_playlist():
         if request.form['playlist'] == 'new':
             user_id = sam.me()['id']
             new_playlist = sam.user_playlist_create(
-                user_id, name=f'Spotto based on {name}')
+                user_id, name=f'Recommendations based on {name}')
             playlist_id = new_playlist['id']
 
         # Add songs to playlist
@@ -752,4 +751,4 @@ def skip_recommendations_event():
 
 
 if __name__ == '__main__':
-    socketio.run(app)
+    socketio.run(app, host="0.0.0.0")
