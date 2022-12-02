@@ -29,11 +29,14 @@ export class AuthComponent {
     }
 
     var res: Response | undefined;
+    var cookie = this.cookieService.getCookie('refresh_token');
     var code = this.route.snapshot.queryParams['code'];
 
     // ! Refresh token is untested
-    if (this.cookieService.getCookie('refresh_token')) {
-      res = (await this.authService.refreshToken().toPromise()) as Response;
+    if (cookie) {
+      res = (await this.authService
+        .refreshToken(cookie)
+        .toPromise()) as Response;
     } else if (code) {
       res = (await this.authService
         .getAccessToken(code)
