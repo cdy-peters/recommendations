@@ -6,17 +6,17 @@ html,
 body {
   color: white;
   height: 100%;
-  display: table;
 }
 
 body {
   background-color: #121212;
-  padding-top: 76px !important;
 }
 
-.center {
+.flex-wrapper {
   display: flex;
-  justify-content: center;
+  min-height: 100vh;
+  flex-direction: column;
+  justify-content: flex-start;
 }
 
 @media (hover: hover) {
@@ -34,49 +34,40 @@ body {
   width: 10px;
   height: 10px;
 }
-
-/* Track */
 ::-webkit-scrollbar-track {
   background: transparent;
 }
-
-/* Handle */
 ::-webkit-scrollbar-thumb {
   background: rgba(86, 86, 86, 0.5);
 }
-
-/* Handle on hover */
 ::-webkit-scrollbar-thumb:hover {
   background: rgba(135, 135, 135, 0.5);
 }
-
-/* Corner */
 ::-webkit-scrollbar-corner {
   background-color: #121212;
 }
 
+/* Footer */
 footer {
-  display: table-row;
-  height: 0;
+  margin-top: auto;
 }
 
 #footer_inner {
-  width: calc(100vw - var(--scrollbar-width));
-
+  color: white;
   background-color: black;
-  padding: 10px 20px;
-
   display: flex;
-  justify-content: space-between;
   align-items: center;
-}
-
-footer p {
-  margin: 0;
+  justify-content: space-between;
+  padding: 10px 20px;
+  margin-top: 1em;
 }
 
 footer a:hover path {
   fill: #1db954;
+}
+
+#copyright p {
+  margin-bottom: 0;
 }
 
 #social_container a {
@@ -102,7 +93,6 @@ footer a:hover path {
   cursor: pointer;
 }
 
-/* Footer Media Queries */
 @media (max-width: 650px) {
   #footer_inner {
     display: block;
