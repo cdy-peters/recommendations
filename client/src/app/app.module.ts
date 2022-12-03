@@ -6,6 +6,7 @@ import { HttpClientModule } from '@angular/common/http';
 import { AppComponent } from './app.component';
 import { HomeComponent } from './home/home.component';
 import { AuthComponent } from './auth/auth.component';
+import { NavComponent } from './nav/nav.component';
 
 const authRequired = () => {
   const getCookie = (name: string) => {
@@ -27,7 +28,7 @@ const authRequired = () => {
 };
 
 @NgModule({
-  declarations: [AppComponent, HomeComponent, AuthComponent],
+  declarations: [AppComponent, HomeComponent, AuthComponent, NavComponent],
   imports: [
     BrowserModule,
     HttpClientModule,
