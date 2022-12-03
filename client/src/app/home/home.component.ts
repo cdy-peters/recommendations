@@ -1,4 +1,7 @@
 import { Component } from '@angular/core';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
+
+import { CookieService } from '../services/cookie.service';
 
 @Component({
   selector: 'app-home',
@@ -6,14 +9,44 @@ import { Component } from '@angular/core';
   styleUrls: ['./home.component.css'],
 })
 export class HomeComponent {
-  constructor() {}
+  constructor(private http: HttpClient, private cookieService: CookieService) {}
 
-  logout() {
-    document.cookie =
-      'access_token = ; expires = Thu, 01 Jan 1970 00:00:00 GMT; path=/';
-    document.cookie =
-      'refresh_token = ; expires = Thu, 01 Jan 1970 00:00:00 GMT; path=/';
+  selectedPlaylist: any;
+  playlists: any[] = [];
 
-    window.location.href = '/';
+  async ngOnInit() {
+    const headers = new HttpHeaders({
+      Authorization: `Bearer ${this.cookieService.getCookie('access_token')}`,
+    });
+    var url = 'https://api.spotify.com/v1/me/playlists?limit=50';
+
+    interface Response {
+      items: any[];
+      href: string;
+      limit: number;
+      next: string;
+      offset: number;
+      previous: string;
+      total: number;
+    }
+    var res;
+    do {
+      res = (await this.http.get(url, { headers }).toPromise()) as Response;
+      for (const item of res.items) {
+        var id = item.id;
+        var name = item.name;
+        var tracks = item.tracks.total;
+        var cover = '/assets/placeholder_cover.png';
+
+        if (item.images.length > 0) cover = item.images[0].url;
+
+        this.playlists.push({ id, name, tracks, cover });
+      }
+      url = res.next;
+    } while (res.next);
+  }
+
+  playlistSelectHandler(playlist: any) {
+    this.selectedPlaylist = playlist;
   }
 }

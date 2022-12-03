@@ -14,7 +14,8 @@ export class AuthService {
   server_url = 'http://localhost:8080';
 
   login() {
-    var scope = 'user-read-private user-read-email';
+    var scope =
+      'user-read-private user-read-email user-library-read playlist-read-private playlist-modify-public playlist-modify-private';
 
     window.location.href =
       'https://accounts.spotify.com/authorize?client_id=' +

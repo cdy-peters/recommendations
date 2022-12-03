@@ -1,0 +1,76 @@
+/* Selected playlist */
+#selected_playlist {
+    display: flex;
+    justify-content: center;
+    margin: 0 20px 20px 20px;
+}
+
+#selected_cover {
+    max-width: 200px;
+    max-height: 200px;
+}
+#selected_cover img {
+    max-width: 100%;
+    height: auto;
+    float: left;
+
+    border-radius: 5px;
+    box-shadow: 0 1px 7px 1px #040404;
+}
+
+#selected_info {
+    margin-left: 20px;
+    width: 200px;
+    height: fit-content;
+    position: relative;
+}
+
+/* Playlist count */
+#playlist_count {
+    text-align: center;
+    margin: 0;
+}
+
+/* Playlist grid */
+#playlist_grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    grid-gap: 10px;
+    grid-auto-rows: minmax(100px, auto);
+}
+
+.playlist_outer {
+    width: fit-content;
+    height: fit-content;
+    padding: 15px;
+    margin: 15px;
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    background-color: #181818;
+    border-radius: 5px;
+
+    cursor: pointer;
+}
+.playlist_outer:hover {
+    background-color: #282828;
+}
+
+.playlist_inner {
+    width: fit-content;
+    height: fit-content;
+}
+.playlist_inner img {
+    width: 150px;
+    height: 150px;
+    border-radius: 5px;
+}
+.playlist_inner p {
+    clear: both;
+    margin: 7px 0 0 0;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    white-space: nowrap;
+}

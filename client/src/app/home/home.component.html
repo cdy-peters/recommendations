@@ -1,1 +1,50 @@
-<h1 style="color: white">Home Page</h1>
+<div *ngIf="playlists; then playlistsTemplate; else noPlaylists"></div>
+
+<ng-template #playlistsTemplate>
+  <div id="selected_playlist">
+    <div
+      *ngIf="
+        selectedPlaylist;
+        then selectedPlaylistTemplate;
+        else noSelectedPlaylist
+      "
+    ></div>
+
+    <ng-template #selectedPlaylistTemplate>
+      <div id="selected_cover">
+        <img src="{{ selectedPlaylist.cover }}" />
+      </div>
+      <div id="selected_info">
+        <p>{{ selectedPlaylist.name }}</p>
+        <p>{{ selectedPlaylist.tracks }} tracks</p>
+      </div>
+    </ng-template>
+
+    <ng-template #noSelectedPlaylist>
+      <div id="selected_cover">
+        <img src="/assets/placeholder_cover.png" />
+      </div>
+      <div id="selected_info">
+        <p>Select a playlist below</p>
+        <p></p>
+      </div>
+    </ng-template>
+  </div>
+
+  <h3 id="playlist_count">{{ playlists.length }} playlists retrieved</h3>
+
+  <div id="playlist_grid">
+    <div *ngFor="let playlist of playlists">
+      <div class="playlist_outer" (click)="playlistSelectHandler(playlist)">
+        <div class="playlist_inner">
+          <img src="{{ playlist.cover }}" />
+          <p>{{ playlist.name }}</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</ng-template>
+
+<ng-template #noPlaylists>
+  <p>No playlists were retrieved</p>
+</ng-template>
