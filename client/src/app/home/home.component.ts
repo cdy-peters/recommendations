@@ -45,9 +45,8 @@ export class HomeComponent {
         var id = item.id;
         var name = item.name;
         var tracks = item.tracks.total;
-        var cover = '/assets/placeholder_cover.png';
-
-        if (item.images.length > 0) cover = item.images[0].url;
+        if (tracks == 0) continue;
+        var cover = item.images[0].url;
 
         this.playlists.push({ id, name, tracks, cover });
         this.filteredPlaylists.push({ id, name, tracks, cover });
