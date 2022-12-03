@@ -1,0 +1,59 @@
+#index_center {
+  width: fit-content;
+  padding: 10px;
+
+  /* Vertically and horizontally center text */
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  -webkit-transform: translate(-50%, -50%);
+  transform: translate(-50%, -50%);
+  text-align: center;
+}
+
+#index_title {
+  /* Text styling */
+  color: white;
+  font-style: normal;
+  font-weight: 700;
+  font-size: 32px;
+  line-height: 40px;
+}
+
+#index_description {
+  max-width: 350px;
+
+  /* Text styling */
+  color: white;
+  font-size: normal;
+  font-weight: 400;
+  font-size: 24px;
+  line-height: 30px;
+}
+
+#login_btn {
+  width: 150px;
+  height: 55px;
+
+  /* Button styling */
+  background-color: #1db954;
+  border-radius: 50px;
+  border: none;
+
+  /* Text styling */
+  color: white;
+  text-decoration: none;
+  font-style: normal;
+  font-weight: 400;
+  font-size: 30px;
+  line-height: 40px;
+
+  /* Vertically and horizontally center text */
+  display: flex;
+  justify-content: center;
+  align-content: center;
+
+  /* Center button in div */
+  margin: auto;
+  left: 50%;
+}
