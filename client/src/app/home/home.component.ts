@@ -13,6 +13,15 @@ export class HomeComponent {
 
   selectedPlaylist: any;
   playlists: any[] = [];
+  filteredPlaylists: any[] = [];
+
+  searchTerm: string = '';
+
+  filterPlaylists() {
+    this.filteredPlaylists = this.playlists.filter((playlist) =>
+      playlist.name.toLowerCase().includes(this.searchTerm.toLowerCase())
+    );
+  }
 
   async ngOnInit() {
     const headers = new HttpHeaders({
@@ -41,6 +50,7 @@ export class HomeComponent {
         if (item.images.length > 0) cover = item.images[0].url;
 
         this.playlists.push({ id, name, tracks, cover });
+        this.filteredPlaylists.push({ id, name, tracks, cover });
       }
       url = res.next;
     } while (res.next);

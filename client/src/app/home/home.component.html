@@ -31,10 +31,22 @@
     </ng-template>
   </div>
 
-  <h3 id="playlist_count">{{ playlists.length }} playlists retrieved</h3>
+  <h3 id="playlist_count">Showing {{ filteredPlaylists.length }} playlists</h3>
+
+  <div id="playlist_search">
+    <div id="search_inner">
+      <i class="bi bi-search"></i>
+      <input
+        (input)="filterPlaylists()"
+        type="text"
+        placeholder="Search for a playlist"
+        [(ngModel)]="searchTerm"
+      />
+    </div>
+  </div>
 
   <div id="playlist_grid">
-    <div *ngFor="let playlist of playlists">
+    <div *ngFor="let playlist of filteredPlaylists">
       <div class="playlist_outer" (click)="playlistSelectHandler(playlist)">
         <div class="playlist_inner">
           <img src="{{ playlist.cover }}" />
