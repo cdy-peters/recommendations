@@ -3,7 +3,12 @@ import { Component } from '@angular/core';
 import { QueryService } from 'src/app/services/query.service';
 import { TransferDataService } from 'src/app/services/transfer-data.service';
 
-import { AverageSongFeatures, Recommendations, Recommendation } from './models';
+import {
+  AverageSongFeatures,
+  Recommendations,
+  Recommendation,
+  Features,
+} from './models';
 
 @Component({
   selector: 'app-recommendations',
@@ -131,6 +136,23 @@ export class RecommendationsComponent {
 
     for (const track of recommendations.tracks) {
       if (!this.tracks.includes(track.id)) {
+        // Compare song features with average song features
+        var url = `https://api.spotify.com/v1/audio-features/${track.id}`;
+        var audio_features = (await this.query.get(url)) as Features;
+        var features = {
+          acousticness: audio_features.acousticness,
+          danceability: audio_features.danceability,
+          energy: audio_features.energy,
+          instrumentalness: audio_features.instrumentalness,
+          liveness: audio_features.liveness,
+          loudness: audio_features.loudness,
+          speechiness: audio_features.speechiness,
+          tempo: audio_features.tempo,
+          valence: audio_features.valence,
+        };
+
+        var sim = this.calcSimilarity(this.average_song_features, features);
+
         var artists = [];
         for (const artist of track.artists) {
           artists.push(artist.name);
@@ -142,10 +164,24 @@ export class RecommendationsComponent {
           artists: artists,
           explicit: track.explicit,
           preview_url: track.preview_url,
+          similarity: sim,
         });
       } else {
         console.log('Track already in playlist');
       }
     }
+  }
+
+  // Calculates cosine similarity between two vectors
+  calcSimilarity(average_features: any, features: any) {
+    var avgArr: number[] = Object.values(average_features);
+    var featuresArr: number[] = Object.values(features);
+
+    const dot = (a: any[], b: any[]) =>
+      a.map((x: any, i: any) => x * b[i]).reduce((m: any, n: any) => m + n);
+    const norm = (a: any[]) => Math.sqrt(dot(a, a));
+
+    var sim = dot(avgArr, featuresArr) / (norm(avgArr) * norm(featuresArr));
+    return +sim.toFixed(5);
   }
 }
