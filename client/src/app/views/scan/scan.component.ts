@@ -1,7 +1,9 @@
 import { Component } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
+import { Router } from '@angular/router';
 
 import { QueryService } from 'src/app/services/query.service';
+import { TransferDataService } from 'src/app/services/transfer-data.service';
 
 import { PlaylistItems, AverageSongFeatures, Features, Artist } from './models';
 
@@ -11,7 +13,12 @@ import { PlaylistItems, AverageSongFeatures, Features, Artist } from './models';
   styleUrls: ['./scan.component.css'],
 })
 export class ScanComponent {
-  constructor(private route: ActivatedRoute, private query: QueryService) {}
+  constructor(
+    private route: ActivatedRoute,
+    private query: QueryService,
+    private router: Router,
+    private transfer: TransferDataService
+  ) {}
 
   tracks: string[] = [];
   artists: {
@@ -93,5 +100,18 @@ export class ScanComponent {
       }
     }
     this.genres.sort((a, b) => b.frequency - a.frequency);
+
+    var genresArr = [];
+    for (const genre of this.genres) {
+      genresArr.push(genre.name);
+    }
+
+    // Navigate to recommendations page
+    this.transfer.setData({
+      average_song_features: this.average_song_features,
+      genres: genresArr,
+    });
+
+    this.router.navigate(['/recommendations']);
   }
 }

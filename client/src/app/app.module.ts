@@ -9,9 +9,11 @@ import { HomeComponent } from './views/home/home.component';
 import { AuthComponent } from './views/auth/auth.component';
 import { NavComponent } from './views/partials/nav/nav.component';
 import { ScanComponent } from './views/scan/scan.component';
+import { RecommendationsComponent } from './views/recommendations/recommendations.component';
 
 import { CookieService } from './services/cookie.service';
 import { QueryService } from './services/query.service';
+import { TransferDataService } from './services/transfer-data.service';
 
 const isAuthenticated = (cookieService: CookieService) => {
   return cookieService.getCookie('access_token')
@@ -20,17 +22,18 @@ const isAuthenticated = (cookieService: CookieService) => {
 };
 
 @NgModule({
-  declarations: [AppComponent, HomeComponent, AuthComponent, NavComponent, ScanComponent],
+  declarations: [AppComponent, HomeComponent, AuthComponent, NavComponent, ScanComponent, RecommendationsComponent],
   imports: [
     BrowserModule,
     HttpClientModule,
     RouterModule.forRoot([
       { path: '', component: isAuthenticated(new CookieService()) },
       { path: 'scan/:playlistId', component: ScanComponent },
+      { path: 'recommendations', component: RecommendationsComponent },
     ]),
     FormsModule,
   ],
-  providers: [CookieService, QueryService],
+  providers: [CookieService, QueryService, TransferDataService],
   bootstrap: [AppComponent],
 })
 export class AppModule { }
