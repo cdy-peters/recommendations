@@ -1,5 +1,5 @@
 
-export interface Artist {
+export interface Artists {
     external_urls: any;
     href: string;
     id: string;
@@ -10,7 +10,7 @@ export interface Artist {
 
 export interface Track {
     album: any;
-    artists: Artist[];
+    artists: Artists[];
     available_markets: string[];
     disc_number: number;
     duration_ms: number;
@@ -47,3 +47,48 @@ export interface PlaylistItems {
     total: number;
 }
 
+export interface AverageSongFeatures {
+    acousticness: number;
+    danceability: number;
+    energy: number;
+    instrumentalness: number;
+    liveness: number;
+    loudness: number;
+    speechiness: number;
+    tempo: number;
+    valence: number;
+}
+
+export interface Features {
+    acousticness: number;
+    analysis_url: string;
+    danceability: number;
+    duration_ms: number;
+    energy: number;
+    id: string;
+    instrumentalness: number;
+    key: number;
+    liveness: number;
+    loudness: number;
+    mode: number;
+    speechiness: number;
+    tempo: number;
+    time_signature: number;
+    track_href: string;
+    type: string;
+    uri: string;
+    valence: number;
+}
+
+export interface Artist {
+    external_urls: any;
+    followers: any;
+    genres: string[];
+    href: string;
+    id: string;
+    images: any[];
+    name: string;
+    popularity: number;
+    type: string;
+    uri: string;
+}

@@ -3,7 +3,7 @@ import { ActivatedRoute } from '@angular/router';
 
 import { QueryService } from 'src/app/services/query.service';
 
-import { PlaylistItems } from './models';
+import { PlaylistItems, AverageSongFeatures, Features, Artist } from './models';
 
 @Component({
   selector: 'app-scan',
@@ -15,6 +15,21 @@ export class ScanComponent {
 
   tracks: string[] = [];
   artists: {
+    id: string;
+    frequency: number;
+  }[] = [];
+  average_song_features: AverageSongFeatures = {
+    acousticness: 0,
+    danceability: 0,
+    energy: 0,
+    instrumentalness: 0,
+    liveness: 0,
+    loudness: 0,
+    speechiness: 0,
+    tempo: 0,
+    valence: 0,
+  };
+  genres: {
     name: string;
     frequency: number;
   }[] = [];
@@ -22,27 +37,61 @@ export class ScanComponent {
   async ngOnInit() {
     const playlistId = this.route.snapshot.paramMap.get('playlistId');
 
+    // Scan playlist for tracks and artists
     var url = `https://api.spotify.com/v1/playlists/${playlistId}/tracks`;
-
     while (url) {
-      var res = (await this.query.get(url)) as PlaylistItems;
+      var playlist = (await this.query.get(url)) as PlaylistItems;
 
-      for (const item of res.items) {
+      for (const item of playlist.items) {
         const track = item.track;
         const id = track.id;
 
         this.tracks.push(id);
 
         for (const artist of track.artists) {
-          const name = artist.name;
-          const index = this.artists.findIndex((artist) => artist.name == name);
+          const id = artist.id;
+          const index = this.artists.findIndex((artist) => artist.id == id);
 
           index == -1
-            ? this.artists.push({ name, frequency: 1 })
+            ? this.artists.push({ id, frequency: 1 })
             : this.artists[index].frequency++;
         }
       }
-      url = res.next;
+      url = playlist.next;
     }
+
+    // Scan tracks for features
+    for (const id of this.tracks) {
+      var url = `https://api.spotify.com/v1/audio-features/${id}`;
+      var features = (await this.query.get(url)) as Features;
+
+      for (const key in this.average_song_features) {
+        var val = <number>features[key as keyof Features];
+
+        this.average_song_features[key as keyof AverageSongFeatures] += val;
+      }
+    }
+
+    for (const key in this.average_song_features) {
+      this.average_song_features[key as keyof AverageSongFeatures] /=
+        this.tracks.length;
+    }
+
+    // Scan artists for genres
+    for (const artist of this.artists) {
+      var url = `https://api.spotify.com/v1/artists/${artist.id}`;
+      var artistInfo = (await this.query.get(url)) as Artist;
+
+      for (const genre of artistInfo.genres) {
+        const index = this.genres.findIndex(
+          (thisGenre) => thisGenre.name == genre
+        );
+
+        index == -1
+          ? this.genres.push({ name: genre, frequency: artist.frequency })
+          : (this.genres[index].frequency += artist.frequency);
+      }
+    }
+    this.genres.sort((a, b) => b.frequency - a.frequency);
   }
 }
