@@ -8,6 +8,8 @@ import { CookieService } from './services/cookie.service';
   styleUrls: ['./app.component.css'],
 })
 export class AppComponent {
+  title = 'recommendations';
+
   constructor(private cookieService: CookieService) {}
 
   authenticated = false;

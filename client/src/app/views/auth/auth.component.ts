@@ -1,8 +1,8 @@
 import { Component } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 
-import { AuthService } from '../services/auth.service';
-import { CookieService } from '../services/cookie.service';
+import { AuthService } from './services/auth.service';
+import { CookieService } from 'src/app/services/cookie.service';
 
 @Component({
   selector: 'app-auth',

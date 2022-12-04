@@ -5,9 +5,11 @@ import { HttpClientModule } from '@angular/common/http';
 import { FormsModule } from '@angular/forms';
 
 import { AppComponent } from './app.component';
-import { HomeComponent } from './home/home.component';
-import { AuthComponent } from './auth/auth.component';
-import { NavComponent } from './nav/nav.component';
+import { HomeComponent } from './views/home/home.component';
+import { AuthComponent } from './views/auth/auth.component';
+import { NavComponent } from './views/partials/nav/nav.component';
+
+import { CookieService } from './services/cookie.service';
 
 const authRequired = () => {
   const getCookie = (name: string) => {
@@ -36,7 +38,7 @@ const authRequired = () => {
     RouterModule.forRoot([{ path: '', component: authRequired() }]),
     FormsModule,
   ],
-  providers: [],
+  providers: [CookieService],
   bootstrap: [AppComponent],
 })
 export class AppModule {}

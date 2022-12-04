@@ -1,7 +1,7 @@
 import { Component } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 
-import { CookieService } from '../services/cookie.service';
+import { CookieService } from 'src/app/services/cookie.service';
 
 @Component({
   selector: 'app-home',
