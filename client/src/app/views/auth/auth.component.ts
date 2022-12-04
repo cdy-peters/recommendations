@@ -4,6 +4,13 @@ import { ActivatedRoute } from '@angular/router';
 import { AuthService } from './services/auth.service';
 import { CookieService } from 'src/app/services/cookie.service';
 
+export interface Response {
+  access_token: string;
+  token_type: string;
+  expires_in: number;
+  refresh_token: string;
+}
+
 @Component({
   selector: 'app-auth',
   templateUrl: './auth.component.html',
@@ -14,20 +21,13 @@ export class AuthComponent {
     private route: ActivatedRoute,
     private authService: AuthService,
     private cookieService: CookieService
-  ) {}
+  ) { }
 
   login() {
     this.authService.login();
   }
 
   async ngOnInit() {
-    interface Response {
-      access_token: string;
-      token_type: string;
-      expires_in: number;
-      refresh_token: string;
-    }
-
     var res: Response | undefined;
     var cookie = this.cookieService.getCookie('refresh_token');
     var code = this.route.snapshot.queryParams['code'];

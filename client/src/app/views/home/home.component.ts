@@ -3,13 +3,15 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
 
 import { CookieService } from 'src/app/services/cookie.service';
 
+import { Playlists } from './models';
+
 @Component({
   selector: 'app-home',
   templateUrl: './home.component.html',
   styleUrls: ['./home.component.css'],
 })
 export class HomeComponent {
-  constructor(private http: HttpClient, private cookieService: CookieService) {}
+  constructor(private http: HttpClient, private cookieService: CookieService) { }
 
   selectedPlaylist: any;
   playlists: any[] = [];
@@ -29,18 +31,8 @@ export class HomeComponent {
     });
     var url = 'https://api.spotify.com/v1/me/playlists?limit=50';
 
-    interface Response {
-      items: any[];
-      href: string;
-      limit: number;
-      next: string;
-      offset: number;
-      previous: string;
-      total: number;
-    }
-    var res;
-    do {
-      res = (await this.http.get(url, { headers }).toPromise()) as Response;
+    while (url) {
+      var res = (await this.http.get(url, { headers }).toPromise()) as Playlists;
       for (const item of res.items) {
         var id = item.id;
         var name = item.name;
@@ -52,7 +44,7 @@ export class HomeComponent {
         this.filteredPlaylists.push({ id, name, tracks, cover });
       }
       url = res.next;
-    } while (res.next);
+    }
   }
 
   playlistSelectHandler(playlist: any) {
