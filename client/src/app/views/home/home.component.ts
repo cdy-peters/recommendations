@@ -1,6 +1,8 @@
 import { Component } from '@angular/core';
+import { Router } from '@angular/router';
 
 import { QueryService } from 'src/app/services/query.service';
+import { TransferDataService } from 'src/app/services/transfer-data.service';
 
 import { Playlists } from './models';
 
@@ -10,7 +12,7 @@ import { Playlists } from './models';
   styleUrls: ['./home.component.css'],
 })
 export class HomeComponent {
-  constructor(private query: QueryService) { }
+  constructor(private router: Router, private query: QueryService, private transfer: TransferDataService) { }
 
   selectedPlaylist: any;
   playlists: any[] = [];
@@ -44,7 +46,13 @@ export class HomeComponent {
     }
   }
 
-  playlistSelectHandler(playlist: any) {
+  selectPlaylistHandler(playlist: any) {
     this.selectedPlaylist = playlist;
+  }
+
+  scanPlaylistHandler() {
+    this.transfer.setData(this.selectedPlaylist);
+
+    this.router.navigate(['/scan']);
   }
 }

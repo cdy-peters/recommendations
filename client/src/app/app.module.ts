@@ -28,7 +28,7 @@ const isAuthenticated = (cookieService: CookieService) => {
     HttpClientModule,
     RouterModule.forRoot([
       { path: '', component: isAuthenticated(new CookieService()) },
-      { path: 'scan/:playlistId', component: ScanComponent },
+      { path: 'scan', component: ScanComponent },
       { path: 'recommendations', component: RecommendationsComponent },
     ]),
     FormsModule,

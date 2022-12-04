@@ -25,7 +25,7 @@
           </div>
 
           <div id="selected_scan">
-            <a [routerLink]="['/scan', selectedPlaylist.id]">
+            <a (click)="scanPlaylistHandler()">
               <button id="selected_button" class="grow">Scan Playlist</button>
             </a>
           </div>
@@ -71,7 +71,7 @@
 
     <div id="playlist_grid">
       <div *ngFor="let playlist of filteredPlaylists">
-        <div class="playlist_outer" (click)="playlistSelectHandler(playlist)">
+        <div class="playlist_outer" (click)="selectPlaylistHandler(playlist)">
           <div class="playlist_inner">
             <img src="{{ playlist.cover }}" />
             <p>{{ playlist.name }}</p>
