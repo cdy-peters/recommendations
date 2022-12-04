@@ -101,15 +101,11 @@ export class ScanComponent {
     }
     this.genres.sort((a, b) => b.frequency - a.frequency);
 
-    var genresArr = [];
-    for (const genre of this.genres) {
-      genresArr.push(genre.name);
-    }
-
     // Navigate to recommendations page
     this.transfer.setData({
+      tracks: this.tracks,
       average_song_features: this.average_song_features,
-      genres: genresArr,
+      genres: this.genres,
     });
 
     this.router.navigate(['/recommendations']);
