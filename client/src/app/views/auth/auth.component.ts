@@ -44,18 +44,12 @@ export class AuthComponent {
     }
 
     if (res) {
-      document.cookie =
-        'access_token=' +
-        res.access_token +
-        '; expires=' +
-        new Date(Date.now() + res.expires_in * 1000).toUTCString() +
-        '; path=/';
-      document.cookie =
-        'refresh_token=' +
-        res.refresh_token +
-        '; expires=' +
-        new Date(Date.now() + 60 * 60 * 24 * 30 * 1000).toUTCString() +
-        '; path=/';
+      this.cookieService.setCookie(
+        'access_token',
+        res.access_token,
+        res.expires_in
+      );
+      this.cookieService.setCookie('refresh_token', res.refresh_token, 604800);
 
       window.location.href = '/';
     }
