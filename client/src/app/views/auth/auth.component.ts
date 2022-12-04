@@ -21,7 +21,7 @@ export class AuthComponent {
     private route: ActivatedRoute,
     private authService: AuthService,
     private cookieService: CookieService
-  ) { }
+  ) {}
 
   login() {
     this.authService.login();

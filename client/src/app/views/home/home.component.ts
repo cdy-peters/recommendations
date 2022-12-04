@@ -1,7 +1,6 @@
 import { Component } from '@angular/core';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
 
-import { CookieService } from 'src/app/services/cookie.service';
+import { QueryService } from 'src/app/services/query.service';
 
 import { Playlists } from './models';
 
@@ -11,7 +10,7 @@ import { Playlists } from './models';
   styleUrls: ['./home.component.css'],
 })
 export class HomeComponent {
-  constructor(private http: HttpClient, private cookieService: CookieService) { }
+  constructor(private query: QueryService) { }
 
   selectedPlaylist: any;
   playlists: any[] = [];
@@ -26,13 +25,11 @@ export class HomeComponent {
   }
 
   async ngOnInit() {
-    const headers = new HttpHeaders({
-      Authorization: `Bearer ${this.cookieService.getCookie('access_token')}`,
-    });
     var url = 'https://api.spotify.com/v1/me/playlists?limit=50';
 
     while (url) {
-      var res = (await this.http.get(url, { headers }).toPromise()) as Playlists;
+      var res = (await this.query.get(url)) as Playlists;
+
       for (const item of res.items) {
         var id = item.id;
         var name = item.name;

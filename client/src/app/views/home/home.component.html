@@ -15,9 +15,20 @@
         <div id="selected_cover">
           <img src="{{ selectedPlaylist.cover }}" />
         </div>
-        <div id="selected_info">
-          <p>{{ selectedPlaylist.name }}</p>
-          <p>{{ selectedPlaylist.tracks }} tracks</p>
+
+        <div id="selected_info_container">
+          <div id="selected_info">
+            <div id="selected_name">
+              <h5>{{ selectedPlaylist.name }}</h5>
+            </div>
+            <p>{{ selectedPlaylist.tracks }} tracks</p>
+          </div>
+
+          <div id="selected_scan">
+            <a [routerLink]="['/scan', selectedPlaylist.id]">
+              <button id="selected_button" class="grow">Scan Playlist</button>
+            </a>
+          </div>
         </div>
       </ng-template>
 
@@ -25,9 +36,19 @@
         <div id="selected_cover">
           <img src="/assets/images/placeholder_cover.png" />
         </div>
-        <div id="selected_info">
-          <p>Select a playlist below</p>
-          <p></p>
+        <div id="selected_info_container">
+          <div id="selected_info">
+            <div id="selected_name">
+              <h5>Select a playlist below</h5>
+            </div>
+            <p></p>
+          </div>
+
+          <div id="selected_scan">
+            <a>
+              <button id="selected_button_disabled">Scan Playlist</button>
+            </a>
+          </div>
         </div>
       </ng-template>
     </div>
