@@ -11,23 +11,10 @@ import { NavComponent } from './views/partials/nav/nav.component';
 
 import { CookieService } from './services/cookie.service';
 
-const authRequired = () => {
-  const getCookie = (name: string) => {
-    let nameEQ = name + '=';
-    let ca = document.cookie.split(';');
-    for (let i = 0; i < ca.length; i++) {
-      let c = ca[i];
-      while (c.charAt(0) == ' ') c = c.substring(1, c.length);
-      if (c.indexOf(nameEQ) == 0) return c.substring(nameEQ.length, c.length);
-    }
-    return null;
-  };
-
-  if (getCookie('access_token')) {
-    return HomeComponent;
-  } else {
-    return AuthComponent;
-  }
+const isAuthenticated = (cookieService: CookieService) => {
+  return cookieService.getCookie('access_token')
+    ? HomeComponent
+    : AuthComponent;
 };
 
 @NgModule({
@@ -35,10 +22,12 @@ const authRequired = () => {
   imports: [
     BrowserModule,
     HttpClientModule,
-    RouterModule.forRoot([{ path: '', component: authRequired() }]),
+    RouterModule.forRoot([
+      { path: '', component: isAuthenticated(new CookieService()) },
+    ]),
     FormsModule,
   ],
   providers: [CookieService],
   bootstrap: [AppComponent],
 })
-export class AppModule {}
+export class AppModule { }
