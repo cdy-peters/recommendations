@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, ViewChild, ElementRef } from '@angular/core';
 
 import { QueryService } from 'src/app/services/query.service';
 import { TransferDataService } from 'src/app/services/transfer-data.service';
@@ -9,7 +9,6 @@ import {
   Recommendation,
   Features,
 } from './models';
-
 @Component({
   selector: 'app-recommendations',
   templateUrl: './recommendations.component.html',
@@ -25,6 +24,10 @@ export class RecommendationsComponent {
   songsRetrieved: number = 0;
   artistsRetrieved: number = 0;
   genresRetrieved: number = 0;
+  previewUrl: string = '';
+  playingTrack: string = '';
+  @ViewChild('songPreview')
+  songPreview!: ElementRef;
 
   tracks: string[] = [];
   averageFeatures: AverageSongFeatures = {
@@ -106,19 +109,13 @@ export class RecommendationsComponent {
         this.averageFeatures.acousticness
       }&target_danceability=${
         this.averageFeatures.danceability
-      }&target_energy=${
-        this.averageFeatures.energy
-      }&target_instrumentalness=${
+      }&target_energy=${this.averageFeatures.energy}&target_instrumentalness=${
         this.averageFeatures.instrumentalness
-      }&target_liveness=${
-        this.averageFeatures.liveness
-      }&target_loudness=${
+      }&target_liveness=${this.averageFeatures.liveness}&target_loudness=${
         this.averageFeatures.loudness
-      }&target_speechiness=${
-        this.averageFeatures.speechiness
-      }&target_tempo=${this.averageFeatures.tempo}&target_valence=${
-        this.averageFeatures.valence
-      }`;
+      }&target_speechiness=${this.averageFeatures.speechiness}&target_tempo=${
+        this.averageFeatures.tempo
+      }&target_valence=${this.averageFeatures.valence}`;
       recommendations = (await this.query.get(url)) as Recommendations;
     } else {
       var tracksTemp = this.tracks.slice(0, 5);
@@ -128,19 +125,13 @@ export class RecommendationsComponent {
         this.averageFeatures.acousticness
       }&target_danceability=${
         this.averageFeatures.danceability
-      }&target_energy=${
-        this.averageFeatures.energy
-      }&target_instrumentalness=${
+      }&target_energy=${this.averageFeatures.energy}&target_instrumentalness=${
         this.averageFeatures.instrumentalness
-      }&target_liveness=${
-        this.averageFeatures.liveness
-      }&target_loudness=${
+      }&target_liveness=${this.averageFeatures.liveness}&target_loudness=${
         this.averageFeatures.loudness
-      }&target_speechiness=${
-        this.averageFeatures.speechiness
-      }&target_tempo=${this.averageFeatures.tempo}&target_valence=${
-        this.averageFeatures.valence
-      }`;
+      }&target_speechiness=${this.averageFeatures.speechiness}&target_tempo=${
+        this.averageFeatures.tempo
+      }&target_valence=${this.averageFeatures.valence}`;
       recommendations = (await this.query.get(url)) as Recommendations;
     }
 
@@ -199,7 +190,12 @@ export class RecommendationsComponent {
     console.log('checkbox change');
   }
 
-  previewHandler() {
-    console.log('preview handler')
+  previewHandler(url: string) {
+    if (this.songPreview.nativeElement.src === url) url = '';
+
+    this.songPreview.nativeElement.src = url;
+    this.playingTrack = url;
+
+    if (url) this.songPreview.nativeElement.play();
   }
 }

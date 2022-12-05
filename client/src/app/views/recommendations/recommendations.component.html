@@ -69,18 +69,22 @@
         <th style="width: 100%">Song</th>
       </tr>
       <tr id="recommendation_row" *ngFor="let track of recommendations">
-        <td id="recommendation_checkbox">
+        <td>
           <input type="checkbox" (change)="onCheckboxChange($event, track)" />
         </td>
-        <td id="recommendation_preview">
+        <td>
           <i
-            class="bi bi-play-fill"
-            *ngIf="track.explicit"
-            (click)="previewHandler()"
+            class="bi"
+            [ngClass]="{
+              'bi-play-fill': playingTrack !== track.preview_url,
+              'bi-pause': playingTrack === track.preview_url
+            }"
+            *ngIf="track.preview_url"
+            (click)="previewHandler(track.preview_url)"
           ></i>
         </td>
-        <td id="recommendtaion_similarity">{{ track.similarity }}</td>
-        <td id="recommendation_info">
+        <td>{{ track.similarity }}</td>
+        <td>
           <div>
             <a
               id="recommendation_name"
@@ -95,3 +99,5 @@
     </table>
   </div>
 </div>
+
+<audio #songPreview src="" (ended)="playingTrack = ''"></audio>
