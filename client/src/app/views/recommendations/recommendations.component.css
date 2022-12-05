@@ -58,7 +58,8 @@
   background-color: #2a2a2a;
 }
 
-.bi-play-fill, .bi-pause {
+.bi-play-fill,
+.bi-pause {
   font-size: 25px;
 }
 
@@ -69,6 +70,10 @@
 #recommendation_artist {
   margin: 0;
   color: #b3b3b3;
+}
+#recommendation_artist svg {
+  margin-bottom: 3px;
+  margin-right: 5px;
 }
 
 /* Media queries */
