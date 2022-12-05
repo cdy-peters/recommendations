@@ -1,0 +1,85 @@
+/* Playlist info */
+#playlist_container {
+  width: 400px;
+  float: left;
+}
+
+#selected_playlist {
+  display: flex;
+}
+
+#playlist_cover {
+  max-width: 200px;
+  max-height: 200px;
+}
+
+#playlist_cover img {
+  max-width: 100%;
+  height: auto;
+
+  border-radius: 5px;
+  box-shadow: 0 1px 7px 1px #040404;
+}
+
+#playlist_details {
+  margin-left: 20px;
+  width: 200px;
+}
+
+/* Average features */
+#average_features {
+  margin: 20px 0;
+}
+
+#average_features_title {
+  font-weight: bolder;
+}
+
+#average_features_table tr > td:first-child {
+  padding-right: 10px;
+}
+
+/* Recommendations */
+#recommendations {
+  width: calc(100% - 400px);
+  float: left;
+}
+
+#recommendation_row td {
+  padding: 10px 10px;
+}
+#recommendation_row td:first-child {
+  border-radius: 5px 0 0 5px;
+}
+#recommendation_row td:last-child {
+  border-radius: 0 5px 5px 0;
+}
+#recommendation_row:hover {
+  background-color: #2a2a2a;
+}
+
+.bi-play-fill {
+  font-size: 25px;
+}
+
+#recommendation_name {
+  color: white;
+}
+
+#recommendation_artist {
+  margin: 0;
+  color: #b3b3b3;
+}
+
+/* Media queries */
+@media screen and (max-width: 999px) {
+  #playlist_container {
+    width: 100%;
+    float: none;
+  }
+
+  #recommendations {
+    width: 100%;
+    float: none;
+  }
+}

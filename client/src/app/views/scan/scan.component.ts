@@ -29,7 +29,7 @@ export class ScanComponent {
     id: string;
     genres: string[];
   }[] = [];
-  average_song_features: AverageSongFeatures = {
+  averageFeatures: AverageSongFeatures = {
     acousticness: 0,
     danceability: 0,
     energy: 0,
@@ -62,10 +62,10 @@ export class ScanComponent {
         var url = `https://api.spotify.com/v1/audio-features/${id}`;
         var features = (await this.query.get(url)) as Features;
 
-        for (const key in this.average_song_features) {
+        for (const key in this.averageFeatures) {
           var val = <number>features[key as keyof Features];
 
-          this.average_song_features[key as keyof AverageSongFeatures] += val;
+          this.averageFeatures[key as keyof AverageSongFeatures] += val;
         }
 
         this.tracks.push(id);
@@ -114,15 +114,22 @@ export class ScanComponent {
       url = playlist.next;
     }
     // Average the song features
-    for (const key in this.average_song_features) {
-      this.average_song_features[key as keyof AverageSongFeatures] /=
-        this.tracks.length;
+    for (const key in this.averageFeatures) {
+      var val = <number>this.averageFeatures[key as keyof AverageSongFeatures];
+
+      this.averageFeatures[key as keyof AverageSongFeatures] = +(
+        val / this.songsRetrieved
+      ).toFixed(5);
     }
 
     // Navigate to recommendations page
     this.transfer.setData({
+      selectedPlaylist: this.selectedPlaylist,
+      songsRetrieved: this.songsRetrieved,
+      artistsRetrieved: this.artistsRetrieved,
+      genresRetrieved: this.genresRetrieved,
       tracks: this.tracks,
-      average_song_features: this.average_song_features,
+      averageFeatures: this.averageFeatures,
       genres: this.genres,
     });
 

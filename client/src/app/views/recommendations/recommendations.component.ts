@@ -21,8 +21,13 @@ export class RecommendationsComponent {
     private transfer: TransferDataService
   ) {}
 
+  selectedPlaylist: any;
+  songsRetrieved: number = 0;
+  artistsRetrieved: number = 0;
+  genresRetrieved: number = 0;
+
   tracks: string[] = [];
-  average_song_features: AverageSongFeatures = {
+  averageFeatures: AverageSongFeatures = {
     acousticness: 0,
     danceability: 0,
     energy: 0,
@@ -44,8 +49,13 @@ export class RecommendationsComponent {
   async ngOnInit() {
     const data = this.transfer.getData();
 
+    this.selectedPlaylist = data.selectedPlaylist;
+    this.songsRetrieved = data.songsRetrieved;
+    this.artistsRetrieved = data.artistsRetrieved;
+    this.genresRetrieved = data.genresRetrieved;
+
     this.tracks = data.tracks;
-    this.average_song_features = data.average_song_features;
+    this.averageFeatures = data.averageFeatures;
     this.genres = data.genres;
 
     var seed_method = 'genres';
@@ -93,21 +103,21 @@ export class RecommendationsComponent {
       var url = `https://api.spotify.com/v1/recommendations?seed_genres=${this.filteredGenres.join(
         ','
       )}&limit=100&target_acousticness=${
-        this.average_song_features.acousticness
+        this.averageFeatures.acousticness
       }&target_danceability=${
-        this.average_song_features.danceability
+        this.averageFeatures.danceability
       }&target_energy=${
-        this.average_song_features.energy
+        this.averageFeatures.energy
       }&target_instrumentalness=${
-        this.average_song_features.instrumentalness
+        this.averageFeatures.instrumentalness
       }&target_liveness=${
-        this.average_song_features.liveness
+        this.averageFeatures.liveness
       }&target_loudness=${
-        this.average_song_features.loudness
+        this.averageFeatures.loudness
       }&target_speechiness=${
-        this.average_song_features.speechiness
-      }&target_tempo=${this.average_song_features.tempo}&target_valence=${
-        this.average_song_features.valence
+        this.averageFeatures.speechiness
+      }&target_tempo=${this.averageFeatures.tempo}&target_valence=${
+        this.averageFeatures.valence
       }`;
       recommendations = (await this.query.get(url)) as Recommendations;
     } else {
@@ -115,21 +125,21 @@ export class RecommendationsComponent {
       var url = `https://api.spotify.com/v1/recommendations?seed_tracks=${tracksTemp.join(
         ','
       )}&limit=100&target_acousticness=${
-        this.average_song_features.acousticness
+        this.averageFeatures.acousticness
       }&target_danceability=${
-        this.average_song_features.danceability
+        this.averageFeatures.danceability
       }&target_energy=${
-        this.average_song_features.energy
+        this.averageFeatures.energy
       }&target_instrumentalness=${
-        this.average_song_features.instrumentalness
+        this.averageFeatures.instrumentalness
       }&target_liveness=${
-        this.average_song_features.liveness
+        this.averageFeatures.liveness
       }&target_loudness=${
-        this.average_song_features.loudness
+        this.averageFeatures.loudness
       }&target_speechiness=${
-        this.average_song_features.speechiness
-      }&target_tempo=${this.average_song_features.tempo}&target_valence=${
-        this.average_song_features.valence
+        this.averageFeatures.speechiness
+      }&target_tempo=${this.averageFeatures.tempo}&target_valence=${
+        this.averageFeatures.valence
       }`;
       recommendations = (await this.query.get(url)) as Recommendations;
     }
@@ -151,7 +161,7 @@ export class RecommendationsComponent {
           valence: audio_features.valence,
         };
 
-        var sim = this.calcSimilarity(this.average_song_features, features);
+        var sim = this.calcSimilarity(this.averageFeatures, features);
 
         var artists = [];
         for (const artist of track.artists) {
@@ -183,5 +193,13 @@ export class RecommendationsComponent {
 
     var sim = dot(avgArr, featuresArr) / (norm(avgArr) * norm(featuresArr));
     return +sim.toFixed(5);
+  }
+
+  onCheckboxChange(e: any, track: any) {
+    console.log('checkbox change');
+  }
+
+  previewHandler() {
+    console.log('preview handler')
   }
 }

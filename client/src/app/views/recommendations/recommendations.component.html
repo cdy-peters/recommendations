@@ -1,7 +1,97 @@
-<div style="margin-top: 76px;">
-    <h1>Recommendations</h1>
-</div>
+<div style="margin-top: 76px"></div>
 
-<div *ngFor="let recommendation of recommendations">
-    {{ recommendation.id}} {{ recommendation.similarity }}
+<div>
+  <div id="playlist_container">
+    <div id="selected_playlist">
+      <div id="playlist_cover">
+        <img src="{{ selectedPlaylist.cover }}" />
+      </div>
+      <div id="playlist_details">
+        <h5>{{ selectedPlaylist.name }}</h5>
+        <p>{{ songsRetrieved }} songs retrieved</p>
+        <p>{{ artistsRetrieved }} artists retrieved</p>
+        <p>{{ genresRetrieved }} genres retrieved</p>
+      </div>
+    </div>
+
+    <div id="average_features">
+      <table id="average_features_table" a>
+        <tr id="average_features_title" colspan="2">
+          Average Features
+        </tr>
+        <tr>
+          <td>Acousticness:</td>
+          <td>{{ averageFeatures.acousticness }}</td>
+        </tr>
+        <tr>
+          <td>Danceability:</td>
+          <td>{{ averageFeatures.danceability }}</td>
+        </tr>
+        <tr>
+          <td>Energy:</td>
+          <td>{{ averageFeatures.energy }}</td>
+        </tr>
+        <tr>
+          <td>Instrumentalness:</td>
+          <td>{{ averageFeatures.instrumentalness }}</td>
+        </tr>
+        <tr>
+          <td>Liveness:</td>
+          <td>{{ averageFeatures.liveness }}</td>
+        </tr>
+        <tr>
+          <td>Loudness:</td>
+          <td>{{ averageFeatures.loudness }}</td>
+        </tr>
+        <tr>
+          <td>Speechiness:</td>
+          <td>{{ averageFeatures.speechiness }}</td>
+        </tr>
+        <tr>
+          <td>Valence:</td>
+          <td>{{ averageFeatures.valence }}</td>
+        </tr>
+      </table>
+    </div>
+  </div>
+
+  <div id="recommendations">
+    <table id="recommendations_table">
+      <tr>
+        <th colspan="4">
+          <h5>Showing {{ recommendations.length }} recommendations</h5>
+        </th>
+      </tr>
+      <tr>
+        <th style="width: 40px"></th>
+        <th style="width: 50px"></th>
+        <th style="width: 85px">Similarity</th>
+        <th style="width: 100%">Song</th>
+      </tr>
+      <tr id="recommendation_row" *ngFor="let track of recommendations">
+        <td id="recommendation_checkbox">
+          <input type="checkbox" (change)="onCheckboxChange($event, track)" />
+        </td>
+        <td id="recommendation_preview">
+          <i
+            class="bi bi-play-fill"
+            *ngIf="track.explicit"
+            (click)="previewHandler()"
+          ></i>
+        </td>
+        <td id="recommendtaion_similarity">{{ track.similarity }}</td>
+        <td id="recommendation_info">
+          <div>
+            <a
+              id="recommendation_name"
+              href="https://open.spotify.com/track/{{ track.id }}"
+              target="_blank"
+              >{{ track.name }}</a
+            >
+            <p id="recommendation_artist">{{ track.artists.join(", ") }}</p>
+          </div>
+        </td>
+      </tr>
+    </table>
+  </div>
 </div>
