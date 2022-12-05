@@ -1,15 +1,12 @@
-import { Injectable } from '@angular/core';
-
-@Injectable({
-  providedIn: 'root'
-})
 export class TransferDataService {
-  constructor() { }
-
   private data: any;
 
   setData(data: any) {
     this.data = data;
+  }
+
+  checkData() {
+    return this.data ? true : false;
   }
 
   getData() {

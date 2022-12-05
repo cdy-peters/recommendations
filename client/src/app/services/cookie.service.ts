@@ -1,11 +1,4 @@
-import { Injectable } from '@angular/core';
-
-@Injectable({
-  providedIn: 'root',
-})
 export class CookieService {
-  constructor() {}
-
   setCookie(name: string, value: string, seconds: number) {
     document.cookie = `${name}=${value}; Max-Age=${seconds}; path=/`;
   }
@@ -19,6 +12,10 @@ export class CookieService {
       if (c.indexOf(nameEQ) == 0) return c.substring(nameEQ.length, c.length);
     }
     return null;
+  }
+
+  isValid() {
+    return this.getCookie('access_token') ? true : false;
   }
 
   deleteCookie(name: string) {

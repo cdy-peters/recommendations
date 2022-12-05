@@ -1,6 +1,6 @@
 import { NgModule } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
-import { RouterModule } from '@angular/router';
+import { Routes, RouterModule } from '@angular/router';
 import { HttpClientModule } from '@angular/common/http';
 import { FormsModule } from '@angular/forms';
 
@@ -15,25 +15,38 @@ import { CookieService } from './services/cookie.service';
 import { QueryService } from './services/query.service';
 import { TransferDataService } from './services/transfer-data.service';
 
-const isAuthenticated = (cookieService: CookieService) => {
-  return cookieService.getCookie('access_token')
-    ? HomeComponent
-    : AuthComponent;
-};
+import { routeGuard } from './auth/route.guard';
+
+const routes: Routes = [
+  {
+    path: '',
+    component: new CookieService().isValid() ? HomeComponent : AuthComponent,
+  },
+  { path: 'scan', component: ScanComponent, canActivate: [routeGuard] },
+  {
+    path: 'recommendations',
+    component: RecommendationsComponent,
+    canActivate: [routeGuard],
+  },
+  { path: '**', redirectTo: '' },
+];
 
 @NgModule({
-  declarations: [AppComponent, HomeComponent, AuthComponent, NavComponent, ScanComponent, RecommendationsComponent],
+  declarations: [
+    AppComponent,
+    HomeComponent,
+    AuthComponent,
+    NavComponent,
+    ScanComponent,
+    RecommendationsComponent,
+  ],
   imports: [
     BrowserModule,
     HttpClientModule,
-    RouterModule.forRoot([
-      { path: '', component: isAuthenticated(new CookieService()) },
-      { path: 'scan', component: ScanComponent },
-      { path: 'recommendations', component: RecommendationsComponent },
-    ]),
+    RouterModule.forRoot(routes),
     FormsModule,
   ],
   providers: [CookieService, QueryService, TransferDataService],
   bootstrap: [AppComponent],
 })
-export class AppModule { }
+export class AppModule {}
