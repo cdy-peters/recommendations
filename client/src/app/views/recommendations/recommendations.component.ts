@@ -148,6 +148,28 @@ export class RecommendationsComponent {
 
     for (const track of recommendations.tracks) {
       if (!this.tracks.includes(track.id)) {
+        // Check if track has familiar genres
+        var genreExists = false;
+        for (const artist of track.artists) {
+          var url = `https://api.spotify.com/v1/artists/${artist.id}`;
+          var artistData = (await this.query.get(url)) as {
+            genres: string[];
+          };
+          var genres = artistData.genres;
+
+          const exists = genres.some(
+            (genre) => this.filteredGenres.indexOf(genre) >= 0
+          );
+          if (exists) {
+            genreExists = true;
+            break;
+          }
+        }
+        if (!genreExists) {
+          console.log('No familiar genres');
+          continue;
+        }
+
         // Compare song features with average song features
         var url = `https://api.spotify.com/v1/audio-features/${track.id}`;
         var audio_features = (await this.query.get(url)) as Features;
