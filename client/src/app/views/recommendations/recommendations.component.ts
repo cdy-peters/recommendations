@@ -58,6 +58,7 @@ export class RecommendationsComponent {
   selectedTracks: string[] = [];
   @ViewChildren('checkboxes') checkboxes!: QueryList<ElementRef>;
   selectAll: boolean = false;
+  addedTracks: string[] = [];
 
   async ngOnInit() {
     const data = this.transfer.getData();
@@ -219,14 +220,25 @@ export class RecommendationsComponent {
   }
 
   async addThisPlaylist(newPlaylistId?: string) {
-    var id = newPlaylistId ? newPlaylistId : this.selectedPlaylist.id;
+    var id = this.selectedPlaylist.id;
+    var uris = [];
+
+    if (newPlaylistId) {
+      id = newPlaylistId;
+      uris = this.selectedTracks.map((t) => `spotify:track:${t}`);
+    } else {
+      for (const track of this.selectedTracks) {
+        if (!this.addedTracks.includes(track)) {
+          uris.push(`spotify:track:${track}`);
+          this.addedTracks.push(track);
+        }
+      }
+
+      if (uris.length === 0) return;
+    }
 
     var url = `https://api.spotify.com/v1/playlists/${id}/tracks`;
-    var body = {
-      uris: this.selectedTracks.map((t) => `spotify:track:${t}`),
-    };
-
-    var response = await this.query.post(url, body);
+    var response = await this.query.post(url, { uris });
     console.log(response);
   }
 
