@@ -71,6 +71,7 @@
       <tr id="recommendation_row" *ngFor="let track of recommendations">
         <td>
           <input
+            #checkboxes
             type="checkbox"
             (change)="onCheckboxChange($event, track.id)"
           />
@@ -121,7 +122,7 @@
 <div id="track_selection">
   <div id="select_options">
     <p>{{ selectedTracks.length }} songs selected</p>
-    <button>Select all</button>
+    <button (click)="onSelectAll()">{{ !selectAll ? 'Select All' : 'Deselect All' }}</button>
   </div>
   <h5>Add selected songs to:</h5>
   <div

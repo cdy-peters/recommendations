@@ -84,7 +84,7 @@
 
 /* Track selection */
 #track_selection {
-  width: 290px;
+  width: 300px;
   background-color: #090909;
   border-radius: 15px;
   padding: 15px;
@@ -100,6 +100,7 @@
   border-radius: 50px;
   font-size: 18px;
   padding: 7px 15px;
+  width: 130px;
 }
 
 #select_options {
@@ -109,6 +110,7 @@
   margin: 0;
   display: flex;
   align-items: center;
+  text-align: center;
 }
 #select_options button {
   background-color: #121212;

@@ -1,4 +1,10 @@
-import { Component, ViewChild, ElementRef } from '@angular/core';
+import {
+  Component,
+  ViewChild,
+  ElementRef,
+  ViewChildren,
+  QueryList,
+} from '@angular/core';
 
 import { QueryService } from 'src/app/services/query.service';
 import { TransferDataService } from 'src/app/services/transfer-data.service';
@@ -50,6 +56,8 @@ export class RecommendationsComponent {
 
   recommendations: Recommendation[] = [];
   selectedTracks: string[] = [];
+  @ViewChildren('checkboxes') checkboxes!: QueryList<ElementRef>;
+  selectAll: boolean = false;
 
   async ngOnInit() {
     const data = this.transfer.getData();
@@ -195,6 +203,19 @@ export class RecommendationsComponent {
       this.selectedTracks = this.selectedTracks.filter((t) => t !== id);
     }
     console.log(this.selectedTracks);
+  }
+
+  onSelectAll() {
+    this.selectAll = !this.selectAll;
+    this.checkboxes.forEach((checkbox) => {
+      checkbox.nativeElement.checked = this.selectAll;
+    });
+
+    if (this.selectAll) {
+      this.selectedTracks = this.recommendations.map((t) => t.id);
+    } else {
+      this.selectedTracks = [];
+    }
   }
 
   async addThisPlaylist(newPlaylistId?: string) {
