@@ -1,7 +1,7 @@
 import { inject } from '@angular/core';
 import { Router, CanActivateFn } from '@angular/router';
 
-import { TransferDataService } from '../services/transfer-data.service';
+import { TransferDataService } from '../shared/services/transfer-data.service';
 
 export const routeGuard: CanActivateFn = () => {
   const router = inject(Router);

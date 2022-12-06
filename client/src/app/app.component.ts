@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
 
-import { CookieService } from './services/cookie.service';
+import { CookieService } from './shared/services/cookie.service';
 
 @Component({
   selector: 'app-root',

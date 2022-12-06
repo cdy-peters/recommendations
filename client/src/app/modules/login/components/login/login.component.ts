@@ -1,9 +1,9 @@
 import { Component } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 
-import { AuthService } from './services/auth.service';
-import { CookieService } from 'src/app/services/cookie.service';
-import { QueryService } from 'src/app/services/query.service';
+import { AuthService } from 'src/app/shared/services/auth.service';
+import { CookieService } from 'src/app/shared/services/cookie.service';
+import { QueryService } from 'src/app/shared/services/query.service';
 
 export interface Response {
   access_token: string;
@@ -27,11 +27,11 @@ export interface User {
 }
 
 @Component({
-  selector: 'app-auth',
-  templateUrl: './auth.component.html',
-  styleUrls: ['./auth.component.css'],
+  selector: 'app-login',
+  templateUrl: './login.component.html',
+  styleUrls: ['./login.component.css'],
 })
-export class AuthComponent {
+export class LoginComponent {
   constructor(
     private route: ActivatedRoute,
     private authService: AuthService,
@@ -60,6 +60,7 @@ export class AuthComponent {
     }
 
     if (res) {
+      console.log(res)
       this.cookieService.setCookie(
         'access_token',
         res.access_token,

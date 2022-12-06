@@ -1,10 +1,10 @@
 import { Component } from '@angular/core';
 import { Router } from '@angular/router';
 
-import { QueryService } from 'src/app/services/query.service';
-import { TransferDataService } from 'src/app/services/transfer-data.service';
+import { QueryService } from 'src/app/shared/services/query.service';
+import { TransferDataService } from 'src/app/shared/services/transfer-data.service';
 
-import { PlaylistItems, AverageSongFeatures, Features, Artist } from './models';
+import { PlaylistItems, AverageSongFeatures, Features, Artist } from '../../models';
 
 @Component({
   selector: 'app-scan',

@@ -1,52 +1,50 @@
+import { HttpClientModule } from '@angular/common/http';
 import { NgModule } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
-import { Routes, RouterModule } from '@angular/router';
-import { HttpClientModule } from '@angular/common/http';
-import { FormsModule } from '@angular/forms';
+import { RouterModule, Routes } from '@angular/router';
 
 import { AppComponent } from './app.component';
-import { HomeComponent } from './views/home/home.component';
-import { AuthComponent } from './views/auth/auth.component';
-import { NavComponent } from './views/partials/nav/nav.component';
-import { ScanComponent } from './views/scan/scan.component';
-import { RecommendationsComponent } from './views/recommendations/recommendations.component';
+import { NavComponent } from './components/nav/nav.component';
 
-import { CookieService } from './services/cookie.service';
-import { QueryService } from './services/query.service';
-import { TransferDataService } from './services/transfer-data.service';
+import { AuthService } from './shared/services/auth.service';
+import { CookieService } from './shared/services/cookie.service';
+import { QueryService } from './shared/services/query.service';
+import { TransferDataService } from './shared/services/transfer-data.service';
 
-import { routeGuard } from './auth/route.guard';
+import { routeGuard } from './guards/route.guard';
 
 const routes: Routes = [
   {
     path: '',
-    component: new CookieService().isValid() ? HomeComponent : AuthComponent,
+    loadChildren: () =>
+      import('./modules/home/home.module').then((m) => m.HomeModule),
   },
-  { path: 'scan', component: ScanComponent, canActivate: [routeGuard] },
+  {
+    path: 'login',
+    loadChildren: () =>
+      import('./modules/login/login.module').then((m) => m.LoginModule),
+  },
+  {
+    path: 'scan',
+    loadChildren: () =>
+      import('./modules/scan/scan.module').then((m) => m.ScanModule),
+    canActivate: [routeGuard],
+  },
   {
     path: 'recommendations',
-    component: RecommendationsComponent,
+    loadChildren: () =>
+      import('./modules/recommendations/recommendations.module').then(
+        (m) => m.RecommendationsModule
+      ),
     canActivate: [routeGuard],
   },
   { path: '**', redirectTo: '' },
 ];
 
 @NgModule({
-  declarations: [
-    AppComponent,
-    HomeComponent,
-    AuthComponent,
-    NavComponent,
-    ScanComponent,
-    RecommendationsComponent,
-  ],
-  imports: [
-    BrowserModule,
-    HttpClientModule,
-    RouterModule.forRoot(routes),
-    FormsModule,
-  ],
-  providers: [CookieService, QueryService, TransferDataService],
+  declarations: [AppComponent, NavComponent],
+  imports: [BrowserModule, HttpClientModule, RouterModule.forRoot(routes)],
+  providers: [AuthService, CookieService, QueryService, TransferDataService],
   bootstrap: [AppComponent],
 })
 export class AppModule {}

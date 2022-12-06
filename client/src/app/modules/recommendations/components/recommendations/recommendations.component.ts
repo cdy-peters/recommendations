@@ -6,8 +6,8 @@ import {
   QueryList,
 } from '@angular/core';
 
-import { QueryService } from 'src/app/services/query.service';
-import { TransferDataService } from 'src/app/services/transfer-data.service';
+import { QueryService } from 'src/app/shared/services/query.service';
+import { TransferDataService } from 'src/app/shared/services/transfer-data.service';
 
 import {
   AverageSongFeatures,
@@ -15,7 +15,7 @@ import {
   Recommendation,
   Features,
   CreatePlaylist,
-} from './models';
+} from '../../models';
 @Component({
   selector: 'app-recommendations',
   templateUrl: './recommendations.component.html',

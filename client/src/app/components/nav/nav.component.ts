@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
 
-import { CookieService } from 'src/app/services/cookie.service';
+import { CookieService } from 'src/app/shared/services/cookie.service';
 
 @Component({
   selector: 'app-nav',
