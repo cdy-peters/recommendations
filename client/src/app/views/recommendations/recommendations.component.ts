@@ -48,6 +48,7 @@ export class RecommendationsComponent {
   filteredGenres: string[] = [];
 
   recommendations: Recommendation[] = [];
+  selectedTracks: string[] = [];
 
   async ngOnInit() {
     const data = this.transfer.getData();
@@ -186,8 +187,13 @@ export class RecommendationsComponent {
     return +sim.toFixed(5);
   }
 
-  onCheckboxChange(e: any, track: any) {
-    console.log('checkbox change');
+  onCheckboxChange(e: any, id: string) {
+    if (e.target.checked) {
+      this.selectedTracks.push(id);
+    } else {
+      this.selectedTracks = this.selectedTracks.filter((t) => t !== id);
+    }
+    console.log(this.selectedTracks);
   }
 
   previewHandler(url: string) {

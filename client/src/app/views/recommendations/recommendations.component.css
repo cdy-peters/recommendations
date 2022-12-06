@@ -1,3 +1,7 @@
+#recommendations_container {
+  display: inline-block;
+}
+
 /* Playlist info */
 #playlist_container {
   width: 400px;
@@ -76,6 +80,52 @@
 #recommendation_artist svg {
   margin-bottom: 3px;
   margin-right: 5px;
+}
+
+/* Track selection */
+#track_selection {
+  width: 290px;
+  background-color: #090909;
+  border-radius: 15px;
+  padding: 15px;
+  position: sticky;
+  bottom: 20px;
+}
+#track_selection div {
+  display: flex;
+  justify-content: space-between;
+}
+#track_selection button {
+  color: white;
+  border-radius: 50px;
+  font-size: 18px;
+  padding: 7px 15px;
+}
+
+#select_options {
+  margin-bottom: 10px;
+}
+#select_options p {
+  margin: 0;
+  display: flex;
+  align-items: center;
+}
+#select_options button {
+  background-color: #121212;
+  border: 1px solid #b2b2b2;
+}
+#select_options button:hover {
+  border-color: white;
+  background-color: #1a1a1a;
+}
+
+#add_options button {
+  background-color: #1db952;
+  border: none;
+}
+#add_options button:disabled {
+  opacity: 0.65;
+  pointer-events: none;
 }
 
 /* Media queries */
