@@ -59,6 +59,8 @@ export class RecommendationsComponent {
   @ViewChildren('checkboxes') checkboxes!: QueryList<ElementRef>;
   selectAll: boolean = false;
   addedTracks: string[] = [];
+  @ViewChild('thisPlaylist') thisPlaylist!: ElementRef;
+  @ViewChild('newPlaylist') newPlaylist!: ElementRef;
 
   async ngOnInit() {
     const data = this.transfer.getData();
@@ -249,6 +251,9 @@ export class RecommendationsComponent {
       id = newPlaylistId;
       uris = this.selectedTracks.map((t) => `spotify:track:${t}`);
     } else {
+      this.thisPlaylist.nativeElement.disabled = true;
+      this.thisPlaylist.nativeElement.innerHTML = 'Adding...';
+
       for (const track of this.selectedTracks) {
         if (!this.addedTracks.includes(track)) {
           uris.push(`spotify:track:${track}`);
@@ -256,15 +261,31 @@ export class RecommendationsComponent {
         }
       }
 
-      if (uris.length === 0) return;
+      if (uris.length === 0) {
+        this.thisPlaylist.nativeElement.disabled = false;
+        this.thisPlaylist.nativeElement.innerHTML = 'This playlist';
+        return;
+      };
     }
 
     var url = `https://api.spotify.com/v1/playlists/${id}/tracks`;
     var response = await this.query.post(url, { uris });
+
+    if (this.thisPlaylist.nativeElement.disabled) {
+      this.thisPlaylist.nativeElement.disabled = false;
+      this.thisPlaylist.nativeElement.innerHTML = 'This playlist';
+    } else {
+      this.newPlaylist.nativeElement.disabled = false;
+      this.newPlaylist.nativeElement.innerHTML = 'New playlist';
+    }
+
     console.log(response);
   }
 
   async addNewPlaylist() {
+    this.newPlaylist.nativeElement.disabled = true;
+    this.newPlaylist.nativeElement.innerHTML = 'Adding...';
+
     var userId = localStorage.getItem('userId');
     var url = `https://api.spotify.com/v1/users/${userId}/playlists`;
     var body = {

@@ -136,8 +136,8 @@
 
   <ng-template #ifSelectedTracks>
     <div id="add_options">
-      <button class="grow" (click)="addThisPlaylist()">This playlist</button>
-      <button class="grow" (click)="addNewPlaylist()">New Playlist</button>
+      <button #thisPlaylist class="grow" (click)="addThisPlaylist()">This playlist</button>
+      <button #newPlaylist class="grow" (click)="addNewPlaylist()">New Playlist</button>
     </div>
   </ng-template>
 
