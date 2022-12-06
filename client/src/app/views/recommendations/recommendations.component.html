@@ -1,118 +1,116 @@
 <div style="margin-top: 76px"></div>
 
-<div>
-  <div id="playlist_container">
-    <div id="selected_playlist">
-      <div id="playlist_cover">
-        <img src="{{ selectedPlaylist.cover }}" />
-      </div>
-      <div id="playlist_details">
-        <h5>{{ selectedPlaylist.name }}</h5>
-        <p>{{ songsRetrieved }} songs retrieved</p>
-        <p>{{ artistsRetrieved }} artists retrieved</p>
-        <p>{{ genresRetrieved }} genres retrieved</p>
-      </div>
+<div id="playlist_container">
+  <div id="selected_playlist">
+    <div id="playlist_cover">
+      <img src="{{ selectedPlaylist.cover }}" />
     </div>
-
-    <div id="average_features">
-      <table id="average_features_table" a>
-        <tr id="average_features_title" colspan="2">
-          Average Features
-        </tr>
-        <tr>
-          <td>Acousticness:</td>
-          <td>{{ averageFeatures.acousticness }}</td>
-        </tr>
-        <tr>
-          <td>Danceability:</td>
-          <td>{{ averageFeatures.danceability }}</td>
-        </tr>
-        <tr>
-          <td>Energy:</td>
-          <td>{{ averageFeatures.energy }}</td>
-        </tr>
-        <tr>
-          <td>Instrumentalness:</td>
-          <td>{{ averageFeatures.instrumentalness }}</td>
-        </tr>
-        <tr>
-          <td>Liveness:</td>
-          <td>{{ averageFeatures.liveness }}</td>
-        </tr>
-        <tr>
-          <td>Loudness:</td>
-          <td>{{ averageFeatures.loudness }}</td>
-        </tr>
-        <tr>
-          <td>Speechiness:</td>
-          <td>{{ averageFeatures.speechiness }}</td>
-        </tr>
-        <tr>
-          <td>Valence:</td>
-          <td>{{ averageFeatures.valence }}</td>
-        </tr>
-      </table>
+    <div id="playlist_details">
+      <h5>{{ selectedPlaylist.name }}</h5>
+      <p>{{ songsRetrieved }} songs retrieved</p>
+      <p>{{ artistsRetrieved }} artists retrieved</p>
+      <p>{{ genresRetrieved }} genres retrieved</p>
     </div>
   </div>
 
-  <div id="recommendations">
-    <table id="recommendations_table">
-      <tr>
-        <th colspan="4">
-          <h5>Showing {{ recommendations.length }} recommendations</h5>
-        </th>
+  <div id="average_features">
+    <table id="average_features_table" a>
+      <tr id="average_features_title" colspan="2">
+        Average Features
       </tr>
       <tr>
-        <th style="width: 40px"></th>
-        <th style="width: 50px"></th>
-        <th style="width: 85px">Similarity</th>
-        <th style="width: 100%">Song</th>
+        <td>Acousticness:</td>
+        <td>{{ averageFeatures.acousticness }}</td>
       </tr>
-      <tr id="recommendation_row" *ngFor="let track of recommendations">
-        <td>
-          <input type="checkbox" (change)="onCheckboxChange($event, track)" />
-        </td>
-        <td>
-          <i
-            class="bi"
-            [ngClass]="{
-              'bi-play-fill': playingTrack !== track.preview_url,
-              'bi-pause': playingTrack === track.preview_url
-            }"
-            *ngIf="track.preview_url"
-            (click)="previewHandler(track.preview_url)"
-          ></i>
-        </td>
-        <td>{{ track.similarity }}</td>
-        <td>
-          <div>
-            <a
-              id="recommendation_name"
-              href="https://open.spotify.com/track/{{ track.id }}"
-              target="_blank"
-              >{{ track.name }}</a
-            >
-            <p id="recommendation_artist">
-              <svg
-                *ngIf="track.explicit"
-                xmlns="http://www.w3.org/2000/svg"
-                width="15"
-                height="15"
-                fill="currentColor"
-                class="bi bi-explicit-fill"
-                viewBox="0 0 16 16"
-              >
-                <path
-                  d="M2.5 0A2.5 2.5 0 0 0 0 2.5v11A2.5 2.5 0 0 0 2.5 16h11a2.5 2.5 0 0 0 2.5-2.5v-11A2.5 2.5 0 0 0 13.5 0h-11Zm4.326 10.88H10.5V12h-5V4.002h5v1.12H6.826V7.4h3.457v1.073H6.826v2.408Z"
-                />
-              </svg>
-              {{ track.artists.join(", ") }}
-            </p>
-          </div>
-        </td>
+      <tr>
+        <td>Danceability:</td>
+        <td>{{ averageFeatures.danceability }}</td>
+      </tr>
+      <tr>
+        <td>Energy:</td>
+        <td>{{ averageFeatures.energy }}</td>
+      </tr>
+      <tr>
+        <td>Instrumentalness:</td>
+        <td>{{ averageFeatures.instrumentalness }}</td>
+      </tr>
+      <tr>
+        <td>Liveness:</td>
+        <td>{{ averageFeatures.liveness }}</td>
+      </tr>
+      <tr>
+        <td>Loudness:</td>
+        <td>{{ averageFeatures.loudness }}</td>
+      </tr>
+      <tr>
+        <td>Speechiness:</td>
+        <td>{{ averageFeatures.speechiness }}</td>
+      </tr>
+      <tr>
+        <td>Valence:</td>
+        <td>{{ averageFeatures.valence }}</td>
       </tr>
     </table>
   </div>
+</div>
+
+<div id="recommendations">
+  <table id="recommendations_table">
+    <tr>
+      <th colspan="4">
+        <h5>Showing {{ recommendations.length }} recommendations</h5>
+      </th>
+    </tr>
+    <tr>
+      <th style="width: 40px"></th>
+      <th style="width: 50px"></th>
+      <th style="width: 85px">Similarity</th>
+      <th style="width: 100%">Song</th>
+    </tr>
+    <tr id="recommendation_row" *ngFor="let track of recommendations">
+      <td>
+        <input type="checkbox" (change)="onCheckboxChange($event, track)" />
+      </td>
+      <td>
+        <i
+          class="bi"
+          [ngClass]="{
+            'bi-play-fill': playingTrack !== track.preview_url,
+            'bi-pause': playingTrack === track.preview_url
+          }"
+          *ngIf="track.preview_url"
+          (click)="previewHandler(track.preview_url)"
+        ></i>
+      </td>
+      <td>{{ track.similarity }}</td>
+      <td>
+        <div>
+          <a
+            id="recommendation_name"
+            href="https://open.spotify.com/track/{{ track.id }}"
+            target="_blank"
+            >{{ track.name }}</a
+          >
+          <p id="recommendation_artist">
+            <svg
+              *ngIf="track.explicit"
+              xmlns="http://www.w3.org/2000/svg"
+              width="15"
+              height="15"
+              fill="currentColor"
+              class="bi bi-explicit-fill"
+              viewBox="0 0 16 16"
+            >
+              <path
+                d="M2.5 0A2.5 2.5 0 0 0 0 2.5v11A2.5 2.5 0 0 0 2.5 16h11a2.5 2.5 0 0 0 2.5-2.5v-11A2.5 2.5 0 0 0 13.5 0h-11Zm4.326 10.88H10.5V12h-5V4.002h5v1.12H6.826V7.4h3.457v1.073H6.826v2.408Z"
+              />
+            </svg>
+            {{ track.artists.join(", ") }}
+          </p>
+        </div>
+      </td>
+    </tr>
+  </table>
 </div>
 
 <audio #songPreview src="" (ended)="playingTrack = ''"></audio>
