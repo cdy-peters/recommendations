@@ -17,12 +17,7 @@ const routes: Routes = [
   {
     path: '',
     loadChildren: () =>
-      import('./modules/home/home.module').then((m) => m.HomeModule),
-  },
-  {
-    path: 'login',
-    loadChildren: () =>
-      import('./modules/login/login.module').then((m) => m.LoginModule),
+      import('./modules/index/index.module').then((mod) => mod.IndexModule),
   },
   {
     path: 'scan',
