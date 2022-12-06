@@ -71,3 +71,21 @@ export interface Features {
   uri: string;
   valence: number;
 }
+
+export interface CreatePlaylist {
+  error?: any;
+  collaborative: boolean;
+  description: string;
+  external_urls: any;
+  followers: any;
+  href: string;
+  id: string;
+  images: any[];
+  name: string;
+  owner: any;
+  public: true;
+  snapshot_id: string;
+  tracks: any;
+  type: string;
+  uri: string;
+}

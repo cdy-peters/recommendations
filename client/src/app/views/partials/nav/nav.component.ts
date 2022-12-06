@@ -13,6 +13,7 @@ export class NavComponent {
   signout() {
     this.cookieService.deleteCookie('access_token');
     this.cookieService.deleteCookie('refresh_token');
+    localStorage.clear();
     window.location.href = '/';
   }
 }

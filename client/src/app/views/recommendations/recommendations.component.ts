@@ -8,6 +8,7 @@ import {
   Recommendations,
   Recommendation,
   Features,
+  CreatePlaylist,
 } from './models';
 @Component({
   selector: 'app-recommendations',
@@ -194,6 +195,31 @@ export class RecommendationsComponent {
       this.selectedTracks = this.selectedTracks.filter((t) => t !== id);
     }
     console.log(this.selectedTracks);
+  }
+
+  async addThisPlaylist(newPlaylistId?: string) {
+    var id = newPlaylistId ? newPlaylistId : this.selectedPlaylist.id;
+
+    var url = `https://api.spotify.com/v1/playlists/${id}/tracks`;
+    var body = {
+      uris: this.selectedTracks.map((t) => `spotify:track:${t}`),
+    };
+
+    var response = await this.query.post(url, body);
+    console.log(response);
+  }
+
+  async addNewPlaylist() {
+    var userId = localStorage.getItem('userId');
+    var url = `https://api.spotify.com/v1/users/${userId}/playlists`;
+    var body = {
+      name: `Recommendations for ${this.selectedPlaylist.name}`,
+      description:
+        'Recommendations retrieved from Recommendations for Spotify. Accessible at https://codypeters.dev/recommendations.',
+    };
+    var response = (await this.query.post(url, body)) as CreatePlaylist;
+
+    if (!response.error) this.addThisPlaylist(response.id);
   }
 
   previewHandler(url: string) {

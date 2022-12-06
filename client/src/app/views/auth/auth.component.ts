@@ -3,12 +3,27 @@ import { ActivatedRoute } from '@angular/router';
 
 import { AuthService } from './services/auth.service';
 import { CookieService } from 'src/app/services/cookie.service';
+import { QueryService } from 'src/app/services/query.service';
 
 export interface Response {
   access_token: string;
   token_type: string;
   expires_in: number;
   refresh_token: string;
+}
+
+export interface User {
+  country: string;
+  display_name: string;
+  email: string;
+  external_urls: any;
+  followers: any;
+  href: string;
+  id: string;
+  images: any[];
+  product: string;
+  type: string;
+  uri: string;
 }
 
 @Component({
@@ -20,7 +35,8 @@ export class AuthComponent {
   constructor(
     private route: ActivatedRoute,
     private authService: AuthService,
-    private cookieService: CookieService
+    private cookieService: CookieService,
+    private query: QueryService
   ) {}
 
   login() {
@@ -50,6 +66,11 @@ export class AuthComponent {
         res.expires_in
       );
       this.cookieService.setCookie('refresh_token', res.refresh_token, 604800);
+
+      var user = (await this.query.get(
+        'https://api.spotify.com/v1/me'
+      )) as User;
+      localStorage.setItem('userId', user.id);
 
       window.location.href = '/';
     }

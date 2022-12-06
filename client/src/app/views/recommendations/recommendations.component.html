@@ -123,11 +123,29 @@
     <p>{{ selectedTracks.length }} songs selected</p>
     <button>Select all</button>
   </div>
-  <h5>Add Selected songs to:</h5>
-  <div id="add_options">
-    <button class="grow" disabled>This playlist</button>
-    <button class="grow" disabled>New Playlist</button>
-  </div>
+  <h5>Add selected songs to:</h5>
+  <div
+    id="add_options"
+    *ngIf="
+      selectedTracks.length > 0;
+      then ifSelectedTracks;
+      else noSelectedTracks
+    "
+  ></div>
+
+  <ng-template #ifSelectedTracks>
+    <div id="add_options">
+      <button class="grow" (click)="addThisPlaylist()">This playlist</button>
+      <button class="grow" (click)="addNewPlaylist()">New Playlist</button>
+    </div>
+  </ng-template>
+
+  <ng-template #noSelectedTracks>
+    <div id="add_options">
+      <button class="grow" disabled>This playlist</button>
+      <button class="grow" disabled>New Playlist</button>
+    </div>
+  </ng-template>
 </div>
 
 <audio #songPreview src="" (ended)="playingTrack = ''"></audio>
