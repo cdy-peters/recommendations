@@ -19,7 +19,7 @@
         <div id="selected_info_container">
           <div id="selected_info">
             <div id="selected_name">
-              <h5>{{ selectedPlaylist.name }}</h5>
+              <h5 class="marquee">{{ selectedPlaylist.name }}</h5>
             </div>
             <p>{{ selectedPlaylist.tracks }} tracks</p>
           </div>
@@ -70,12 +70,14 @@
     </div>
 
     <div id="playlist_grid">
-      <div *ngFor="let playlist of filteredPlaylists">
-        <div class="playlist_outer" (click)="selectPlaylistHandler(playlist)">
-          <div class="playlist_inner">
-            <img src="{{ playlist.cover }}" />
-            <p>{{ playlist.name }}</p>
-          </div>
+      <div
+        *ngFor="let playlist of filteredPlaylists"
+        class="playlist_outer"
+        (click)="selectPlaylistHandler(playlist)"
+      >
+        <div class="playlist_inner">
+          <img src="{{ playlist.cover }}" />
+          <p>{{ playlist.name }}</p>
         </div>
       </div>
     </div>
