@@ -3,54 +3,38 @@
 
   <ng-template #playlistsTemplate>
     <div id="selected_playlist">
-      <div
-        *ngIf="
-          selectedPlaylist;
-          then selectedPlaylistTemplate;
-          else noSelectedPlaylist
-        "
-      ></div>
+      <div id="selected_cover">
+        <img
+          src="{{
+            selectedPlaylist
+              ? selectedPlaylist.cover
+              : '/assets/images/placeholder_cover.png'
+          }}"
+        />
+      </div>
 
-      <ng-template #selectedPlaylistTemplate>
-        <div id="selected_cover">
-          <img src="{{ selectedPlaylist.cover }}" />
+      <div id="selected_info_container">
+        <div id="selected_info">
+          <div #selectedName id="selected_name">
+            <h5>
+              {{
+                selectedPlaylist
+                  ? selectedPlaylist.name
+                  : "Select a playlist below"
+              }}
+            </h5>
+          </div>
+          <p>
+            {{ selectedPlaylist ? selectedPlaylist.tracks + " tracks" : "" }}
+          </p>
         </div>
 
-        <div id="selected_info_container">
-          <div id="selected_info">
-            <div #selectedName id="selected_name">
-              <h5>{{ selectedPlaylist.name }}</h5>
-            </div>
-            <p>{{ selectedPlaylist.tracks }} tracks</p>
-          </div>
-
-          <div id="selected_scan">
-            <a (click)="scanPlaylistHandler()">
-              <button id="selected_button" class="grow">Scan Playlist</button>
-            </a>
-          </div>
+        <div id="selected_scan">
+          <a (click)="scanPlaylistHandler()">
+            <button id="selected_button" class="grow">Scan Playlist</button>
+          </a>
         </div>
-      </ng-template>
-
-      <ng-template #noSelectedPlaylist>
-        <div id="selected_cover">
-          <img src="/assets/images/placeholder_cover.png" />
-        </div>
-        <div id="selected_info_container">
-          <div id="selected_info">
-            <div id="selected_name">
-              <h5>Select a playlist below</h5>
-            </div>
-            <p></p>
-          </div>
-
-          <div id="selected_scan">
-            <a>
-              <button id="selected_button" disabled>Scan Playlist</button>
-            </a>
-          </div>
-        </div>
-      </ng-template>
+      </div>
     </div>
 
     <h3 id="playlist_count">
