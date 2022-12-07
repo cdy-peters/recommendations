@@ -7,7 +7,7 @@
         <img src="{{ selectedPlaylist.cover }}" />
       </div>
       <div id="playlist_details">
-        <h5>{{ selectedPlaylist.name }}</h5>
+        <h5 class="marquee_title">{{ selectedPlaylist.name }}</h5>
         <p>{{ songsRetrieved }} songs retrieved</p>
         <p>{{ artistsRetrieved }} artists retrieved</p>
         <p>{{ genresRetrieved }} genres retrieved</p>
@@ -66,7 +66,7 @@
         <th style="width: 40px"></th>
         <th style="width: 50px"></th>
         <th style="width: 85px">Similarity</th>
-        <th style="width: 100%">Song</th>
+        <th style="width: 800px">Song</th>
       </tr>
       <tr id="recommendation_row" *ngFor="let track of recommendations">
         <td>
@@ -122,7 +122,9 @@
 <div id="track_selection">
   <div id="select_options">
     <p>{{ selectedTracks.length }} songs selected</p>
-    <button (click)="onSelectAll()">{{ !selectAll ? 'Select All' : 'Deselect All' }}</button>
+    <button (click)="onSelectAll()">
+      {{ !selectAll ? "Select All" : "Deselect All" }}
+    </button>
   </div>
   <h5>Add selected songs to:</h5>
   <div
@@ -136,8 +138,12 @@
 
   <ng-template #ifSelectedTracks>
     <div id="add_options">
-      <button #thisPlaylist class="grow" (click)="addThisPlaylist()">This playlist</button>
-      <button #newPlaylist class="grow" (click)="addNewPlaylist()">New Playlist</button>
+      <button #thisPlaylist class="grow" (click)="addThisPlaylist()">
+        This playlist
+      </button>
+      <button #newPlaylist class="grow" (click)="addNewPlaylist()">
+        New Playlist
+      </button>
     </div>
   </ng-template>
 

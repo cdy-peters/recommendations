@@ -4,10 +4,11 @@
 
 /* Playlist info */
 #playlist_container {
-  width: 400px;
+  width: 420px;
   float: left;
   position: sticky;
   top: 76px;
+  margin-right: 40px;
 }
 
 #selected_playlist {
@@ -30,6 +31,11 @@
 #playlist_details {
   margin-left: 20px;
   width: 200px;
+  white-space: nowrap;
+  overflow: hidden;
+}
+#playlist_details h5 {
+  width: fit-content;
 }
 
 /* Average features */
