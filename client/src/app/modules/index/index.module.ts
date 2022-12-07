@@ -2,12 +2,12 @@ import { CommonModule } from '@angular/common';
 import { NgModule } from '@angular/core';
 import { RouterModule, ROUTES, Routes } from '@angular/router';
 
-import { CookieService } from 'src/app/shared/services/cookie.service';
+import { AuthService } from 'src/app/shared/services/auth.service';
 
-export const indexRoutes = (cookie: CookieService) => {
+export const indexRoutes = (auth: AuthService) => {
   var routes: Routes = [];
 
-  if (cookie.isValid()) {
+  if (auth.isAuthenticated()) {
     routes = [
       {
         path: '',
@@ -35,7 +35,7 @@ export const indexRoutes = (cookie: CookieService) => {
     {
       provide: ROUTES,
       useFactory: indexRoutes,
-      deps: [CookieService],
+      deps: [AuthService],
     },
   ],
 })

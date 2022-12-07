@@ -45,15 +45,9 @@ export class LoginComponent {
 
   async ngOnInit() {
     var res: Response | undefined;
-    var cookie = this.cookieService.getCookie('refresh_token');
     var code = this.route.snapshot.queryParams['code'];
 
-    // ! Refresh token is untested
-    if (cookie) {
-      res = (await this.authService
-        .refreshToken(cookie)
-        .toPromise()) as Response;
-    } else if (code) {
+    if (code) {
       res = (await this.authService
         .getAccessToken(code)
         .toPromise()) as Response;
