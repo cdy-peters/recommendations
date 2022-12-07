@@ -4,7 +4,7 @@ import { Router } from '@angular/router';
 import { QueryService } from 'src/app/shared/services/query.service';
 import { TransferDataService } from 'src/app/shared/services/transfer-data.service';
 
-import { Playlists } from './models';
+import { PlaylistsResponse } from 'src/app/shared/models/spotify-models';
 
 @Component({
   selector: 'app-home',
@@ -30,7 +30,7 @@ export class HomeComponent {
     var url = 'https://api.spotify.com/v1/me/playlists?limit=50';
 
     while (url) {
-      var res = (await this.query.get(url)) as Playlists;
+      var res = <PlaylistsResponse>await this.query.get(url);
 
       for (const item of res.items) {
         var id = item.id;

@@ -4,7 +4,8 @@ import { Router } from '@angular/router';
 import { QueryService } from 'src/app/shared/services/query.service';
 import { TransferDataService } from 'src/app/shared/services/transfer-data.service';
 
-import { PlaylistItems, AverageSongFeatures, Features, Artist } from '../../models';
+import { AverageSongFeatures } from 'src/app/shared/models/models';
+import { ArtistResponse, FeaturesResponse, PlaylistItemsResponse } from 'src/app/shared/models/spotify-models';
 
 @Component({
   selector: 'app-scan',
@@ -29,17 +30,7 @@ export class ScanComponent {
     id: string;
     genres: string[];
   }[] = [];
-  averageFeatures: AverageSongFeatures = {
-    acousticness: 0,
-    danceability: 0,
-    energy: 0,
-    instrumentalness: 0,
-    liveness: 0,
-    loudness: 0,
-    speechiness: 0,
-    tempo: 0,
-    valence: 0,
-  };
+  averageFeatures: AverageSongFeatures = new AverageSongFeatures();
   genres: {
     name: string;
     frequency: number;
@@ -52,7 +43,7 @@ export class ScanComponent {
     // Scan playlist for tracks and artists
     var url = `https://api.spotify.com/v1/playlists/${playlistId}/tracks`;
     while (url) {
-      var playlist = (await this.query.get(url)) as PlaylistItems;
+      var playlist = <PlaylistItemsResponse>await this.query.get(url);
 
       for (const item of playlist.items) {
         const track = item.track;
@@ -60,10 +51,10 @@ export class ScanComponent {
 
         // Get track features
         var url = `https://api.spotify.com/v1/audio-features/${id}`;
-        var features = (await this.query.get(url)) as Features;
+        var features = <FeaturesResponse>await this.query.get(url);
 
         for (const key in this.averageFeatures) {
-          var val = <number>features[key as keyof Features];
+          var val = <number>features[key as keyof FeaturesResponse];
 
           this.averageFeatures[key as keyof AverageSongFeatures] += val;
         }
@@ -78,7 +69,7 @@ export class ScanComponent {
           const index = this.artists.findIndex((artist) => artist.id == id);
           if (index == -1) {
             var url = `https://api.spotify.com/v1/artists/${artist.id}`;
-            var artistInfo = (await this.query.get(url)) as Artist;
+            var artistInfo = <ArtistResponse>await this.query.get(url);
             var genres = artistInfo.genres;
 
             this.artists.push({ id, genres: genres });

@@ -1,9 +1,5 @@
 import {
-  Component,
-  ViewChild,
-  ElementRef,
-  ViewChildren,
-  QueryList,
+  Component, ElementRef, QueryList, ViewChild, ViewChildren
 } from '@angular/core';
 
 import { QueryService } from 'src/app/shared/services/query.service';
@@ -11,11 +7,12 @@ import { TransferDataService } from 'src/app/shared/services/transfer-data.servi
 
 import {
   AverageSongFeatures,
-  Recommendations,
-  Recommendation,
-  Features,
-  CreatePlaylist,
-} from '../../models';
+  Recommendation
+} from 'src/app/shared/models/models';
+import {
+  CreatePlaylistResponse, FeaturesResponse, RecommendationsResponse
+} from 'src/app/shared/models/spotify-models';
+
 @Component({
   selector: 'app-recommendations',
   templateUrl: './recommendations.component.html',
@@ -37,17 +34,7 @@ export class RecommendationsComponent {
   songPreview!: ElementRef;
 
   tracks: string[] = [];
-  averageFeatures: AverageSongFeatures = {
-    acousticness: 0,
-    danceability: 0,
-    energy: 0,
-    instrumentalness: 0,
-    liveness: 0,
-    loudness: 0,
-    speechiness: 0,
-    tempo: 0,
-    valence: 0,
-  };
+  averageFeatures: AverageSongFeatures = new AverageSongFeatures();
   genres: {
     name: string;
     frequency: number;
@@ -129,7 +116,7 @@ export class RecommendationsComponent {
       }&target_speechiness=${this.averageFeatures.speechiness}&target_tempo=${
         this.averageFeatures.tempo
       }&target_valence=${this.averageFeatures.valence}`;
-      recommendations = (await this.query.get(url)) as Recommendations;
+      recommendations = <RecommendationsResponse>await this.query.get(url);
     } else {
       var tracksTemp = this.tracks.slice(0, 5);
       var url = `https://api.spotify.com/v1/recommendations?seed_tracks=${tracksTemp.join(
@@ -145,7 +132,7 @@ export class RecommendationsComponent {
       }&target_speechiness=${this.averageFeatures.speechiness}&target_tempo=${
         this.averageFeatures.tempo
       }&target_valence=${this.averageFeatures.valence}`;
-      recommendations = (await this.query.get(url)) as Recommendations;
+      recommendations = <RecommendationsResponse>await this.query.get(url);
     }
 
     for (const track of recommendations.tracks) {
@@ -174,7 +161,7 @@ export class RecommendationsComponent {
 
         // Compare song features with average song features
         var url = `https://api.spotify.com/v1/audio-features/${track.id}`;
-        var audio_features = (await this.query.get(url)) as Features;
+        var audio_features = <FeaturesResponse>await this.query.get(url);
         var features = {
           acousticness: audio_features.acousticness,
           danceability: audio_features.danceability,
@@ -293,7 +280,7 @@ export class RecommendationsComponent {
       description:
         'Recommendations retrieved from Recommendations for Spotify. Accessible at https://codypeters.dev/recommendations.',
     };
-    var response = (await this.query.post(url, body)) as CreatePlaylist;
+    var response = <CreatePlaylistResponse>await this.query.post(url, body);
 
     if (!response.error) this.addThisPlaylist(response.id);
   }
