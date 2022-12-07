@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, ViewChild } from '@angular/core';
 import { Router } from '@angular/router';
 
 import { QueryService } from 'src/app/shared/services/query.service';
@@ -48,6 +48,8 @@ export class HomeComponent {
 
   selectPlaylistHandler(playlist: any) {
     this.selectedPlaylist = playlist;
+
+    setMarquee("#selected_name > h5", playlist.name, 200);
   }
 
   scanPlaylistHandler() {

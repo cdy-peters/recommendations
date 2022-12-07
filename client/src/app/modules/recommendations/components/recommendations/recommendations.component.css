@@ -34,9 +34,6 @@
   white-space: nowrap;
   overflow: hidden;
 }
-#playlist_details h5 {
-  width: fit-content;
-}
 
 /* Average features */
 #average_features {

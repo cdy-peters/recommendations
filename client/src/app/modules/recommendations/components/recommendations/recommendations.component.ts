@@ -63,6 +63,9 @@ export class RecommendationsComponent {
 
     var seed_method = 'genres';
 
+    // Set marquee
+    setMarquee('#playlist_details > h5', this.selectedPlaylist.name, 200);
+
     // Filter genres
     var url = `https://api.spotify.com/v1/recommendations/available-genre-seeds`;
     var genre_seeds = (await this.query.get(url)) as { genres: string[] };
