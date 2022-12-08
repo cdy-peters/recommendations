@@ -4,6 +4,7 @@ import { RouterModule } from '@angular/router';
 
 import { RecommendationsComponent } from './components/recommendations/recommendations.component';
 
+import { RecommendationsService } from './services/recommendations.service';
 
 @NgModule({
   declarations: [
@@ -12,6 +13,9 @@ import { RecommendationsComponent } from './components/recommendations/recommend
   imports: [
     CommonModule,
     RouterModule.forChild([ { path: '', component: RecommendationsComponent } ]),
+  ],
+  providers: [
+    RecommendationsService,
   ],
 })
 export class RecommendationsModule {}
