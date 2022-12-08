@@ -1,2 +1,3 @@
 declare var $: any;
-declare var setMarquee: any;
+declare var setTitleMarquee: any;
+declare var setTrackMarquee: any;

@@ -1,4 +1,4 @@
-<div style="margin-top: 76px"></div>
+<div style="margin-top: 76px" (window:resize)="onResize()"></div>
 
 <div id="recommendations_container">
   <div id="playlist_container">
@@ -88,14 +88,15 @@
           ></i>
         </td>
         <td>{{ track.similarity }}</td>
-        <td>
-          <div>
-            <a
-              id="recommendation_name"
-              href="https://open.spotify.com/track/{{ track.id }}"
-              target="_blank"
-              >{{ track.name }}</a
-            >
+        <td style="white-space: nowrap; overflow: hidden; max-width: 0">
+          <div style="overflow: hidden">
+            <p id="recommendation_name">
+              <a
+                href="https://open.spotify.com/track/{{ track.id }}"
+                target="_blank"
+                >{{ track.name }}</a
+              >
+            </p>
             <p id="recommendation_artist">
               <svg
                 *ngIf="track.explicit"
@@ -110,7 +111,7 @@
                   d="M2.5 0A2.5 2.5 0 0 0 0 2.5v11A2.5 2.5 0 0 0 2.5 16h11a2.5 2.5 0 0 0 2.5-2.5v-11A2.5 2.5 0 0 0 13.5 0h-11Zm4.326 10.88H10.5V12h-5V4.002h5v1.12H6.826V7.4h3.457v1.073H6.826v2.408Z"
                 />
               </svg>
-              {{ track.artists.join(", ") }}
+              <span>{{ track.artists.join(", ") }}</span>
             </p>
           </div>
         </td>

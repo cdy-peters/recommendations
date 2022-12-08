@@ -49,7 +49,7 @@ export class HomeComponent {
   selectPlaylistHandler(playlist: any) {
     this.selectedPlaylist = playlist;
 
-    setMarquee("#selected_name > h5", playlist.name, 200);
+    setTitleMarquee("#selected_name > h5", playlist.name, 200);
   }
 
   scanPlaylistHandler() {

@@ -73,6 +73,9 @@
 }
 
 #recommendation_name {
+  margin: 0;
+}
+#recommendation_name a {
   color: white;
 }
 

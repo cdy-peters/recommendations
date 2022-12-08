@@ -14,11 +14,7 @@ import {
   AverageSongFeatures,
   Recommendation,
 } from 'src/app/shared/models/models';
-import {
-  CreatePlaylistResponse,
-  FeaturesResponse,
-  RecommendationsResponse,
-} from 'src/app/shared/models/spotify-models';
+import { CreatePlaylistResponse } from 'src/app/shared/models/spotify-models';
 
 @Component({
   selector: 'app-recommendations',
@@ -68,6 +64,15 @@ export class RecommendationsComponent {
     // Receive data from promise
     var recommendations = await this.recommend.getRecommendations(data);
     this.recommendations.push(...recommendations);
+
+    // Set marquee
+    setTimeout(() => {
+      setTrackMarquee();
+    }, 0);
+  }
+
+  onResize() {
+    setTrackMarquee();
   }
 
   onCheckboxChange(e: any, id: string) {
