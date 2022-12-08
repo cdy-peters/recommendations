@@ -1,8 +1,8 @@
 /* Selected playlist */
 #selected_playlist {
   display: flex;
-  justify-content: center;
-  margin: 0 20px 20px 20px;
+  width: fit-content;
+  margin: 0 auto 20px auto;
 }
 
 #selected_cover {
@@ -20,16 +20,11 @@
 
 #selected_info_container {
   margin-left: 20px;
-  width: 200px;
-  height: fit-content;
-  min-height: 200px;
+  height: inherit;
   position: relative;
 }
-
-#selected_info {
-  width: 200px;
-  height: fit-content;
-  position: relative;
+#selected_info_container p {
+  height: 24px;
 }
 
 #selected_name {
@@ -41,6 +36,10 @@
 }
 
 #selected_scan {
+  width: fit-content;
+  left: 0;
+  right: 0;
+  margin: 0 auto;
   position: absolute;
   bottom: 0;
 }
@@ -106,7 +105,7 @@
   width: fit-content;
   height: fit-content;
   padding: 15px;
-  margin: 15px;
+  margin: 15px auto;
 
   display: flex;
   justify-content: center;
@@ -137,4 +136,19 @@
   overflow: hidden;
   white-space: nowrap;
   width: 150px;
+}
+
+@media screen and (max-width: 440px) {
+  #selected_playlist {
+    display: block;
+    height: 350px;
+  }
+
+  #selected_info_container {
+    margin-left: 0;
+  }
+
+  #selected_scan {
+    position: static;
+  }
 }
