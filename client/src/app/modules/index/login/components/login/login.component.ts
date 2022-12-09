@@ -2,29 +2,9 @@ import { Component } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 
 import { AuthService } from 'src/app/shared/services/auth.service';
-import { CookieService } from 'src/app/shared/services/cookie.service';
 import { QueryService } from 'src/app/shared/services/query.service';
 
-export interface Response {
-  access_token: string;
-  token_type: string;
-  expires_in: number;
-  refresh_token: string;
-}
-
-export interface User {
-  country: string;
-  display_name: string;
-  email: string;
-  external_urls: any;
-  followers: any;
-  href: string;
-  id: string;
-  images: any[];
-  product: string;
-  type: string;
-  uri: string;
-}
+import { User } from 'src/app/shared/models/models';
 
 @Component({
   selector: 'app-login',
@@ -34,37 +14,19 @@ export interface User {
 export class LoginComponent {
   constructor(
     private route: ActivatedRoute,
-    private authService: AuthService,
-    private cookieService: CookieService,
+    private auth: AuthService,
     private query: QueryService
   ) {}
 
-  login() {
-    this.authService.login();
-  }
+  login = () => this.auth.login();
 
   async ngOnInit() {
-    var res: Response | undefined;
     var code = this.route.snapshot.queryParams['code'];
 
     if (code) {
-      res = (await this.authService
-        .getAccessToken(code)
-        .toPromise()) as Response;
-    }
+      await this.auth.getAccessToken(code);
 
-    if (res) {
-      console.log(res)
-      this.cookieService.setCookie(
-        'access_token',
-        res.access_token,
-        res.expires_in
-      );
-      this.cookieService.setCookie('refresh_token', res.refresh_token, 604800);
-
-      var user = (await this.query.get(
-        'https://api.spotify.com/v1/me'
-      )) as User;
+      var user = <User>await this.query.get('https://api.spotify.com/v1/me');
       localStorage.setItem('userId', user.id);
 
       window.location.href = '/';

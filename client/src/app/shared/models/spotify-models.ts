@@ -1,3 +1,12 @@
+// https://developer.spotify.com/documentation/general/guides/authorization/code-flow/
+export interface TokenResponse {
+  access_token: string;
+  token_type: string;
+  scope: string;
+  expires_in: number;
+  refresh_token: string;
+}
+
 // https://developer.spotify.com/documentation/web-api/reference/#/operations/get-a-list-of-current-users-playlists
 export interface PlaylistItems {
   collaborative: boolean;

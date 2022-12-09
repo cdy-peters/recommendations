@@ -4,6 +4,8 @@ import { lastValueFrom } from 'rxjs';
 
 import { CookieService } from './cookie.service';
 
+import { TokenResponse } from '../models/spotify-models';
+
 @Injectable({
   providedIn: 'root',
 })
@@ -42,12 +44,17 @@ export class AuthService {
     return false;
   }
 
-  getAccessToken(code: string) {
-    return this.http.get(this.server_url + '/getAccessToken', {
-      params: {
-        code: code,
-      },
-    });
+  async getAccessToken(code: string) {
+    var res = <TokenResponse>await lastValueFrom(
+      this.http.get(this.server_url + '/getAccessToken', {
+        params: {
+          code,
+        },
+      })
+    );
+
+    this.cookie.setCookie('access_token', res.access_token, res.expires_in);
+    this.cookie.setCookie('refresh_token', res.refresh_token, 604800);
   }
 
   async refreshToken(refresh_token: string) {
@@ -60,16 +67,7 @@ export class AuthService {
     );
 
     this.cookie.setCookie('access_token', res.access_token, res.expires_in);
-    if (res.refresh_token) {
+    if (res.refresh_token)
       this.cookie.setCookie('refresh_token', res.refresh_token, 604800);
-    }
   }
-}
-
-export interface TokenResponse {
-  access_token: string;
-  token_type: string;
-  scope: string;
-  expires_in: number;
-  refresh_token?: string;
 }
