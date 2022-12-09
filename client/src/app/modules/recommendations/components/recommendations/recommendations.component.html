@@ -64,7 +64,7 @@
     </div>
   </div>
 
-  <div id="recommendations">
+  <div id="recommendations" [hidden]="recommendations.length === 0">
     <table id="recommendations_table">
       <tr>
         <th colspan="4">
@@ -126,10 +126,16 @@
         </td>
       </tr>
     </table>
+
+    <div id="more_recommendations">
+      <button class="grow" (click)="moreRecommendations()">
+        Get More Recommendations
+      </button>
+    </div>
   </div>
 </div>
 
-<div id="track_selection">
+<div id="track_selection" [hidden]="recommendations.length === 0">
   <div id="select_options">
     <p>{{ selectedTracks.length }} songs selected</p>
     <button (click)="onSelectAll()">

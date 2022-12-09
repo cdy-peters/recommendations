@@ -53,7 +53,11 @@
 /* Recommendations */
 #recommendations {
   width: calc(100% - 400px);
-  margin-left: 400px;
+  margin-left: 420px;
+}
+
+#recommendations_table {
+  margin-bottom: 20px;
 }
 
 #table_checkbox {
@@ -112,6 +116,16 @@
   margin-right: 5px;
 }
 
+#more_recommendations button {
+  background-color: #1db952;
+  color: white;
+  border-radius: 50px;
+  font-size: 18px;
+  padding: 7px 15px;
+  border: none;
+  margin-left: 40px;
+}
+
 /* Track selection */
 #track_selection {
   width: 300px;
@@ -121,6 +135,7 @@
   position: sticky;
   bottom: 20px;
   opacity: 0.99;
+  margin-top: 20px;
 }
 #track_selection div {
   display: flex;
@@ -176,6 +191,14 @@
 
   #recommendations_table h5 {
     text-align: center;
+  }
+
+  #more_recommendations {
+    display: flex;
+    justify-content: center;
+  }
+  #more_recommendations button {
+    margin-left: 0;
   }
 }
 

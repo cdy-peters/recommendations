@@ -103,6 +103,20 @@ export class RecommendationsComponent {
     }, 0);
   }
 
+  async moreRecommendations() {
+    var recommendations = await this.recommend.getMoreRecommendations();
+
+    recommendations.forEach((r) => {
+      if (!this.recommendations.some((t) => t.id === r.id)) {
+        this.recommendations.push(r);
+      }
+    });
+
+    setTimeout(() => {
+      setTrackMarquee();
+    }, 0);
+  }
+
   onCheckboxChange(e: any, id: string) {
     if (e.target.checked) {
       this.selectedTracks.push(id);

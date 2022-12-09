@@ -26,18 +26,9 @@ export class RecommendationsService {
   }[] = [];
   filteredGenres: string[] = [];
   recommendations: Recommendation[] = [];
+  seed_method: string = 'genres';
 
-  async getRecommendations(data: any) {
-    this.selectedPlaylist = data.selectedPlaylist;
-    this.tracks = data.tracks;
-    this.averageFeatures = data.averageFeatures;
-    this.genres = data.genres;
-
-    var seed_method = 'genres';
-
-    // Set marquee
-    setTitleMarquee('#playlist_details > h5', this.selectedPlaylist.name, 200);
-
+  async filterGenres() {
     // Filter genres
     var url = `https://api.spotify.com/v1/recommendations/available-genre-seeds`;
     var genre_seeds = (await this.query.get(url)) as { genres: string[] };
@@ -56,7 +47,7 @@ export class RecommendationsService {
     if (this.filteredGenres.length > 3) {
       this.filteredGenres = this.filteredGenres.slice(0, 5);
     } else {
-      seed_method = 'tracks';
+      this.seed_method = 'tracks';
       this.filteredGenres = [];
 
       for (const genre of this.genres) {
@@ -74,11 +65,12 @@ export class RecommendationsService {
         }
       }
     }
+  }
 
+  async fetchRecommendations() {
     // Get recommendations
     var recommendations;
-    if (seed_method === 'genres') {
-      console.log('genres');
+    if (this.seed_method === 'genres') {
       var url = `https://api.spotify.com/v1/recommendations?seed_genres=${this.filteredGenres.join(
         ','
       )}&limit=10&target_acousticness=${
@@ -114,7 +106,7 @@ export class RecommendationsService {
     for (const track of recommendations.tracks) {
       if (!this.tracks.includes(track.id)) {
         // Check if track has familiar genres
-        if (seed_method !== 'genres') {
+        if (this.seed_method !== 'genres') {
           var genreExists = false;
           for (const artist of track.artists) {
             var url = `https://api.spotify.com/v1/artists/${artist.id}`;
@@ -171,10 +163,31 @@ export class RecommendationsService {
         console.log('Track already in playlist');
       }
     }
+  }
+
+  async getRecommendations(data: any) {
+    this.selectedPlaylist = data.selectedPlaylist;
+    this.tracks = data.tracks;
+    this.averageFeatures = data.averageFeatures;
+    this.genres = data.genres;
+
+    // Set marquee
+    setTitleMarquee('#playlist_details > h5', this.selectedPlaylist.name, 200);
+
+    await this.filterGenres();
+
+    await this.fetchRecommendations();
+
     return {
       recommendations: this.recommendations,
       averageFeatures: this.averageFeatures,
     };
+  }
+
+  async getMoreRecommendations() {
+    await this.fetchRecommendations();
+
+    return this.recommendations;
   }
 
   // Calculates cosine similarity between two vectors
