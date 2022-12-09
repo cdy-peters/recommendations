@@ -53,6 +53,7 @@ export class RecommendationsComponent {
   addedTracks: string[] = [];
   @ViewChild('thisPlaylist') thisPlaylist!: ElementRef;
   @ViewChild('newPlaylist') newPlaylist!: ElementRef;
+  @ViewChild('getMoreRecommendations') getMoreRecommendations!: ElementRef;
 
   showAverageFeatures: boolean = true;
   showAverageFeaturesChanged: boolean = false;
@@ -104,6 +105,10 @@ export class RecommendationsComponent {
   }
 
   async moreRecommendations() {
+    this.getMoreRecommendations.nativeElement.disabled = true;
+    this.getMoreRecommendations.nativeElement.innerHTML =
+      'Getting Recommendations...';
+
     var recommendations = await this.recommend.getMoreRecommendations();
 
     recommendations.forEach((r) => {
@@ -115,6 +120,10 @@ export class RecommendationsComponent {
     setTimeout(() => {
       setTrackMarquee();
     }, 0);
+
+    this.getMoreRecommendations.nativeElement.disabled = false;
+    this.getMoreRecommendations.nativeElement.innerHTML =
+      'Get More Recommendations';
   }
 
   onCheckboxChange(e: any, id: string) {

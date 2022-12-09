@@ -1,5 +1,6 @@
 #recommendations_container {
   display: inline-block;
+  width: 100%;
 }
 
 /* Playlist info */
@@ -124,6 +125,7 @@
   padding: 7px 15px;
   border: none;
   margin-left: 40px;
+  width: 270px;
 }
 
 /* Track selection */
@@ -171,7 +173,8 @@
   background-color: #1db952;
   border: none;
 }
-#add_options button:disabled {
+#add_options button:disabled,
+#more_recommendations button:disabled {
   opacity: 0.65;
   pointer-events: none;
 }
@@ -189,6 +192,7 @@
     margin-left: 0;
   }
 
+  #getting_recommendations,
   #recommendations_table h5 {
     text-align: center;
   }

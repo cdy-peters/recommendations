@@ -64,8 +64,18 @@
     </div>
   </div>
 
-  <div id="recommendations" [hidden]="recommendations.length === 0">
-    <table id="recommendations_table">
+  <div id="recommendations">
+    <div
+      *ngIf="
+        recommendations.length !== 0;
+        then isRecommendations;
+        else noRecommendations
+      "
+    ></div>
+  </div>
+
+  <ng-template #isRecommendations>
+    <table id="recommendations_table" [hidden]="recommendations.length === 0">
       <tr>
         <th colspan="4">
           <h5>Showing {{ recommendations.length }} recommendations</h5>
@@ -127,12 +137,20 @@
       </tr>
     </table>
 
-    <div id="more_recommendations">
-      <button class="grow" (click)="moreRecommendations()">
+    <div id="more_recommendations" [hidden]="recommendations.length === 0">
+      <button
+        #getMoreRecommendations
+        class="grow"
+        (click)="moreRecommendations()"
+      >
         Get More Recommendations
       </button>
     </div>
-  </div>
+  </ng-template>
+
+  <ng-template #noRecommendations>
+    <h5 id="getting_recommendations">Getting recommendations...</h5>
+  </ng-template>
 </div>
 
 <div id="track_selection" [hidden]="recommendations.length === 0">
