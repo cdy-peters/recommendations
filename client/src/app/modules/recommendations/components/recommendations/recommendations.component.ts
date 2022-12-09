@@ -4,7 +4,7 @@ import {
   HostListener,
   QueryList,
   ViewChild,
-  ViewChildren
+  ViewChildren,
 } from '@angular/core';
 
 import { QueryService } from 'src/app/shared/services/query.service';
@@ -13,7 +13,7 @@ import { RecommendationsService } from '../../services/recommendations.service';
 
 import {
   AverageSongFeatures,
-  Recommendation
+  Recommendation,
 } from 'src/app/shared/models/models';
 import { CreatePlaylistResponse } from 'src/app/shared/models/spotify-models';
 
@@ -92,8 +92,10 @@ export class RecommendationsComponent {
     this.genresRetrieved = data.genresRetrieved;
 
     // Receive data from promise
-    var recommendations = await this.recommend.getRecommendations(data);
+    var { recommendations, averageFeatures } =
+      await this.recommend.getRecommendations(data);
     this.recommendations.push(...recommendations);
+    this.averageFeatures = averageFeatures;
 
     // Set marquee
     setTimeout(() => {

@@ -171,7 +171,10 @@ export class RecommendationsService {
         console.log('Track already in playlist');
       }
     }
-    return this.recommendations;
+    return {
+      recommendations: this.recommendations,
+      averageFeatures: this.averageFeatures,
+    };
   }
 
   // Calculates cosine similarity between two vectors
