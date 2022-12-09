@@ -1,4 +1,4 @@
-import { Component, ViewChild } from '@angular/core';
+import { Component } from '@angular/core';
 import { Router } from '@angular/router';
 
 import { QueryService } from 'src/app/shared/services/query.service';
@@ -12,7 +12,11 @@ import { PlaylistsResponse } from 'src/app/shared/models/spotify-models';
   styleUrls: ['./home.component.css'],
 })
 export class HomeComponent {
-  constructor(private router: Router, private query: QueryService, private transfer: TransferDataService) { }
+  constructor(
+    private router: Router,
+    private query: QueryService,
+    private transfer: TransferDataService
+  ) {}
 
   selectedPlaylist: any;
   playlists: any[] = [];
@@ -49,7 +53,7 @@ export class HomeComponent {
   selectPlaylistHandler(playlist: any) {
     this.selectedPlaylist = playlist;
 
-    setTitleMarquee("#selected_name > h5", playlist.name, 200);
+    setTitleMarquee('#selected_name > h5', playlist.name, 200);
   }
 
   scanPlaylistHandler() {

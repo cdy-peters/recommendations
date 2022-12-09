@@ -28,7 +28,13 @@
 
       <div id="selected_scan">
         <a (click)="scanPlaylistHandler()">
-          <button id="selected_button" class="grow">Scan Playlist</button>
+          <button
+            id="selected_button"
+            [ngClass]="{ grow: selectedPlaylist }"
+            [disabled]="!selectedPlaylist"
+          >
+            Scan Playlist
+          </button>
         </a>
       </div>
     </div>
