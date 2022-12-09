@@ -9,6 +9,7 @@
   position: sticky;
   top: 76px;
   margin-right: 40px;
+  width: fit-content;
 }
 
 #selected_playlist {
@@ -37,11 +38,12 @@
 
 /* Average features */
 #average_features {
-  margin: 20px 0;
+  margin-bottom: 20px;
 }
 
 #average_features_title {
   font-weight: bolder;
+  margin: 0;
 }
 
 #average_features_table tr > td:first-child {
@@ -52,6 +54,19 @@
 #recommendations {
   width: calc(100% - 400px);
   margin-left: 400px;
+}
+
+#table_checkbox {
+  width: 40px;
+}
+#table_preview {
+  width: 50px;
+}
+#table_similarity {
+  width: 85px;
+}
+#table_track {
+  width: 800px;
 }
 
 #recommendation_row td {
@@ -70,6 +85,15 @@
 .bi-play-fill,
 .bi-pause {
   font-size: 25px;
+}
+
+#recommendation_track {
+  white-space: nowrap;
+  overflow: hidden;
+  max-width: 0;
+}
+#recommendation_track div {
+  overflow: hidden;
 }
 
 #recommendation_name {
@@ -96,6 +120,7 @@
   padding: 15px;
   position: sticky;
   bottom: 20px;
+  opacity: 0.99;
 }
 #track_selection div {
   display: flex;
@@ -139,13 +164,44 @@
 /* Media queries */
 @media screen and (max-width: 999px) {
   #playlist_container {
-    width: 100%;
     float: none;
     position: static;
+    margin: 0 auto;
   }
 
   #recommendations {
     width: 100%;
     margin-left: 0;
+  }
+
+  #recommendations_table h5 {
+    text-align: center;
+  }
+}
+
+@media screen and (max-width: 449px) {
+  #selected_playlist {
+    display: block;
+  }
+
+  #playlist_details {
+    margin-left: 0;
+    text-align: center;
+  }
+
+  #average_features_title {
+    text-align: center;
+  }
+
+  #average_features_table {
+    margin: 0 auto;
+  }
+
+  #recommendation_similarity {
+    display: none;
+  }
+
+  #table_similarity {
+    display: none;
   }
 }

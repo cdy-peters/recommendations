@@ -1,9 +1,10 @@
 import {
   Component,
   ElementRef,
+  HostListener,
   QueryList,
   ViewChild,
-  ViewChildren,
+  ViewChildren
 } from '@angular/core';
 
 import { QueryService } from 'src/app/shared/services/query.service';
@@ -12,7 +13,7 @@ import { RecommendationsService } from '../../services/recommendations.service';
 
 import {
   AverageSongFeatures,
-  Recommendation,
+  Recommendation
 } from 'src/app/shared/models/models';
 import { CreatePlaylistResponse } from 'src/app/shared/models/spotify-models';
 
@@ -53,7 +54,36 @@ export class RecommendationsComponent {
   @ViewChild('thisPlaylist') thisPlaylist!: ElementRef;
   @ViewChild('newPlaylist') newPlaylist!: ElementRef;
 
+  showAverageFeatures: boolean = true;
+  showAverageFeaturesChanged: boolean = false;
+  showAverageFeaturesDropdown: boolean = false;
+
+  onShowAverageFeatures() {
+    this.showAverageFeatures = !this.showAverageFeatures;
+    this.showAverageFeaturesChanged = true;
+  }
+
+  @HostListener('window:resize', ['$event'])
+  onResize() {
+    setTrackMarquee();
+
+    if (window.innerWidth < 1000) {
+      if (this.showAverageFeaturesChanged) return;
+      this.showAverageFeatures = false;
+      this.showAverageFeaturesDropdown = true;
+    } else {
+      this.showAverageFeatures = true;
+      this.showAverageFeaturesChanged = false;
+      this.showAverageFeaturesDropdown = false;
+    }
+  }
+
   async ngOnInit() {
+    if (window.innerWidth < 1000) {
+      this.showAverageFeatures = false;
+      this.showAverageFeaturesDropdown = true;
+    }
+
     const data = this.transfer.getData();
 
     this.selectedPlaylist = data.selectedPlaylist;
@@ -69,10 +99,6 @@ export class RecommendationsComponent {
     setTimeout(() => {
       setTrackMarquee();
     }, 0);
-  }
-
-  onResize() {
-    setTrackMarquee();
   }
 
   onCheckboxChange(e: any, id: string) {

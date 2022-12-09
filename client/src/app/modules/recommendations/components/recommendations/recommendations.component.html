@@ -1,4 +1,4 @@
-<div style="margin-top: 76px" (window:resize)="onResize()"></div>
+<div style="margin-top: 76px"></div>
 
 <div id="recommendations_container">
   <div id="playlist_container">
@@ -15,10 +15,19 @@
     </div>
 
     <div id="average_features">
-      <table id="average_features_table" a>
-        <tr id="average_features_title" colspan="2">
-          Average Features
-        </tr>
+      <p id="average_features_title">
+        Average Features
+        <i
+          class="bi"
+          [ngClass]="{
+            'bi-caret-down-fill': !showAverageFeatures,
+            'bi-caret-up-fill': showAverageFeatures
+          }"
+          (click)="onShowAverageFeatures()"
+          [hidden]="!showAverageFeaturesDropdown"
+        ></i>
+      </p>
+      <table id="average_features_table" [hidden]="!showAverageFeatures">
         <tr>
           <td>Acousticness:</td>
           <td>{{ averageFeatures.acousticness }}</td>
@@ -63,10 +72,10 @@
         </th>
       </tr>
       <tr>
-        <th style="width: 40px"></th>
-        <th style="width: 50px"></th>
-        <th style="width: 85px">Similarity</th>
-        <th style="width: 800px">Song</th>
+        <th id="table_checkbox"></th>
+        <th id="table_preview"></th>
+        <th id="table_similarity">Similarity</th>
+        <th id="table_track">Song</th>
       </tr>
       <tr id="recommendation_row" *ngFor="let track of recommendations">
         <td>
@@ -87,9 +96,9 @@
             (click)="previewHandler(track.preview_url)"
           ></i>
         </td>
-        <td>{{ track.similarity }}</td>
-        <td style="white-space: nowrap; overflow: hidden; max-width: 0">
-          <div style="overflow: hidden">
+        <td id="recommendation_similarity">{{ track.similarity }}</td>
+        <td id="recommendation_track">
+          <div>
             <p id="recommendation_name">
               <a
                 href="https://open.spotify.com/track/{{ track.id }}"
