@@ -1,6 +1,7 @@
 import { Component } from '@angular/core';
 import { Router } from '@angular/router';
 
+import { CookieService } from 'src/app/shared/services/cookie.service';
 import { QueryService } from 'src/app/shared/services/query.service';
 import { TransferDataService } from 'src/app/shared/services/transfer-data.service';
 
@@ -15,7 +16,8 @@ export class HomeComponent {
   constructor(
     private router: Router,
     private query: QueryService,
-    private transfer: TransferDataService
+    private transfer: TransferDataService,
+    private cookie: CookieService
   ) {}
 
   selectedPlaylist: any;
@@ -31,6 +33,10 @@ export class HomeComponent {
   }
 
   async ngOnInit() {
+    while (!this.cookie.getCookie('access_token')) {
+      await new Promise((resolve) => setTimeout(resolve, 100));
+    }
+
     var url = 'https://api.spotify.com/v1/me/playlists?limit=50';
 
     while (url) {
