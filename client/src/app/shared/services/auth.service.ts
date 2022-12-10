@@ -13,7 +13,7 @@ export class AuthService {
   constructor(private http: HttpClient, private cookie: CookieService) {}
 
   client_id = 'b5bee82890774ce69535a3a2fd2caa86';
-  redirect_uri = 'http://localhost:4200';
+  redirect_uri = 'http://localhost:4200/callback';
   server_url = 'http://localhost:8080';
 
   login() {

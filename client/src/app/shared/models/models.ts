@@ -1,17 +1,3 @@
-export interface User {
-  country: string;
-  display_name: string;
-  email: string;
-  external_urls: any;
-  followers: any;
-  href: string;
-  id: string;
-  images: any[];
-  product: string;
-  type: string;
-  uri: string;
-}
-
 export class AverageSongFeatures {
   acousticness: number = 0;
   danceability: number = 0;

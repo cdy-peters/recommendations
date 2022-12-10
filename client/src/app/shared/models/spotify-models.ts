@@ -7,6 +7,21 @@ export interface TokenResponse {
   refresh_token: string;
 }
 
+// https://developer.spotify.com/documentation/web-api/reference/#/operations/get-current-users-profile
+export interface UserResponse {
+  country: string;
+  display_name: string;
+  email: string;
+  external_urls: any;
+  followers: any;
+  href: string;
+  id: string;
+  images: any[];
+  product: string;
+  type: string;
+  uri: string;
+}
+
 // https://developer.spotify.com/documentation/web-api/reference/#/operations/get-a-list-of-current-users-playlists
 export interface PlaylistItems {
   collaborative: boolean;

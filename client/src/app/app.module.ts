@@ -20,6 +20,11 @@ const routes: Routes = [
       import('./modules/index/index.module').then((mod) => mod.IndexModule),
   },
   {
+    path: 'callback',
+    loadChildren: () =>
+      import('./modules/index/home/home.module').then((mod) => mod.HomeModule),
+  },
+  {
     path: 'scan',
     loadChildren: () =>
       import('./modules/scan/scan.module').then((m) => m.ScanModule),
