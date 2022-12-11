@@ -9,6 +9,7 @@ import {
 import {
   FeaturesResponse,
   RecommendationsResponse,
+  ArtistResponse,
 } from 'src/app/shared/models/spotify-models';
 
 @Injectable({
@@ -17,25 +18,21 @@ import {
 export class RecommendationsService {
   constructor(private query: QueryService) {}
 
-  selectedPlaylist: any;
   tracks: string[] = [];
   averageFeatures: AverageSongFeatures = new AverageSongFeatures();
-  genres: {
-    genre: string;
-    frequency: number;
-  }[] = [];
   filteredGenres: string[] = [];
   recommendations: Recommendation[] = [];
   seed_method: string = 'genres';
 
-  async filterGenres() {
+  async filterGenres(genres: { genre: string; frequency: number }[]) {
+    // TODO: Refactor/rewrite this function
     // Filter genres
     var url = `https://api.spotify.com/v1/recommendations/available-genre-seeds`;
-    var genre_seeds = (await this.query.get(url)) as { genres: string[] };
+    var genre_seeds = <{ genres: string[] }>await this.query.get(url);
 
     this.filteredGenres = [];
     // Filter out genres that are not in the genre seeds or have a frequency of 1
-    for (const genre of this.genres) {
+    for (const genre of genres) {
       if (genre.frequency > 1) {
         if (genre_seeds.genres.includes(genre.genre)) {
           this.filteredGenres.push(genre.genre);
@@ -50,7 +47,7 @@ export class RecommendationsService {
       this.seed_method = 'tracks';
       this.filteredGenres = [];
 
-      for (const genre of this.genres) {
+      for (const genre of genres) {
         if (genre.frequency > 1) {
           this.filteredGenres.push(genre.genre);
         }
@@ -60,7 +57,7 @@ export class RecommendationsService {
       if (this.filteredGenres.length <= 3) {
         this.filteredGenres = [];
 
-        for (const genre of this.genres) {
+        for (const genre of genres) {
           this.filteredGenres.push(genre.genre);
         }
       }
@@ -69,39 +66,19 @@ export class RecommendationsService {
 
   async fetchRecommendations() {
     // Get recommendations
-    var recommendations;
+    var seed = '';
+
     if (this.seed_method === 'genres') {
-      var url = `https://api.spotify.com/v1/recommendations?seed_genres=${this.filteredGenres.join(
-        ','
-      )}&limit=10&target_acousticness=${
-        this.averageFeatures.acousticness
-      }&target_danceability=${
-        this.averageFeatures.danceability
-      }&target_energy=${this.averageFeatures.energy}&target_instrumentalness=${
-        this.averageFeatures.instrumentalness
-      }&target_liveness=${this.averageFeatures.liveness}&target_loudness=${
-        this.averageFeatures.loudness
-      }&target_speechiness=${this.averageFeatures.speechiness}&target_tempo=${
-        this.averageFeatures.tempo
-      }&target_valence=${this.averageFeatures.valence}`;
-      recommendations = <RecommendationsResponse>await this.query.get(url);
+      var genresTemp = this.filteredGenres.slice(0, 5);
+      seed = `seed_genres=${genresTemp.join(',')}`;
     } else {
       var tracksTemp = this.tracks.slice(0, 5);
-      var url = `https://api.spotify.com/v1/recommendations?seed_tracks=${tracksTemp.join(
-        ','
-      )}&limit=10&target_acousticness=${
-        this.averageFeatures.acousticness
-      }&target_danceability=${
-        this.averageFeatures.danceability
-      }&target_energy=${this.averageFeatures.energy}&target_instrumentalness=${
-        this.averageFeatures.instrumentalness
-      }&target_liveness=${this.averageFeatures.liveness}&target_loudness=${
-        this.averageFeatures.loudness
-      }&target_speechiness=${this.averageFeatures.speechiness}&target_tempo=${
-        this.averageFeatures.tempo
-      }&target_valence=${this.averageFeatures.valence}`;
-      recommendations = <RecommendationsResponse>await this.query.get(url);
+      seed = `seed_tracks=${tracksTemp.join(',')}`;
     }
+
+    var filters = `target_acousticness=${this.averageFeatures.acousticness}&target_danceability=${this.averageFeatures.danceability}&target_energy=${this.averageFeatures.energy}&target_instrumentalness=${this.averageFeatures.instrumentalness}&target_liveness=${this.averageFeatures.liveness}&target_loudness=${this.averageFeatures.loudness}&target_speechiness=${this.averageFeatures.speechiness}&target_tempo=${this.averageFeatures.tempo}&target_valence=${this.averageFeatures.valence}`;
+    var url = `https://api.spotify.com/v1/recommendations?${seed}&limit=10&${filters}`;
+    var recommendations = <RecommendationsResponse>await this.query.get(url);
 
     for (const track of recommendations.tracks) {
       if (!this.tracks.includes(track.id)) {
@@ -110,13 +87,11 @@ export class RecommendationsService {
           var genreExists = false;
           for (const artist of track.artists) {
             var url = `https://api.spotify.com/v1/artists/${artist.id}`;
-            var artistData = (await this.query.get(url)) as {
-              genres: string[];
-            };
+            var artistData = <ArtistResponse>await this.query.get(url);
             var genres = artistData.genres;
 
             const exists = genres.some(
-              (genre) => this.filteredGenres.indexOf(genre) >= 0
+              (g) => this.filteredGenres.indexOf(g) >= 0
             );
             if (exists) {
               genreExists = true;
@@ -144,12 +119,9 @@ export class RecommendationsService {
           valence: audio_features.valence,
         };
 
-        var sim = this.calcSimilarity(this.averageFeatures, features);
+        var sim = this.calcSimilarity(features);
 
-        var artists = [];
-        for (const artist of track.artists) {
-          artists.push(artist.name);
-        }
+        var artists = track.artists.map((a) => a.name);
 
         this.recommendations.push({
           id: track.id,
@@ -165,34 +137,22 @@ export class RecommendationsService {
     }
   }
 
-  async getRecommendations(data: any) {
-    this.selectedPlaylist = data.selectedPlaylist;
-    this.tracks = data.tracks;
-    this.averageFeatures = data.averageFeatures;
-    this.genres = data.genres;
+  async getRecommendations(data?: any) {
+    if (data) {
+      this.tracks = data.tracks;
+      this.averageFeatures = data.averageFeatures;
 
-    // Set marquee
-    setTitleMarquee('#playlist_details > h5', this.selectedPlaylist.name, 200);
+      await this.filterGenres(data.genres);
+    }
 
-    await this.filterGenres();
-
-    await this.fetchRecommendations();
-
-    return {
-      recommendations: this.recommendations,
-      averageFeatures: this.averageFeatures,
-    };
-  }
-
-  async getMoreRecommendations() {
     await this.fetchRecommendations();
 
     return this.recommendations;
   }
 
   // Calculates cosine similarity between two vectors
-  calcSimilarity(average_features: any, features: any) {
-    var avgArr: number[] = Object.values(average_features);
+  calcSimilarity(features: any) {
+    var avgArr: number[] = Object.values(this.averageFeatures);
     var featuresArr: number[] = Object.values(features);
 
     const dot = (a: any[], b: any[]) =>

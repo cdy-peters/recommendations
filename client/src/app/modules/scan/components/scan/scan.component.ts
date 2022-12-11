@@ -23,7 +23,7 @@ export class ScanComponent {
     private transfer: TransferDataService
   ) {}
 
-  selectedPlaylist: any;
+  selectedPlaylist: any = this.transfer.getData();
 
   tracks: string[] = [];
   averageFeatures: AverageSongFeatures = new AverageSongFeatures();
@@ -35,6 +35,42 @@ export class ScanComponent {
     genre: string;
     frequency: number;
   }[] = [];
+
+  async ngOnInit() {
+    // Get tracks (audio features), artists and genres
+    var url = `https://api.spotify.com/v1/playlists/${this.selectedPlaylist.id}/tracks`;
+    while (url) {
+      var playlist = <PlaylistItemsResponse>await this.query.get(url);
+
+      for (const item of playlist.items) {
+        const track = item.track;
+
+        await this.getTracks(track.id);
+        for (const artist of track.artists) await this.getGenres(artist.id);
+      }
+
+      url = playlist.next;
+    }
+
+    // Average the song features
+    for (const key in this.averageFeatures) {
+      var val = <number>this.averageFeatures[<keyof AverageSongFeatures>key];
+      val /= this.tracks.length;
+
+      this.averageFeatures[<keyof AverageSongFeatures>key] = +val.toFixed(5);
+    }
+
+    // Navigate to recommendations page
+    this.transfer.setData({
+      selectedPlaylist: this.selectedPlaylist,
+      averageFeatures: this.averageFeatures,
+      tracks: this.tracks,
+      genres: this.genres,
+      artists: this.artists,
+    });
+
+    this.router.navigate(['/recommendations']);
+  }
 
   async getTracks(id: string) {
     var url = `https://api.spotify.com/v1/audio-features/${id}`;
@@ -74,43 +110,5 @@ export class ScanComponent {
         this.genres[index].frequency++;
       }
     }
-  }
-
-  async ngOnInit() {
-    this.selectedPlaylist = this.transfer.getData();
-
-    // Get tracks (audio features), artists and genres
-    var url = `https://api.spotify.com/v1/playlists/${this.selectedPlaylist.id}/tracks`;
-    while (url) {
-      var playlist = <PlaylistItemsResponse>await this.query.get(url);
-
-      for (const item of playlist.items) {
-        const track = item.track;
-
-        await this.getTracks(track.id);
-        for (const artist of track.artists) await this.getGenres(artist.id);
-      }
-
-      url = playlist.next;
-    }
-
-    // Average the song features
-    for (const key in this.averageFeatures) {
-      var val = <number>this.averageFeatures[<keyof AverageSongFeatures>key];
-      val /= this.tracks.length;
-
-      this.averageFeatures[<keyof AverageSongFeatures>key] = +val.toFixed(5);
-    }
-
-    // Navigate to recommendations page
-    this.transfer.setData({
-      selectedPlaylist: this.selectedPlaylist,
-      averageFeatures: this.averageFeatures,
-      tracks: this.tracks,
-      genres: this.genres,
-      artists: this.artists,
-    });
-
-    this.router.navigate(['/recommendations']);
   }
 }

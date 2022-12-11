@@ -33,13 +33,14 @@ export class RecommendationsComponent {
   showAverageFeaturesChanged: boolean = false;
   showAverageFeaturesDropdown: boolean = false;
 
-  selectedPlaylist: any;
-  songsRetrieved: number = 0;
-  artistsRetrieved: number = 0;
-  genresRetrieved: number = 0;
+  data: any = this.transfer.getData();
+  selectedPlaylist: any = this.data.selectedPlaylist;
+  averageFeatures: AverageSongFeatures = this.data.averageFeatures;
+  songsRetrieved: number = this.data.tracks.length;
+  artistsRetrieved: number = this.data.artists.length;
+  genresRetrieved: number = this.data.genres.length;
 
   recommendations: Recommendation[] = [];
-  averageFeatures: AverageSongFeatures = new AverageSongFeatures();
   @ViewChild('getMoreRecommendations') getMoreRecommendations!: ElementRef;
 
   playingTrack: string = '';
@@ -59,18 +60,12 @@ export class RecommendationsComponent {
       this.showAverageFeaturesDropdown = true;
     }
 
-    const data = this.transfer.getData();
-
-    this.selectedPlaylist = data.selectedPlaylist;
-    this.songsRetrieved = data.tracks.length;
-    this.artistsRetrieved = data.artists.length;
-    this.genresRetrieved = data.genres.length;
+    // Set title marquee
+    setTitleMarquee('#playlist_details > h5', this.selectedPlaylist.name, 200);
 
     // Receive data from promise
-    var { recommendations, averageFeatures } =
-      await this.recommend.getRecommendations(data);
+    var recommendations = await this.recommend.getRecommendations(this.data);
     this.recommendations.push(...recommendations);
-    this.averageFeatures = averageFeatures;
 
     // Set marquee
     setTimeout(() => {
@@ -83,7 +78,7 @@ export class RecommendationsComponent {
     this.getMoreRecommendations.nativeElement.innerHTML =
       'Getting Recommendations...';
 
-    var recommendations = await this.recommend.getMoreRecommendations();
+    var recommendations = await this.recommend.getRecommendations();
 
     recommendations.forEach((r) => {
       if (!this.recommendations.some((t) => t.id === r.id)) {
