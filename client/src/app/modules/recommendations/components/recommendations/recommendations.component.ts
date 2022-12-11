@@ -29,55 +29,29 @@ export class RecommendationsComponent {
     private recommend: RecommendationsService
   ) {}
 
+  showAverageFeatures: boolean = true;
+  showAverageFeaturesChanged: boolean = false;
+  showAverageFeaturesDropdown: boolean = false;
+
   selectedPlaylist: any;
   songsRetrieved: number = 0;
   artistsRetrieved: number = 0;
   genresRetrieved: number = 0;
-  previewUrl: string = '';
+
+  recommendations: Recommendation[] = [];
+  averageFeatures: AverageSongFeatures = new AverageSongFeatures();
+  @ViewChild('getMoreRecommendations') getMoreRecommendations!: ElementRef;
+
   playingTrack: string = '';
   @ViewChild('songPreview')
   songPreview!: ElementRef;
 
-  tracks: string[] = [];
-  averageFeatures: AverageSongFeatures = new AverageSongFeatures();
-  genres: {
-    name: string;
-    frequency: number;
-  }[] = [];
-  filteredGenres: string[] = [];
-
-  recommendations: Recommendation[] = [];
   selectedTracks: string[] = [];
   @ViewChildren('checkboxes') checkboxes!: QueryList<ElementRef>;
   selectAll: boolean = false;
   addedTracks: string[] = [];
   @ViewChild('thisPlaylist') thisPlaylist!: ElementRef;
   @ViewChild('newPlaylist') newPlaylist!: ElementRef;
-  @ViewChild('getMoreRecommendations') getMoreRecommendations!: ElementRef;
-
-  showAverageFeatures: boolean = true;
-  showAverageFeaturesChanged: boolean = false;
-  showAverageFeaturesDropdown: boolean = false;
-
-  onShowAverageFeatures() {
-    this.showAverageFeatures = !this.showAverageFeatures;
-    this.showAverageFeaturesChanged = true;
-  }
-
-  @HostListener('window:resize', ['$event'])
-  onResize() {
-    setTrackMarquee();
-
-    if (window.innerWidth < 1000) {
-      if (this.showAverageFeaturesChanged) return;
-      this.showAverageFeatures = false;
-      this.showAverageFeaturesDropdown = true;
-    } else {
-      this.showAverageFeatures = true;
-      this.showAverageFeaturesChanged = false;
-      this.showAverageFeaturesDropdown = false;
-    }
-  }
 
   async ngOnInit() {
     if (window.innerWidth < 1000) {
@@ -88,9 +62,9 @@ export class RecommendationsComponent {
     const data = this.transfer.getData();
 
     this.selectedPlaylist = data.selectedPlaylist;
-    this.songsRetrieved = data.songsRetrieved;
-    this.artistsRetrieved = data.artistsRetrieved;
-    this.genresRetrieved = data.genresRetrieved;
+    this.songsRetrieved = data.tracks.length;
+    this.artistsRetrieved = data.artists.length;
+    this.genresRetrieved = data.genres.length;
 
     // Receive data from promise
     var { recommendations, averageFeatures } =
@@ -124,6 +98,26 @@ export class RecommendationsComponent {
     this.getMoreRecommendations.nativeElement.disabled = false;
     this.getMoreRecommendations.nativeElement.innerHTML =
       'Get More Recommendations';
+  }
+
+  onShowAverageFeatures() {
+    this.showAverageFeatures = !this.showAverageFeatures;
+    this.showAverageFeaturesChanged = true;
+  }
+
+  @HostListener('window:resize', ['$event'])
+  onResize() {
+    setTrackMarquee();
+
+    if (window.innerWidth < 1000) {
+      if (this.showAverageFeaturesChanged) return;
+      this.showAverageFeatures = false;
+      this.showAverageFeaturesDropdown = true;
+    } else {
+      this.showAverageFeatures = true;
+      this.showAverageFeaturesChanged = false;
+      this.showAverageFeaturesDropdown = false;
+    }
   }
 
   onCheckboxChange(e: any, id: string) {

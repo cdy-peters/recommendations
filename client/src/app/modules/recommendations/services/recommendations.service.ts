@@ -21,7 +21,7 @@ export class RecommendationsService {
   tracks: string[] = [];
   averageFeatures: AverageSongFeatures = new AverageSongFeatures();
   genres: {
-    name: string;
+    genre: string;
     frequency: number;
   }[] = [];
   filteredGenres: string[] = [];
@@ -37,8 +37,8 @@ export class RecommendationsService {
     // Filter out genres that are not in the genre seeds or have a frequency of 1
     for (const genre of this.genres) {
       if (genre.frequency > 1) {
-        if (genre_seeds.genres.includes(genre.name)) {
-          this.filteredGenres.push(genre.name);
+        if (genre_seeds.genres.includes(genre.genre)) {
+          this.filteredGenres.push(genre.genre);
         }
       }
     }
@@ -52,7 +52,7 @@ export class RecommendationsService {
 
       for (const genre of this.genres) {
         if (genre.frequency > 1) {
-          this.filteredGenres.push(genre.name);
+          this.filteredGenres.push(genre.genre);
         }
       }
 
@@ -61,7 +61,7 @@ export class RecommendationsService {
         this.filteredGenres = [];
 
         for (const genre of this.genres) {
-          this.filteredGenres.push(genre.name);
+          this.filteredGenres.push(genre.genre);
         }
       }
     }
