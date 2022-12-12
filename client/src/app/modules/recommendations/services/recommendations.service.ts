@@ -4,11 +4,12 @@ import { QueryService } from 'src/app/shared/services/query.service';
 
 import {
   AverageSongFeatures,
-  Recommendation
+  Recommendation,
 } from 'src/app/shared/models/models';
 import {
-  ArtistResponse, FeaturesResponse,
-  RecommendationsResponse
+  ArtistResponse,
+  FeaturesResponse,
+  RecommendationsResponse,
 } from 'src/app/shared/models/spotify-models';
 
 @Injectable({
@@ -21,7 +22,7 @@ export class RecommendationsService {
   averageFeatures: AverageSongFeatures = new AverageSongFeatures();
   genres: string[] = [];
   genreSeeds: string[] = [];
-  recommendations: Recommendation[] = [];
+  allTracks: Set<string> = new Set();
 
   async filterGenres(genres: { genre: string; frequency: number }[]) {
     // Sort genres by frequency
@@ -48,6 +49,8 @@ export class RecommendationsService {
   }
 
   async fetchRecommendations() {
+    var recommendations: Recommendation[] = [];
+
     // Get seed for recommendations
     var seeds: { genre: string[]; track: string[] } = { genre: [], track: [] };
 
@@ -73,10 +76,10 @@ export class RecommendationsService {
     var filters = `target_acousticness=${this.averageFeatures.acousticness}&target_danceability=${this.averageFeatures.danceability}&target_energy=${this.averageFeatures.energy}&target_instrumentalness=${this.averageFeatures.instrumentalness}&target_liveness=${this.averageFeatures.liveness}&target_loudness=${this.averageFeatures.loudness}&target_speechiness=${this.averageFeatures.speechiness}&target_tempo=${this.averageFeatures.tempo}&target_valence=${this.averageFeatures.valence}`;
     var url = `https://api.spotify.com/v1/recommendations?${seed}&limit=10&${filters}`;
     console.log(url);
-    var recommendations = <RecommendationsResponse>await this.query.get(url);
+    var recommendationsRes = <RecommendationsResponse>await this.query.get(url);
 
-    for (const track of recommendations.tracks) {
-      if (!this.tracks.includes(track.id)) {
+    for (const track of recommendationsRes.tracks) {
+      if (!this.allTracks.has(track.id)) {
         // Check if track has familiar genres
         var genreExists = false;
         for (const artist of track.artists) {
@@ -114,7 +117,8 @@ export class RecommendationsService {
 
         var artists = track.artists.map((a) => a.name);
 
-        this.recommendations.push({
+        this.allTracks.add(track.id);
+        recommendations.push({
           id: track.id,
           name: track.name,
           artists: artists,
@@ -126,6 +130,7 @@ export class RecommendationsService {
         console.log('Track already in playlist');
       }
     }
+    return recommendations;
   }
 
   async getRecommendations(data?: any) {
@@ -133,12 +138,14 @@ export class RecommendationsService {
       this.tracks = data.tracks;
       this.averageFeatures = data.averageFeatures;
 
+      for (const track of this.tracks) this.allTracks.add(track);
+
       await this.filterGenres(data.genres);
     }
 
-    await this.fetchRecommendations();
+    var recommendations = await this.fetchRecommendations();
 
-    return this.recommendations;
+    return recommendations;
   }
 
   // Calculates cosine similarity between two vectors
