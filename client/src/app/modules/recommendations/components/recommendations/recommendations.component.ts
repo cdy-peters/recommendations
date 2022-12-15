@@ -163,7 +163,9 @@ export class RecommendationsComponent {
     }
 
     var url = `https://api.spotify.com/v1/playlists/${id}/tracks`;
-    var response = await this.query.post(url, { uris });
+    while (uris.length > 0) {
+      await this.query.post(url, { uris: uris.splice(0, 100) });
+    }
 
     if (this.thisPlaylist.nativeElement.disabled) {
       this.thisPlaylist.nativeElement.disabled = false;
@@ -172,8 +174,6 @@ export class RecommendationsComponent {
       this.newPlaylist.nativeElement.disabled = false;
       this.newPlaylist.nativeElement.innerHTML = 'New playlist';
     }
-
-    console.log(response);
   }
 
   async addNewPlaylist() {
