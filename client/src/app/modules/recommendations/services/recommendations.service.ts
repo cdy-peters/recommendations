@@ -23,6 +23,8 @@ export class RecommendationsService {
   genres: string[] = [];
   genreSeeds: string[] = [];
   allTracks: Set<string> = new Set();
+  recommendations: Recommendation[] = [];
+  limit: number = 0;
 
   async filterGenres(genres: { genre: string; frequency: number }[]) {
     // Sort genres by frequency
@@ -49,8 +51,6 @@ export class RecommendationsService {
   }
 
   async fetchRecommendations() {
-    var recommendations: Recommendation[] = [];
-
     // Get seed for recommendations
     var seeds: { genre: string[]; track: string[] } = { genre: [], track: [] };
 
@@ -73,8 +73,9 @@ export class RecommendationsService {
     seed += `seed_tracks=${seeds.track.join(',')}`;
 
     // Get recommendations
+    console.log(this.limit);
     var filters = `target_acousticness=${this.averageFeatures.acousticness}&target_danceability=${this.averageFeatures.danceability}&target_energy=${this.averageFeatures.energy}&target_instrumentalness=${this.averageFeatures.instrumentalness}&target_liveness=${this.averageFeatures.liveness}&target_loudness=${this.averageFeatures.loudness}&target_speechiness=${this.averageFeatures.speechiness}&target_tempo=${this.averageFeatures.tempo}&target_valence=${this.averageFeatures.valence}`;
-    var url = `https://api.spotify.com/v1/recommendations?${seed}&limit=10&${filters}`;
+    var url = `https://api.spotify.com/v1/recommendations?${seed}&limit=${this.limit}&${filters}`;
     console.log(url);
     var recommendationsRes = <RecommendationsResponse>await this.query.get(url);
 
@@ -118,7 +119,7 @@ export class RecommendationsService {
         var artists = track.artists.map((a) => a.name);
 
         this.allTracks.add(track.id);
-        recommendations.push({
+        this.recommendations.push({
           id: track.id,
           name: track.name,
           artists: artists,
@@ -126,11 +127,12 @@ export class RecommendationsService {
           preview_url: track.preview_url,
           similarity: sim,
         });
+
+        if (this.recommendations.length >= 20) break;
       } else {
         console.log('Track already in playlist');
       }
     }
-    return recommendations;
   }
 
   async getRecommendations(data?: any) {
@@ -138,14 +140,28 @@ export class RecommendationsService {
       this.tracks = data.tracks;
       this.averageFeatures = data.averageFeatures;
 
+      this.limit = 25;
       for (const track of this.tracks) this.allTracks.add(track);
 
       await this.filterGenres(data.genres);
     }
 
-    var recommendations = await this.fetchRecommendations();
+    this.recommendations = [];
+    var count = 0;
 
-    return recommendations;
+    while (this.recommendations.length < 20) {
+      if (count === 3) {
+        if (this.limit < 100) {
+          this.limit += 25;
+        } else {
+          break;
+        }
+      }
+      await this.fetchRecommendations();
+      count++;
+    }
+
+    return this.recommendations;
   }
 
   // Calculates cosine similarity between two vectors
