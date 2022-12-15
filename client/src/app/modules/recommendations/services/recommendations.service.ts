@@ -24,7 +24,8 @@ export class RecommendationsService {
   genreSeeds: string[] = [];
   allTracks: Set<string> = new Set();
   recommendations: Recommendation[] = [];
-  limit: number = 0;
+  limit: number = 25;
+  checkGenres: boolean = true;
 
   async filterGenres(genres: { genre: string; frequency: number }[]) {
     // Sort genres by frequency
@@ -82,21 +83,23 @@ export class RecommendationsService {
     for (const track of recommendationsRes.tracks) {
       if (!this.allTracks.has(track.id)) {
         // Check if track has familiar genres
-        var genreExists = false;
-        for (const artist of track.artists) {
-          var url = `https://api.spotify.com/v1/artists/${artist.id}`;
-          var artistData = <ArtistResponse>await this.query.get(url);
-          var genres = artistData.genres;
+        if (this.checkGenres) {
+          var genreExists = false;
+          for (const artist of track.artists) {
+            var url = `https://api.spotify.com/v1/artists/${artist.id}`;
+            var artistData = <ArtistResponse>await this.query.get(url);
+            var genres = artistData.genres;
 
-          const exists = genres.some((g) => this.genres.indexOf(g) >= 0);
-          if (exists) {
-            genreExists = true;
-            break;
+            const exists = genres.some((g) => this.genres.indexOf(g) >= 0);
+            if (exists) {
+              genreExists = true;
+              break;
+            }
           }
-        }
-        if (!genreExists) {
-          console.log('No familiar genres');
-          continue;
+          if (!genreExists) {
+            console.log('No familiar genres');
+            continue;
+          }
         }
 
         // Compare song features with average song features
@@ -140,7 +143,6 @@ export class RecommendationsService {
       this.tracks = data.tracks;
       this.averageFeatures = data.averageFeatures;
 
-      this.limit = 25;
       for (const track of this.tracks) this.allTracks.add(track);
 
       await this.filterGenres(data.genres);
@@ -153,6 +155,8 @@ export class RecommendationsService {
       if (count === 3) {
         if (this.limit < 100) {
           this.limit += 25;
+        } else if (this.limit === 100 && this.checkGenres) {
+          this.checkGenres = false;
         } else {
           break;
         }
