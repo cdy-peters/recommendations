@@ -143,6 +143,12 @@ export class RecommendationsService {
       this.tracks = data.tracks;
       this.averageFeatures = data.averageFeatures;
 
+      // Randomize tracks
+      this.tracks = this.tracks
+        .map((a) => ({ sort: Math.random(), value: a }))
+        .sort((a, b) => a.sort - b.sort)
+        .map((a) => a.value);
+
       for (const track of this.tracks) this.allTracks.add(track);
 
       await this.filterGenres(data.genres);
