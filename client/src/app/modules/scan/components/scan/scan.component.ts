@@ -36,6 +36,8 @@ export class ScanComponent {
     frequency: number;
   }[] = [];
 
+  skip: boolean = false;
+
   async ngOnInit() {
     // Get tracks (audio features), artists and genres
     var url = `https://api.spotify.com/v1/playlists/${this.selectedPlaylist.id}/tracks`;
@@ -43,6 +45,8 @@ export class ScanComponent {
       var playlist = <PlaylistItemsResponse>await this.query.get(url);
 
       for (const item of playlist.items) {
+        if (this.skip) break;
+
         const track = item.track;
 
         await this.getTracks(track.id);

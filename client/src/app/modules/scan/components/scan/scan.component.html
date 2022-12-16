@@ -1,15 +1,17 @@
-<div style="margin-top: 76px">
-  <div id="playlist_container">
-    <div id="playlist_cover">
-      <img src="{{ selectedPlaylist.cover }}" />
-    </div>
-    <h5>{{ selectedPlaylist.name }}</h5>
-  </div>
+<div style="margin-top: 76px"></div>
 
-  <div id="progress">
-    <h5>Analysing playlist</h5>
-    <p>{{ tracks.length }} songs retrieved</p>
-    <p>{{ artists.length }} artists retrieved</p>
-    <p>{{ genres.length }} genres retrieved</p>
+<div id="playlist_container">
+  <div id="playlist_cover">
+    <img src="{{ selectedPlaylist.cover }}" />
   </div>
+  <h5>{{ selectedPlaylist.name }}</h5>
 </div>
+
+<div id="progress">
+  <h5>Analysing playlist</h5>
+  <p>{{ tracks.length }} songs retrieved</p>
+  <p>{{ artists.length }} artists retrieved</p>
+  <p>{{ genres.length }} genres retrieved</p>
+</div>
+
+<button class="grow" id="skip_btn" (click)="skip = true">Skip Scanning</button>
