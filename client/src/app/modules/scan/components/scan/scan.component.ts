@@ -8,7 +8,7 @@ import { AverageSongFeatures } from 'src/app/shared/models/models';
 import {
   ArtistResponse,
   FeaturesResponse,
-  PlaylistItemsResponse,
+  PlaylistItemsResponse
 } from 'src/app/shared/models/spotify-models';
 
 @Component({
@@ -40,18 +40,18 @@ export class ScanComponent {
 
   async ngOnInit() {
     // Get tracks (audio features), artists and genres
-    var url = `https://api.spotify.com/v1/playlists/${this.selectedPlaylist.id}/tracks`;
+    var url = `https://api.spotify.com/v1/playlists/${this.selectedPlaylist.id}/tracks?limit=50`;
+
     while (url) {
       var playlist = <PlaylistItemsResponse>await this.query.get(url);
 
-      for (const item of playlist.items) {
-        if (this.skip) break;
+      // Get tracks
+      var ids = playlist.items.map((i) => i.track.id);
+      await this.getTracks(ids);
 
-        const track = item.track;
-
-        await this.getTracks(track.id);
-        for (const artist of track.artists) await this.getGenres(artist.id);
-      }
+      // Get artists and genres
+      var artists = playlist.items.map((i) => i.track.artists);
+      await this.getGenres(artists);
 
       url = playlist.next;
     }
@@ -76,42 +76,75 @@ export class ScanComponent {
     this.router.navigate(['/recommendations']);
   }
 
-  async getTracks(id: string) {
-    var url = `https://api.spotify.com/v1/audio-features/${id}`;
-    var features = <FeaturesResponse>await this.query.get(url);
+  async getTracks(ids: string[]) {
+    var url = `https://api.spotify.com/v1/audio-features?ids=${ids.join(',')}`;
+    var audioFeatures = <any>await this.query.get(url);
 
-    for (const key in this.averageFeatures) {
-      var val = <number>features[<keyof AverageSongFeatures>key];
+    audioFeatures = <FeaturesResponse[]>audioFeatures.audio_features;
 
-      this.averageFeatures[<keyof AverageSongFeatures>key] += val;
+    for (var i = 0; i < audioFeatures.length; i++) {
+      for (const key in this.averageFeatures) {
+        var val = <number>audioFeatures[i][<keyof AverageSongFeatures>key];
+
+        this.averageFeatures[<keyof AverageSongFeatures>key] += val;
+      }
+
+      this.tracks.push(ids[i]);
     }
-
-    this.tracks.push(id);
   }
 
-  async getGenres(id: string) {
-    const index = this.artists.findIndex((a) => a.id == id);
+  async getGenres(artists: any[]) {
+    var ids: { id: string; frequency: number }[] = [];
 
-    if (index == -1) {
-      var url = `https://api.spotify.com/v1/artists/${id}`;
-      var artistInfo = <ArtistResponse>await this.query.get(url);
-      var genres = artistInfo.genres;
+    // Get ids of artists
+    for (const trackArtists of artists) {
+      for (const artist of trackArtists) {
+        const id = artist.id;
 
-      this.artists.push({ id, genres });
+        // Check if artist has already been added
+        const index = this.artists.findIndex((a) => a.id == id);
+        if (index != -1) {
+          var genres = this.artists[index].genres;
 
-      for (const genre of genres) {
-        const index = this.genres.findIndex((g) => g.genre == genre);
+          for (const genre of genres) {
+            const index = this.genres.findIndex((g) => g.genre == genre);
+            this.genres[index].frequency++;
+          }
+        } else {
+          const index = ids.findIndex((i) => i.id == id);
 
-        index == -1
-          ? this.genres.push({ genre, frequency: 1 })
-          : this.genres[index].frequency++;
+          index === -1
+            ? ids.push({ id, frequency: 1 })
+            : ids[index].frequency++;
+        }
       }
-    } else {
-      var genres = this.artists[index].genres;
+    }
 
-      for (const genre of genres) {
-        const index = this.genres.findIndex((g) => g.genre == genre);
-        this.genres[index].frequency++;
+    // Get genres of artists that have not been added already
+    if (ids.length) {
+      var idsQuery = ids.map((id) => id.id);
+
+      while (idsQuery.length) {
+        var url = `https://api.spotify.com/v1/artists?ids=${idsQuery
+          .splice(0, 50)
+          .join(',')}`;
+        var artistInfo = <any>await this.query.get(url);
+        artistInfo = <ArtistResponse[]>artistInfo.artists;
+
+        for (const artist of artistInfo) {
+          const id = artist.id;
+          const genres = artist.genres;
+
+          this.artists.push({ id, genres });
+
+          for (const genre of genres) {
+            const index = this.genres.findIndex((g) => g.genre == genre);
+
+            index == -1
+              ? this.genres.push({ genre, frequency: 1 })
+              : this.genres[index].frequency++;
+          }
+        }
       }
     }
   }
