@@ -12,6 +12,10 @@ const redirect_uri = process.env.REDIRECT_URI;
 
 app.use(bodyparser.json());
 app.use(bodyparser.urlencoded({ extended: true }));
+app.use((req, res, next) => {
+  res.header("Access-Control-Allow-Origin", "http://localhost:4200");
+  next();
+});
 
 app.get("/getAccessToken", (req, res) => {
   var code = req.query.code;
