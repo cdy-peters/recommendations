@@ -1,3 +1,14 @@
+#no_playlists {
+  text-align: center;
+  margin-top: 20px;
+}
+
+#loading {
+  margin-top: 20px;
+  display: flex;
+  justify-content: center;
+}
+
 /* Selected playlist */
 #selected_playlist {
   display: flex;

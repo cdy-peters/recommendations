@@ -7,7 +7,8 @@ import { QueryService } from 'src/app/shared/services/query.service';
 import { TransferDataService } from 'src/app/shared/services/transfer-data.service';
 
 import {
-  PlaylistsResponse, UserResponse
+  PlaylistsResponse,
+  UserResponse,
 } from 'src/app/shared/models/spotify-models';
 
 @Component({
@@ -30,6 +31,7 @@ export class HomeComponent {
   filteredPlaylists: any[] = [];
 
   searchTerm: string = '';
+  loading: boolean = true;
 
   filterPlaylists() {
     this.filteredPlaylists = this.playlists.filter((playlist) =>
@@ -78,6 +80,7 @@ export class HomeComponent {
       }
       url = res.next;
     }
+    this.loading = false;
   }
 
   selectPlaylistHandler(playlist: any) {

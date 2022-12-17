@@ -1,59 +1,71 @@
 <div style="margin-top: 76px"></div>
 
-<div *ngIf="playlists; then playlistsTemplate; else noPlaylists"></div>
+<div id="selected_playlist">
+  <div id="selected_cover">
+    <img
+      src="{{
+        selectedPlaylist
+          ? selectedPlaylist.cover
+          : '/assets/images/placeholder_cover.png'
+      }}"
+    />
+  </div>
+
+  <div id="selected_info_container">
+    <div #selectedName id="selected_name">
+      <h5>
+        {{
+          selectedPlaylist ? selectedPlaylist.name : "Select a playlist below"
+        }}
+      </h5>
+    </div>
+    <p>
+      {{ selectedPlaylist ? selectedPlaylist.tracks + " tracks" : "" }}
+    </p>
+
+    <div id="selected_scan">
+      <a (click)="scanPlaylistHandler()">
+        <button
+          id="selected_button"
+          [ngClass]="{ grow: selectedPlaylist }"
+          [disabled]="!selectedPlaylist"
+        >
+          Scan Playlist
+        </button>
+      </a>
+    </div>
+  </div>
+</div>
+
+<h3 id="playlist_count">Showing {{ filteredPlaylists.length }} playlists</h3>
+
+<div id="playlist_search">
+  <div id="search_inner">
+    <i class="bi bi-search"></i>
+    <input
+      (input)="filterPlaylists()"
+      type="text"
+      placeholder="Search for a playlist"
+      [(ngModel)]="searchTerm"
+    />
+  </div>
+</div>
+
+<div *ngIf="loading; then loadingTemplate; else loaded"></div>
+
+<ng-template #loadingTemplate>
+  <div id="loading">
+    <div class="spinner-border" role="status">
+      <span class="visually-hidden"></span>
+    </div>
+  </div>
+</ng-template>
+
+<ng-template #loaded>
+  <div *ngIf="playlists.length; then playlistsTemplate; else noPlaylists"></div>
+</ng-template>
 
 <ng-template #playlistsTemplate>
-  <div id="selected_playlist">
-    <div id="selected_cover">
-      <img
-        src="{{
-          selectedPlaylist
-            ? selectedPlaylist.cover
-            : '/assets/images/placeholder_cover.png'
-        }}"
-      />
-    </div>
-
-    <div id="selected_info_container">
-      <div #selectedName id="selected_name">
-        <h5>
-          {{
-            selectedPlaylist ? selectedPlaylist.name : "Select a playlist below"
-          }}
-        </h5>
-      </div>
-      <p>
-        {{ selectedPlaylist ? selectedPlaylist.tracks + " tracks" : "" }}
-      </p>
-
-      <div id="selected_scan">
-        <a (click)="scanPlaylistHandler()">
-          <button
-            id="selected_button"
-            [ngClass]="{ grow: selectedPlaylist }"
-            [disabled]="!selectedPlaylist"
-          >
-            Scan Playlist
-          </button>
-        </a>
-      </div>
-    </div>
-  </div>
-
-  <h3 id="playlist_count">Showing {{ filteredPlaylists.length }} playlists</h3>
-
-  <div id="playlist_search">
-    <div id="search_inner">
-      <i class="bi bi-search"></i>
-      <input
-        (input)="filterPlaylists()"
-        type="text"
-        placeholder="Search for a playlist"
-        [(ngModel)]="searchTerm"
-      />
-    </div>
-  </div>
-
   <div id="playlist_grid">
     <div
       *ngFor="let playlist of filteredPlaylists"
@@ -69,5 +81,5 @@
 </ng-template>
 
 <ng-template #noPlaylists>
-  <p>No playlists were retrieved</p>
+  <h3 id="no_playlists">No playlists were retrieved</h3>
 </ng-template>
