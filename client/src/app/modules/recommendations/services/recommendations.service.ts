@@ -88,20 +88,23 @@ export class RecommendationsService {
       return 0;
     }
 
-    var genresSet: Set<string> = new Set();
-
+    var artists: string[] = [];
     for (const artist of track.artists) {
       // Check for familiar artists
       const index = this.artists.findIndex((a) => a.id == artist.id);
       if (index != -1) return 1;
 
-      // Get artist genres
-      var url = `https://api.spotify.com/v1/artists/${artist.id}`;
-      var artistData = <ArtistResponse>await this.query.get(url);
-      var genres = artistData.genres;
-
-      for (const genre of genres) genresSet.add(genre);
+      artists.push(artist.id);
     }
+
+    // Get artist genres
+    var genresSet: Set<string> = new Set();
+    var url = `https://api.spotify.com/v1/artists?ids=${artists.join(',')}`;
+    var artistData = <any>await this.query.get(url);
+    artistData = <ArtistResponse>artistData.artists;
+
+    for (const artist of artistData)
+      for (const genre of artist.genres) genresSet.add(genre);
 
     // Check for familiar genres
     var genres = Array.from(genresSet);
