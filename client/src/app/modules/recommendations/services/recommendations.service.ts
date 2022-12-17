@@ -102,23 +102,6 @@ export class RecommendationsService {
           }
         }
 
-        // Compare song features with average song features
-        var url = `https://api.spotify.com/v1/audio-features/${track.id}`;
-        var audio_features = <FeaturesResponse>await this.query.get(url);
-        var features = {
-          acousticness: audio_features.acousticness,
-          danceability: audio_features.danceability,
-          energy: audio_features.energy,
-          instrumentalness: audio_features.instrumentalness,
-          liveness: audio_features.liveness,
-          loudness: audio_features.loudness,
-          speechiness: audio_features.speechiness,
-          tempo: audio_features.tempo,
-          valence: audio_features.valence,
-        };
-
-        var sim = this.calcSimilarity(features);
-
         var artists = track.artists.map((a) => a.name);
 
         this.allTracks.add(track.id);
@@ -128,7 +111,6 @@ export class RecommendationsService {
           artists: artists,
           explicit: track.explicit,
           preview_url: track.preview_url,
-          similarity: sim,
         });
 
         if (this.recommendations.length >= 20) break;
@@ -171,13 +153,37 @@ export class RecommendationsService {
       count++;
     }
 
+    // Compare average features to recommendation features
+    var ids = this.recommendations.map((i) => i.id);
+
+    var url = `https://api.spotify.com/v1/audio-features?ids=${ids.join(',')}`;
+    var audioFeatures = <any>await this.query.get(url);
+    audioFeatures = <FeaturesResponse[]>audioFeatures.audio_features;
+
+    for (const features of audioFeatures) {
+      var id = features.id;
+      var featuresArr = [
+        features.acousticness,
+        features.danceability,
+        features.energy,
+        features.instrumentalness,
+        features.liveness,
+        features.loudness,
+        features.speechiness,
+        features.tempo,
+        features.valence,
+      ];
+
+      var rec = this.recommendations.filter((r) => r.id == id);
+      rec[0].similarity = this.calcSimilarity(featuresArr);
+    }
+
     return this.recommendations;
   }
 
   // Calculates cosine similarity between two vectors
-  calcSimilarity(features: any) {
+  calcSimilarity(featuresArr: any) {
     var avgArr: number[] = Object.values(this.averageFeatures);
-    var featuresArr: number[] = Object.values(features);
 
     const dot = (a: any[], b: any[]) =>
       a.map((x: any, i: any) => x * b[i]).reduce((m: any, n: any) => m + n);

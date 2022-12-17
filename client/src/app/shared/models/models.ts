@@ -16,5 +16,5 @@ export interface Recommendation {
   artists: string[];
   explicit: boolean;
   preview_url: string;
-  similarity: number;
+  similarity?: number;
 }
