@@ -21,11 +21,17 @@ export class RecommendationsService {
   tracks: string[] = [];
   averageFeatures: AverageSongFeatures = new AverageSongFeatures();
   genres: string[] = [];
+  artists: {
+    id: string;
+    genres: string[];
+  }[] = [];
+
   genreSeeds: string[] = [];
-  allTracks: Set<string> = new Set();
-  recommendations: Recommendation[] = [];
   limit: number = 25;
-  checkGenres: boolean = true;
+  recommendations: Recommendation[] = [];
+  allTracks: Set<string> = new Set();
+  checkRecommendations: boolean = true;
+  invalidTrack: Set<string> = new Set();
 
   async filterGenres(genres: { genre: string; frequency: number }[]) {
     // Sort genres by frequency
@@ -51,7 +57,7 @@ export class RecommendationsService {
     console.log('genre seeds', this.genreSeeds);
   }
 
-  async fetchRecommendations() {
+  getSeed() {
     // Get seed for recommendations
     var seeds: { genre: string[]; track: string[] } = { genre: [], track: [] };
 
@@ -73,50 +79,75 @@ export class RecommendationsService {
     }
     seed += `seed_tracks=${seeds.track.join(',')}`;
 
+    return seed;
+  }
+
+  async checkRecommendation(track: any) {
+    if (this.invalidTrack.has(track.id)) {
+      console.log('Recommendation is in invalid tracks');
+      return 0;
+    }
+
+    var genresSet: Set<string> = new Set();
+
+    for (const artist of track.artists) {
+      // Check for familiar artists
+      const index = this.artists.findIndex((a) => a.id == artist.id);
+      if (index != -1) return 1;
+
+      // Get artist genres
+      var url = `https://api.spotify.com/v1/artists/${artist.id}`;
+      var artistData = <ArtistResponse>await this.query.get(url);
+      var genres = artistData.genres;
+
+      for (const genre of genres) genresSet.add(genre);
+    }
+
+    // Check for familiar genres
+    var genres = Array.from(genresSet);
+    const exists = genres.some((g) => this.genres.indexOf(g) >= 0);
+    if (!exists) {
+      this.invalidTrack.add(track.id);
+      return 0;
+    }
+
+    return 1;
+  }
+
+  async fetchRecommendations() {
     // Get recommendations
     console.log(this.limit);
     var filters = `target_acousticness=${this.averageFeatures.acousticness}&target_danceability=${this.averageFeatures.danceability}&target_energy=${this.averageFeatures.energy}&target_instrumentalness=${this.averageFeatures.instrumentalness}&target_liveness=${this.averageFeatures.liveness}&target_loudness=${this.averageFeatures.loudness}&target_speechiness=${this.averageFeatures.speechiness}&target_tempo=${this.averageFeatures.tempo}&target_valence=${this.averageFeatures.valence}`;
-    var url = `https://api.spotify.com/v1/recommendations?${seed}&limit=${this.limit}&${filters}`;
+    var url = `https://api.spotify.com/v1/recommendations?${this.getSeed()}&limit=${
+      this.limit
+    }&${filters}`;
     console.log(url);
     var recommendationsRes = <RecommendationsResponse>await this.query.get(url);
 
     for (const track of recommendationsRes.tracks) {
-      if (!this.allTracks.has(track.id)) {
-        // Check if track has familiar genres
-        if (this.checkGenres) {
-          var genreExists = false;
-          for (const artist of track.artists) {
-            var url = `https://api.spotify.com/v1/artists/${artist.id}`;
-            var artistData = <ArtistResponse>await this.query.get(url);
-            var genres = artistData.genres;
-
-            const exists = genres.some((g) => this.genres.indexOf(g) >= 0);
-            if (exists) {
-              genreExists = true;
-              break;
-            }
-          }
-          if (!genreExists) {
-            console.log('No familiar genres');
-            continue;
-          }
-        }
-
-        var artists = track.artists.map((a) => a.name);
-
-        this.allTracks.add(track.id);
-        this.recommendations.push({
-          id: track.id,
-          name: track.name,
-          artists: artists,
-          explicit: track.explicit,
-          preview_url: track.preview_url,
-        });
-
-        if (this.recommendations.length >= 20) break;
-      } else {
-        console.log('Track already in playlist');
+      if (this.allTracks.has(track.id)) {
+        console.log('Track exists');
+        continue;
       }
+
+      if (
+        this.checkRecommendations &&
+        !(await this.checkRecommendation(track))
+      ) {
+        console.log('Invalid recommendation');
+        continue;
+      }
+
+      this.allTracks.add(track.id);
+      this.recommendations.push({
+        id: track.id,
+        name: track.name,
+        artists: track.artists.map((a) => a.name),
+        explicit: track.explicit,
+        preview_url: track.preview_url,
+      });
+
+      if (this.recommendations.length >= 20) break;
     }
   }
 
@@ -124,6 +155,7 @@ export class RecommendationsService {
     if (data) {
       this.tracks = data.tracks;
       this.averageFeatures = data.averageFeatures;
+      this.artists = data.artists;
 
       // Randomize tracks
       this.tracks = this.tracks
@@ -143,8 +175,8 @@ export class RecommendationsService {
       if (count === 3) {
         if (this.limit < 100) {
           this.limit += 25;
-        } else if (this.limit === 100 && this.checkGenres) {
-          this.checkGenres = false;
+        } else if (this.limit === 100 && this.checkRecommendations) {
+          this.checkRecommendations = false;
         } else {
           break;
         }
