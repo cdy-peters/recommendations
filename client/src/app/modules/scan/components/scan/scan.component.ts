@@ -8,7 +8,7 @@ import { AverageSongFeatures } from 'src/app/shared/models/models';
 import {
   ArtistResponse,
   FeaturesResponse,
-  PlaylistItemsResponse
+  PlaylistItemsResponse,
 } from 'src/app/shared/models/spotify-models';
 
 @Component({
@@ -42,7 +42,7 @@ export class ScanComponent {
     // Get tracks (audio features), artists and genres
     var url = `https://api.spotify.com/v1/playlists/${this.selectedPlaylist.id}/tracks?limit=50`;
 
-    while (url) {
+    while (url && !this.skip) {
       var playlist = <PlaylistItemsResponse>await this.query.get(url);
 
       // Get tracks
