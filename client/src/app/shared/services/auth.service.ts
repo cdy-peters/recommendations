@@ -37,7 +37,7 @@ export class AuthService {
 
     var refresh_token = this.cookie.getCookie('refresh_token');
     if (refresh_token) {
-      this.refreshToken(refresh_token);
+      this.refreshToken();
       return true;
     }
 
@@ -57,7 +57,13 @@ export class AuthService {
     this.cookie.setCookie('refresh_token', res.refresh_token, 604800);
   }
 
-  async refreshToken(refresh_token: string) {
+  async refreshToken() {
+    const refresh_token = this.cookie.getCookie('refresh_token');
+    if (!refresh_token) {
+      this.login();
+      return;
+    }
+
     var res = <TokenResponse>await lastValueFrom(
       this.http.get(this.server_url + '/refreshToken', {
         params: {

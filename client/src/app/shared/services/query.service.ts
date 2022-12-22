@@ -19,12 +19,7 @@ export class QueryService {
     switch (status) {
       // Invalid access token
       case 401:
-        var refresh_token = this.cookies.getCookie('refresh_token');
-        if (refresh_token) {
-          await this.auth.refreshToken(refresh_token);
-        } else {
-          this.auth.login();
-        }
+        await this.auth.refreshToken();
     }
   }
 
