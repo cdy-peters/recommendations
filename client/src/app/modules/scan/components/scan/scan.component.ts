@@ -37,6 +37,7 @@ export class ScanComponent {
   }[] = [];
 
   skip: boolean = false;
+  trackErrors: number = 0;
 
   async ngOnInit() {
     // Get tracks (audio features), artists and genres
@@ -59,7 +60,7 @@ export class ScanComponent {
     // Average the song features
     for (const key in this.averageFeatures) {
       var val = <number>this.averageFeatures[<keyof AverageSongFeatures>key];
-      val /= this.tracks.length;
+      val /= this.tracks.length - this.trackErrors;
 
       this.averageFeatures[<keyof AverageSongFeatures>key] = +val.toFixed(5);
     }
@@ -83,10 +84,15 @@ export class ScanComponent {
     audioFeatures = <FeaturesResponse[]>audioFeatures.audio_features;
 
     for (var i = 0; i < audioFeatures.length; i++) {
-      for (const key in this.averageFeatures) {
-        var val = <number>audioFeatures[i][<keyof AverageSongFeatures>key];
+      // Check if track has audio features
+      if (audioFeatures[i]) {
+        for (const key in this.averageFeatures) {
+          var val = <number>audioFeatures[i][<keyof AverageSongFeatures>key];
 
-        this.averageFeatures[<keyof AverageSongFeatures>key] += val;
+          this.averageFeatures[<keyof AverageSongFeatures>key] += val;
+        }
+      } else {
+        this.trackErrors++;
       }
 
       this.tracks.push(ids[i]);
