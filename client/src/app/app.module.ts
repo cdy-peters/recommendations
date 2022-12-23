@@ -4,7 +4,6 @@ import { BrowserModule } from '@angular/platform-browser';
 import { RouterModule, Routes } from '@angular/router';
 
 import { AppComponent } from './app.component';
-import { NavComponent } from './components/nav/nav.component';
 
 import { AuthService } from './shared/services/auth.service';
 import { CookieService } from './shared/services/cookie.service';
@@ -42,7 +41,7 @@ const routes: Routes = [
 ];
 
 @NgModule({
-  declarations: [AppComponent, NavComponent],
+  declarations: [AppComponent],
   imports: [BrowserModule, HttpClientModule, RouterModule.forRoot(routes)],
   providers: [AuthService, CookieService, QueryService, TransferDataService],
   bootstrap: [AppComponent],

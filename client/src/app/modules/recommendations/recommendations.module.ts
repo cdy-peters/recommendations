@@ -3,12 +3,14 @@ import { NgModule } from '@angular/core';
 import { RouterModule } from '@angular/router';
 
 import { RecommendationsComponent } from './components/recommendations/recommendations.component';
+import { NavComponent } from 'src/app/components/nav/nav.component';
 
 import { RecommendationsService } from './services/recommendations.service';
 
 @NgModule({
   declarations: [
     RecommendationsComponent,
+    NavComponent,
   ],
   imports: [
     CommonModule,
