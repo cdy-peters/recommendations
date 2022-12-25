@@ -26,6 +26,9 @@ export class QueryService {
         var retryAfter = err.headers.get('Retry-After');
         await new Promise((resolve) => setTimeout(resolve, retryAfter * 1000));
         break;
+      default:
+        console.log(err);
+        break;
     }
   }
 
