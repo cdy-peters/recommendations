@@ -15,11 +15,17 @@ export class QueryService {
     private auth: AuthService
   ) {}
 
-  async errorHandler(status: number) {
-    switch (status) {
+  async errorHandler(err: any) {
+    switch (err.status) {
       // Invalid access token
       case 401:
         await this.auth.refreshToken();
+        break;
+      // Too many requests
+      case 429:
+        var retryAfter = err.headers.get('Retry-After');
+        await new Promise((resolve) => setTimeout(resolve, retryAfter * 1000));
+        break;
     }
   }
 
@@ -33,7 +39,7 @@ export class QueryService {
       const res = await lastValueFrom(this.http.get(url, { headers }));
       return res;
     } catch (err: any) {
-      await this.errorHandler(err.status);
+      await this.errorHandler(err);
       return await this.get(url);
     }
   }
@@ -48,7 +54,7 @@ export class QueryService {
       const res = await lastValueFrom(this.http.post(url, body, { headers }));
       return res;
     } catch (err: any) {
-      await this.errorHandler(err.status);
+      await this.errorHandler(err);
       return await this.post(url, body);
     }
   }
