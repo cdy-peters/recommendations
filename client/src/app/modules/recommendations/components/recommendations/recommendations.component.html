@@ -155,42 +155,44 @@
   </ng-template>
 </div>
 
-<div id="track_selection" [hidden]="recommendations.length === 0">
-  <div id="select_options">
-    <p>{{ selectedTracks.length }} songs selected</p>
-    <button (click)="onSelectAll()">
-      {{ !selectAll ? "Select All" : "Deselect All" }}
-    </button>
+<div id="track_selection_container" [hidden]="recommendations.length === 0">
+  <app-scroll-top></app-scroll-top>
+
+  <div id="track_selection">
+    <div id="select_options">
+      <p>{{ selectedTracks.length }} songs selected</p>
+      <button (click)="onSelectAll()">
+        {{ !selectAll ? "Select All" : "Deselect All" }}
+      </button>
+    </div>
+    <h5>Add selected songs to:</h5>
+    <div
+      id="add_options"
+      *ngIf="
+        selectedTracks.length > 0;
+        then ifSelectedTracks;
+        else noSelectedTracks
+      "
+    ></div>
+
+    <ng-template #ifSelectedTracks>
+      <div id="add_options">
+        <button #thisPlaylist class="grow" (click)="addThisPlaylist()">
+          This playlist
+        </button>
+        <button #newPlaylist class="grow" (click)="addNewPlaylist()">
+          New Playlist
+        </button>
+      </div>
+    </ng-template>
+
+    <ng-template #noSelectedTracks>
+      <div id="add_options">
+        <button class="grow" disabled>This playlist</button>
+        <button class="grow" disabled>New Playlist</button>
+      </div>
+    </ng-template>
   </div>
-  <h5>Add selected songs to:</h5>
-  <div
-    id="add_options"
-    *ngIf="
-      selectedTracks.length > 0;
-      then ifSelectedTracks;
-      else noSelectedTracks
-    "
-  ></div>
-
-  <ng-template #ifSelectedTracks>
-    <div id="add_options">
-      <button #thisPlaylist class="grow" (click)="addThisPlaylist()">
-        This playlist
-      </button>
-      <button #newPlaylist class="grow" (click)="addNewPlaylist()">
-        New Playlist
-      </button>
-    </div>
-  </ng-template>
-
-  <ng-template #noSelectedTracks>
-    <div id="add_options">
-      <button class="grow" disabled>This playlist</button>
-      <button class="grow" disabled>New Playlist</button>
-    </div>
-  </ng-template>
 </div>
-
-<app-scroll-top></app-scroll-top>
 
 <audio #songPreview src="" (ended)="playingTrack = ''"></audio>

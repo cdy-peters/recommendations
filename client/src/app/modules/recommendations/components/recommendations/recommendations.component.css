@@ -129,15 +129,19 @@
 }
 
 /* Track selection */
+#track_selection_container {
+  position: sticky;
+  bottom: 20px;
+  margin-top: 20px;
+}
+
 #track_selection {
   width: 300px;
   background-color: #090909;
   border-radius: 15px;
   padding: 15px;
-  position: sticky;
-  bottom: 20px;
   opacity: 0.99;
-  margin-top: 20px;
+  margin-top: 10px;
 }
 #track_selection div {
   display: flex;
