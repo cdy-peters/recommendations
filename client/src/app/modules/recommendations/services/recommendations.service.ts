@@ -61,12 +61,12 @@ export class RecommendationsService {
     // Get seed for recommendations
     var seeds: { genre: string[]; track: string[] } = { genre: [], track: [] };
 
-    if (this.genreSeeds.length > 0) {
-      seeds.genre = this.genreSeeds.slice(0, 2);
-      this.genreSeeds = this.genreSeeds
-        .slice(seeds.genre.length)
-        .concat(this.genreSeeds.slice(0, seeds.genre.length));
-    }
+    // if (this.genreSeeds.length > 0) {
+    //   seeds.genre = this.genreSeeds.slice(0, 2);
+    //   this.genreSeeds = this.genreSeeds
+    //     .slice(seeds.genre.length)
+    //     .concat(this.genreSeeds.slice(0, seeds.genre.length));
+    // }
 
     seeds.track = this.tracks.slice(0, 5 - seeds.genre.length);
     this.tracks = this.tracks
@@ -74,9 +74,9 @@ export class RecommendationsService {
       .concat(this.tracks.slice(0, seeds.track.length));
 
     var seed = '';
-    if (seeds.genre.length > 0) {
-      seed = `seed_genres=${seeds.genre.join(',')}&`;
-    }
+    // if (seeds.genre.length > 0) {
+    //   seed = `seed_genres=${seeds.genre.join(',')}&`;
+    // }
     seed += `seed_tracks=${seeds.track.join(',')}`;
 
     return seed;
