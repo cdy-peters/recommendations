@@ -133,6 +133,7 @@
   position: sticky;
   bottom: 20px;
   margin-top: 20px;
+  width: fit-content;
 }
 
 #track_selection {
