@@ -1,3 +1,11 @@
 <div class="container">
   <router-outlet></router-outlet>
+
+  <button
+    id="scroll_top_btn"
+    (click)="scrollToTop()"
+    [hidden]="!windowScrolled"
+  >
+    <i class="bi bi-arrow-up-short"></i>
+  </button>
 </div>
