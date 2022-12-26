@@ -1,10 +1,17 @@
 const setClass = (element, width, minWidth) => {
   if (width > minWidth) {
     element.css("width", `${width - minWidth}px`);
+
     element.addClass("marquee");
+
+    var animation = `marquee ${width / 70}s linear infinite alternate`;
+    element.css("animation", animation);
   } else {
     element.css("width", "auto");
+
     element.removeClass("marquee");
+
+    element.css("animation", "none");
   }
 };
 
