@@ -44,18 +44,15 @@ export class RecommendationsService {
     var iqr = q3 - q1;
     genres = genres.filter((genre) => genre.frequency > iqr);
     this.genres = genres.map((genre) => genre.genre);
-    console.log('filter by iqr', iqr, genres);
 
     // Get any valid genre seeds
     var url = `https://api.spotify.com/v1/recommendations/available-genre-seeds`;
     var availableGenreSeeds = <{ genres: string[] }>await this.query.get(url);
 
     for (const genre of genres) {
-      if (availableGenreSeeds.genres.includes(genre.genre)) {
+      if (availableGenreSeeds.genres.includes(genre.genre))
         this.genreSeeds.push(genre.genre);
-      }
     }
-    console.log('genre seeds', this.genreSeeds);
   }
 
   getSeed() {
@@ -75,19 +72,14 @@ export class RecommendationsService {
       .concat(this.tracks.slice(0, seeds.track.length));
 
     var seed = '';
-    // if (seeds.genre.length > 0) {
-    //   seed = `seed_genres=${seeds.genre.join(',')}&`;
-    // }
+    // if (seeds.genre.length > 0) seed = `seed_genres=${seeds.genre.join(',')}&`;
     seed += `seed_tracks=${seeds.track.join(',')}`;
 
     return seed;
   }
 
   async checkRecommendation(track: any) {
-    if (this.invalidTrack.has(track.id)) {
-      console.log('Recommendation is in invalid tracks');
-      return 0;
-    }
+    if (this.invalidTrack.has(track.id)) return 0;
 
     var artists: string[] = [];
     for (const artist of track.artists) {
@@ -120,27 +112,18 @@ export class RecommendationsService {
 
   async fetchRecommendations() {
     // Get recommendations
-    console.log(this.limit);
     var filters = `target_acousticness=${this.averageFeatures.acousticness}&target_danceability=${this.averageFeatures.danceability}&target_energy=${this.averageFeatures.energy}&target_instrumentalness=${this.averageFeatures.instrumentalness}&target_liveness=${this.averageFeatures.liveness}&target_loudness=${this.averageFeatures.loudness}&target_speechiness=${this.averageFeatures.speechiness}&target_tempo=${this.averageFeatures.tempo}&target_valence=${this.averageFeatures.valence}`;
     var url = `https://api.spotify.com/v1/recommendations?${this.getSeed()}&limit=${
       this.limit
     }&${filters}`;
-    console.log(url);
+
     var recommendationsRes = <RecommendationsResponse>await this.query.get(url);
 
     for (const track of recommendationsRes.tracks) {
-      if (this.allTracks.has(track.id)) {
-        console.log('Track exists');
-        continue;
-      }
+      if (this.allTracks.has(track.id)) continue;
 
-      if (
-        this.checkRecommendations &&
-        !(await this.checkRecommendation(track))
-      ) {
-        console.log('Invalid recommendation');
+      if (this.checkRecommendations && !(await this.checkRecommendation(track)))
         continue;
-      }
 
       this.allTracks.add(track.id);
       this.recommendations.push({

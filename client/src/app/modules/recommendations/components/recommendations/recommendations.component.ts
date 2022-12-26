@@ -4,7 +4,7 @@ import {
   HostListener,
   QueryList,
   ViewChild,
-  ViewChildren,
+  ViewChildren
 } from '@angular/core';
 
 import { QueryService } from 'src/app/shared/services/query.service';
@@ -13,7 +13,7 @@ import { RecommendationsService } from '../../services/recommendations.service';
 
 import {
   AverageSongFeatures,
-  Recommendation,
+  Recommendation
 } from 'src/app/shared/models/models';
 import { CreatePlaylistResponse } from 'src/app/shared/models/spotify-models';
 
@@ -85,9 +85,8 @@ export class RecommendationsComponent {
     var recommendations = await this.recommend.getRecommendations();
 
     recommendations.forEach((r) => {
-      if (!this.recommendations.some((t) => t.id === r.id)) {
+      if (!this.recommendations.some((t) => t.id === r.id))
         this.recommendations.push(r);
-      }
     });
 
     setTimeout(() => {
@@ -118,12 +117,9 @@ export class RecommendationsComponent {
   }
 
   onCheckboxChange(e: any, id: string) {
-    if (e.target.checked) {
-      this.selectedTracks.push(id);
-    } else {
-      this.selectedTracks = this.selectedTracks.filter((t) => t !== id);
-    }
-    console.log(this.selectedTracks);
+    e.target.checked
+      ? this.selectedTracks.push(id)
+      : (this.selectedTracks = this.selectedTracks.filter((t) => t !== id));
   }
 
   onSelectAll() {
@@ -132,11 +128,9 @@ export class RecommendationsComponent {
       checkbox.nativeElement.checked = this.selectAll;
     });
 
-    if (this.selectAll) {
-      this.selectedTracks = this.recommendations.map((t) => t.id);
-    } else {
-      this.selectedTracks = [];
-    }
+    this.selectAll
+      ? (this.selectedTracks = this.recommendations.map((t) => t.id))
+      : (this.selectedTracks = []);
   }
 
   async addThisPlaylist(newPlaylistId?: string) {

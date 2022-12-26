@@ -8,7 +8,7 @@ import { TransferDataService } from 'src/app/shared/services/transfer-data.servi
 
 import {
   PlaylistsResponse,
-  UserResponse,
+  UserResponse
 } from 'src/app/shared/models/spotify-models';
 
 @Component({

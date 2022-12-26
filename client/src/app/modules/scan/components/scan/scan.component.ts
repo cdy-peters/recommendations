@@ -8,7 +8,7 @@ import { AverageSongFeatures } from 'src/app/shared/models/models';
 import {
   ArtistResponse,
   FeaturesResponse,
-  PlaylistItemsResponse,
+  PlaylistItemsResponse
 } from 'src/app/shared/models/spotify-models';
 
 @Component({

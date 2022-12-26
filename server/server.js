@@ -4,7 +4,7 @@ const request = require("request");
 require("dotenv").config();
 
 const app = express();
-const port = process.env.PORT || 3000;
+const port = process.env.PORT || 4200;
 
 const client_id = process.env.CLIENT_ID;
 const client_secret = process.env.CLIENT_SECRET;
@@ -12,10 +12,7 @@ const redirect_uri = process.env.REDIRECT_URI;
 
 app.use(bodyparser.json());
 app.use(bodyparser.urlencoded({ extended: true }));
-app.use((req, res, next) => {
-  res.header("Access-Control-Allow-Origin", "http://localhost:4200");
-  next();
-});
+app.use("/", express.static("../client/dist/recommendations"));
 
 app.get("/getAccessToken", (req, res) => {
   var code = req.query.code;
@@ -71,6 +68,10 @@ app.get("/refreshToken", (req, res) => {
       return res.send(body);
     }
   );
+});
+
+app.get("/*", (req, res) => {
+  res.sendFile("index.html", { root: "../client/dist/recommendations" });
 });
 
 app.listen(port, () => {

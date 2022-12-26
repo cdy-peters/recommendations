@@ -14,7 +14,7 @@ export class AuthService {
 
   client_id = 'b5bee82890774ce69535a3a2fd2caa86';
   redirect_uri = 'http://localhost:4200/callback';
-  server_url = 'http://localhost:8080';
+  server_url = 'http://localhost:4200';
 
   login() {
     var scope =
@@ -31,9 +31,7 @@ export class AuthService {
 
   isAuthenticated() {
     var access_token = this.cookie.getCookie('access_token');
-    if (access_token) {
-      return true;
-    }
+    if (access_token) return true;
 
     var refresh_token = this.cookie.getCookie('refresh_token');
     if (refresh_token) {

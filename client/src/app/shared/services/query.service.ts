@@ -1,9 +1,9 @@
-import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { Injectable } from '@angular/core';
 import { lastValueFrom } from 'rxjs';
 
-import { CookieService } from './cookie.service';
 import { AuthService } from './auth.service';
+import { CookieService } from './cookie.service';
 
 @Injectable({
   providedIn: 'root',
@@ -27,7 +27,7 @@ export class QueryService {
         await new Promise((resolve) => setTimeout(resolve, retryAfter * 1000));
         break;
       default:
-        console.log(err);
+        console.error(err);
         break;
     }
   }
