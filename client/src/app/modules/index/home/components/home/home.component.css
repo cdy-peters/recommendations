@@ -159,6 +159,14 @@
     margin-left: 0;
   }
 
+  #selected_name h5 {
+    text-align: center;
+  }
+
+  #selected_track_count {
+    text-align: center;
+  }
+
   #selected_scan {
     position: static;
   }

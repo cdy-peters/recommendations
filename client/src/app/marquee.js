@@ -3,7 +3,7 @@ const setClass = (element, width, minWidth) => {
     element.css("width", `${width - minWidth}px`);
     element.addClass("marquee");
   } else {
-    element.css("width", "fit-content");
+    element.css("width", "auto");
     element.removeClass("marquee");
   }
 };
