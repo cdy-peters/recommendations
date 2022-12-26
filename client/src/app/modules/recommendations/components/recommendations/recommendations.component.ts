@@ -40,8 +40,9 @@ export class RecommendationsComponent {
   artistsRetrieved: number = this.data.artists.length;
   genresRetrieved: number = this.data.genres.length;
 
+  recommendationsLength: number = 0;
   recommendations: Recommendation[] = [];
-  @ViewChild('getMoreRecommendations') getMoreRecommendations!: ElementRef;
+  gettingMoreRecommendations: boolean = false;
 
   playingTrack: string = '';
   @ViewChild('songPreview')
@@ -55,6 +56,10 @@ export class RecommendationsComponent {
   @ViewChild('newPlaylist') newPlaylist!: ElementRef;
 
   async ngOnInit() {
+    this.recommend.recommendationsChanged.subscribe((length) => {
+      this.recommendationsLength = length;
+    });
+
     if (window.innerWidth < 1000) {
       this.showAverageFeatures = false;
       this.showAverageFeaturesDropdown = true;
@@ -74,9 +79,8 @@ export class RecommendationsComponent {
   }
 
   async moreRecommendations() {
-    this.getMoreRecommendations.nativeElement.disabled = true;
-    this.getMoreRecommendations.nativeElement.innerHTML =
-      'Getting Recommendations...';
+    this.recommendationsLength = 0;
+    this.gettingMoreRecommendations = true;
 
     var recommendations = await this.recommend.getRecommendations();
 
@@ -90,9 +94,7 @@ export class RecommendationsComponent {
       setTrackMarquee();
     }, 0);
 
-    this.getMoreRecommendations.nativeElement.disabled = false;
-    this.getMoreRecommendations.nativeElement.innerHTML =
-      'Get More Recommendations';
+    this.gettingMoreRecommendations = false;
   }
 
   onShowAverageFeatures() {

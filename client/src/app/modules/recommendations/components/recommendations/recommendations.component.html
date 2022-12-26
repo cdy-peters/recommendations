@@ -144,14 +144,21 @@
         #getMoreRecommendations
         class="grow"
         (click)="moreRecommendations()"
+        [disabled]="gettingMoreRecommendations"
       >
-        Get More Recommendations
+        {{
+          gettingMoreRecommendations
+            ? "Retrieved " + recommendationsLength + " of 20 Recommendations"
+            : "Get More Recommendations"
+        }}
       </button>
     </div>
   </ng-template>
 
   <ng-template #noRecommendations>
-    <h5 id="getting_recommendations">Getting recommendations...</h5>
+    <h5 id="getting_recommendations">
+      Retrieved {{ recommendationsLength }} of 20 Recommendations
+    </h5>
   </ng-template>
 </div>
 

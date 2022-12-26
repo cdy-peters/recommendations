@@ -1,15 +1,15 @@
-import { Injectable } from '@angular/core';
+import { EventEmitter, Injectable } from '@angular/core';
 
 import { QueryService } from 'src/app/shared/services/query.service';
 
 import {
   AverageSongFeatures,
-  Recommendation,
+  Recommendation
 } from 'src/app/shared/models/models';
 import {
   ArtistResponse,
   FeaturesResponse,
-  RecommendationsResponse,
+  RecommendationsResponse
 } from 'src/app/shared/models/spotify-models';
 
 @Injectable({
@@ -29,6 +29,7 @@ export class RecommendationsService {
   genreSeeds: string[] = [];
   limit: number = 25;
   recommendations: Recommendation[] = [];
+  recommendationsChanged = new EventEmitter<number>();
   allTracks: Set<string> = new Set();
   checkRecommendations: boolean = true;
   invalidTrack: Set<string> = new Set();
@@ -149,6 +150,7 @@ export class RecommendationsService {
         explicit: track.explicit,
         preview_url: track.preview_url,
       });
+      this.recommendationsChanged.emit(this.recommendations.length);
 
       if (this.recommendations.length >= 20) break;
     }
